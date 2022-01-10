@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import sys
+import json
 
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
@@ -31,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", type=str, default=os.environ["SM_MODEL_DIR"])
     parser.add_argument("--n_gpus", type=str, default=os.environ["SM_NUM_GPUS"])
     parser.add_argument("--data_dir", type=str, default=os.environ["SM_CHANNEL_DATA"])
+    parser.add_argument("--mapping_file", type=str, default=os.environ["SM_MAPPING_FILE"])
     # parser.add_argument("--training_dir", type=str, default=os.environ["SM_CHANNEL_TRAIN"])
     # parser.add_argument("--test_dir", type=str, default=os.environ["SM_CHANNEL_TEST"])
 
@@ -51,22 +53,16 @@ if __name__ == "__main__":
     logger.info(f" loaded train_dataset length is: {len(datasets['train'])}")
     logger.info(f" loaded test_dataset length is: {len(datasets['test'])}")
 
-    label_map = {"O": 0,
-              "I-CONTACT": 1,
-              "I-DATE": 2,
-              "I-EVENT": 3,
-              "I-FINANCE": 4,
-              "I-FORM": 5,
-              "I-LOC": 6,
-              "I-MISC": 7,
-              "I-ORG": 8,
-              "I-PER": 9,
-              "I-STATE": 10}
+    #load label map as dictionary
+    with open(args.mapping_file) as json_file:
+      label_map = json.load(json_file)
     
-    label_names = ['O', 'I-CONTACT', 'I-DATE', 'I-EVENT', 'I-FINANCE', 'I-FORM', 'I-LOC', 'I-MISC', 'I-ORG', 'I-PER', 'I-STATE']
+    #get list of labels (keys from dictionary)
+    label_names = list(label_map.keys())
+    num_labels = len(label_names)
 
-    datasets['train'].features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=11, names=label_names, names_file=None, id=None), length=-1, id=None)
-    datasets['test'].features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=11, names=label_names, names_file=None, id=None), length=-1, id=None)
+    datasets['train'].features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=num_labels, names=label_names, names_file=None, id=None), length=-1, id=None)
+    datasets['test'].features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=num_labels, names=label_names, names_file=None, id=None), length=-1, id=None)
 
     #data tokenisation
     tokenizer = AutoTokenizer.from_pretrained(args.model_id)
