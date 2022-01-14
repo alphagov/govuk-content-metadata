@@ -31,7 +31,8 @@ if __name__ == "__main__":
     # Data, model, and output directories
     parser.add_argument("--output_dir", type=str, default=os.environ["SM_MODEL_DIR"])
     parser.add_argument("--n_gpus", type=str, default=os.environ["SM_NUM_GPUS"])
-    parser.add_argument("--data_dir", type=str, default=os.environ["SM_CHANNEL_DATA"])
+    parser.add_argument("--train_data_dir", type=str, default=os.environ["SM_TRAIN_DATA"])
+    parser.add_argument("--test_data_dir", type=str, default=os.environ["SM_TEST_DATA"])
     parser.add_argument("--mapping_file", type=str, default=os.environ["SM_MAPPING_FILE"])
     # parser.add_argument("--training_dir", type=str, default=os.environ["SM_CHANNEL_TRAIN"])
     # parser.add_argument("--test_dir", type=str, default=os.environ["SM_CHANNEL_TEST"])
@@ -48,10 +49,14 @@ if __name__ == "__main__":
     )
 
     # load datasets
-    datasets = load_from_disk(args.data_dir)
+    train_dataset = load_from_disk(args.train_data_dir)
+    test_dataset = load_from_disk(args.test_data_dir)
 
-    logger.info(f" loaded train_dataset length is: {len(datasets['train'])}")
-    logger.info(f" loaded test_dataset length is: {len(datasets['test'])}")
+    dataset_name = args.train_data_dir.split('/')[-1]
+    print("Dataset_name: ",dataset_name)
+
+    logger.info(f" loaded train_dataset length is: {len(train_dataset)}")
+    logger.info(f" loaded test_dataset length is: {len(test_dataset)}")
 
     #load label map as dictionary
     with open(args.mapping_file) as json_file:
@@ -61,8 +66,8 @@ if __name__ == "__main__":
     label_names = list(label_map.keys())
     num_labels = len(label_names)
 
-    datasets['train'].features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=num_labels, names=label_names, names_file=None, id=None), length=-1, id=None)
-    datasets['test'].features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=num_labels, names=label_names, names_file=None, id=None), length=-1, id=None)
+    train_dataset.features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=num_labels, names=label_names, names_file=None, id=None), length=-1, id=None)
+    test_dataset.features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=num_labels, names=label_names, names_file=None, id=None), length=-1, id=None)
 
     #data tokenisation
     tokenizer = AutoTokenizer.from_pretrained(args.model_id)
@@ -70,7 +75,7 @@ if __name__ == "__main__":
     label_all_tokens = True
 
     def tokenize_and_align_labels(examples):
-        tokenized_inputs = tokenizer(examples["text_token"], truncation=True, is_split_into_words=True)
+        tokenized_inputs = tokenizer(examples["text_tokens"], truncation=True, is_split_into_words=True)
 
         labels = []
         for i, label in enumerate(examples[f"new_label_list_id"]):
@@ -91,7 +96,8 @@ if __name__ == "__main__":
         tokenized_inputs["labels"] = labels
         return tokenized_inputs
 
-    tokenized_datasets = datasets.map(tokenize_and_align_labels, batched=True)
+    tokenized_train_dataset = train_dataset.map(tokenize_and_align_labels, batched=True)
+    tokenized_test_dataset = test_dataset.map(tokenize_and_align_labels, batched=True)
 
     # define metrics
     metric = load_metric("seqeval")
@@ -114,7 +120,7 @@ if __name__ == "__main__":
         }
 
     # Prepare model labels - useful in inference API
-    label_list = datasets["train"].features[f"new_label_list_id"].feature.names
+    label_list = train_dataset.features[f"new_label_list_id"].feature.names
     num_labels = len(label_list)
     id2label = {str(i): label for i, label in enumerate(label_list)}
     label2id = {v: k for k, v in id2label.items()}
@@ -127,7 +133,7 @@ if __name__ == "__main__":
     # training
     model_name = args.model_id.split("/")[-1]
     tod_date = date.today().strftime("%d-%m-%Y")
-    full_model_name = f"{model_name}-finetuned-ner-govuk-{tod_date}"
+    full_model_name = f"{model_name}-finetuned-ner-govuk-{tod_date}-{dataset_name}"
     out_path = f"{args.output_dir}/{full_model_name}"
 
     # data collator
@@ -149,8 +155,8 @@ if __name__ == "__main__":
     trainer = Trainer(
         model,
         train_args,
-        train_dataset=tokenized_datasets["train"],
-        eval_dataset=tokenized_datasets["test"],
+        train_dataset=tokenized_train_dataset,
+        eval_dataset=tokenized_test_dataset,
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=compute_metrics
@@ -171,7 +177,7 @@ if __name__ == "__main__":
 
     # overall results
     print(f"***** Eval results *****")
-    eval_result = trainer.evaluate(eval_dataset=tokenized_datasets['test'])
+    eval_result = trainer.evaluate(eval_dataset=tokenized_test_dataset)
     eval_items = eval_result.items()
     eval_list = list(eval_items)
     eval_df = pd.DataFrame(eval_list)
@@ -180,7 +186,7 @@ if __name__ == "__main__":
 
     # detailed results
     print(f"***** Detail results *****")
-    predictions, labels, _ = trainer.predict(tokenized_datasets["test"])
+    predictions, labels, _ = trainer.predict(tokenized_test_dataset)
     predictions = np.argmax(predictions, axis=2)
     # Remove ignored index (special tokens)
     true_predictions = [
@@ -201,20 +207,22 @@ if __name__ == "__main__":
     true_labels_flat = [item for sublist in true_labels for item in sublist]
     true_preds_flat = [item for sublist in true_predictions for item in sublist]
 
+    confusion_labels = sorted(list(set(true_preds_flat)))
+
+    #with 'O'
     confmat = confusion_matrix(y_true=true_labels_flat, y_pred=true_preds_flat)
-    confmat_labels = label_names[1:]
-    confmat_labels.append('O')
-    cmplot = ConfusionMatrixDisplay(confmat, display_labels=confmat_labels) #, display_labels=label_names[1:]
+    cmplot = ConfusionMatrixDisplay(confmat, display_labels=confusion_labels) #, display_labels=label_names[1:]
     fig, ax = plt.subplots(figsize=(15,15))
     cmplot.plot(ax=ax, cmap='GnBu')
     fig_path = os.path.join(model_metrics_folder, f"confusion_matrix_o.png")
     plt.title("Confusion Matrix (With 'O')")
     plt.savefig(fig_path)
 
+    #without
     confmat_2 = [i[:-1] for i in confmat[:-1]]
     confmat_2 = np.array(confmat_2)
-    confmat_labels = label_names[1:]
-    cmplot = ConfusionMatrixDisplay(confmat_2, display_labels=confmat_labels)
+    confusion_labels_no_O = confusion_labels[:-1]
+    cmplot = ConfusionMatrixDisplay(confmat_2, display_labels=confusion_labels_no_O)
     fig, ax = plt.subplots(figsize=(15,15))
     cmplot.plot(ax=ax, cmap='GnBu')
     fig_path = os.path.join(model_metrics_folder, f"confusion_matrix.png")
@@ -222,5 +230,3 @@ if __name__ == "__main__":
     plt.savefig(fig_path)
 
     logger.info("***** results complete *****")
-
-    
