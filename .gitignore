@@ -878,6 +878,9 @@ docs/reference/api/*
 # Ignore the `.secrets` file
 .secrets
 
+# Ignore credential test file
+src/credential_test.py
+
 # Ignore R artifacts
 *.Renviron
 *.Rhistory
