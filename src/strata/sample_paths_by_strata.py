@@ -4,19 +4,14 @@ from typing import Dict
 
 
 def get_stratified_sample(df: pd.DataFrame, strata_col: str, weights: Dict[str, int], sample_size: int) -> pd.DataFrame:
-    """"""
+    """
+    """
     df = df.copy()
     num_strata = len(weights)
     size_strata_if_equal_size = int(round(sample_size/num_strata, 0))
     weighted_size_strata = {stratum: int(round(weight*size_strata_if_equal_size, 0)) for stratum, weight in weights.items()}
 
-    if strata_col == "taxon_level1":
-        df[df.taxon_level1 is None or df.taxon_level1.isnull()]
-
-    print(df.shape)
     df = df.groupby(strata_col, as_index=False).apply(lambda x: x.sample(n=weighted_size_strata[x.name]))
-
-    print(df.shape)
 
     return df
 
@@ -48,12 +43,12 @@ if __name__ == '__main__':
 
     # stratified random sample by schemas/document_types
     schemas_stratified_random_sample_df = get_stratified_sample(strata_df, "schema_strata_name", SCHEMAS_WEIGHTS, SCHEMA_DOCS_SAMPLE_SIZE)
-    print("Stratified ranom sample by Schema/Document Type: sample sizes by strata")
+    print("Stratified random sample by Schema name/Document type: sample sizes by strata")
     print(schemas_stratified_random_sample_df.groupby("schema_strata_name").base_path.count())
     schemas_stratified_random_sample_df[["schema_name", "document_type", "schema_strata_name", "base_path"]].to_csv("src/strata/data/schemas_stratified_random_sample.csv", index=False)
 
     # stratified random sample by taxons
     taxons_stratified_random_sample_df = get_stratified_sample(strata_df, "taxon_level1", TAXONS_WEIGHTS, TAXONS_SAMPLE_SIZE)
-    print("Stratified ranom sample by Taxons: sample sizes by strata")
+    print("Stratified random sample by Taxons: sample sizes by strata")
     print(taxons_stratified_random_sample_df.groupby("taxon_level1").base_path.count())
     taxons_stratified_random_sample_df[["taxon_level1", "base_path"]].to_csv("src/strata/data/taxons_stratified_random_sample.csv", index=False)
