@@ -887,3 +887,7 @@ src/credential_test.py
 
 # Ignore Sphinx documentation link checking folder
 docs/_linkcheck/
+
+# temporarily
+src/strata/data/*
+!src/strata/data/.gitkeep 
