@@ -872,6 +872,11 @@ data/processed/*
 !data/interim/.gitkeep
 !data/processed/.gitkeep
 
+# Ignore the contents of the `models` folder, except for the `README.md` file
+models/*
+models/**/
+!models/README.md
+
 # Ignore the `docs/reference/api` folder
 docs/reference/api/*
 
