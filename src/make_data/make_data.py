@@ -45,17 +45,27 @@ def text_to_sents(text):
     """
     Split a blob of text into sentences using SpaCy function.
     """
+
+    if isinstance(text, float):
+        return []
+    
     doc = nlp(text)
     assert doc.has_annotation("SENT_START")
     sent_list = [sent.text for sent in doc.sents]
     return sent_list
 
-def text_col_to_sents(dataframe, text_col, new_col):
+def text_col_to_sents2(dataframe, text_col, new_col):
     """
     Turn a text column of a DataFrame into a column of sentences.
     """
-    dataframe[new_col] = dataframe[text_col].apply(lambda x: text_to_sents(str(x)))
+    dataframe[new_col] = dataframe[text_col].apply(lambda x: text_to_sents(x))
     return dataframe
+
+def text_col_to_sents(df, text_col):
+    """
+    Turn a text column of a DataFrame into a column of sentences.
+    """
+    return  df[text_col].apply(lambda x: text_to_sents(x))
 
 def sentences_to_jsonl(dataframe, sentence_col, meta_cols, outfile):
     """
@@ -72,9 +82,31 @@ def sentences_to_jsonl(dataframe, sentence_col, meta_cols, outfile):
 
 if __name__ == '__main__':
 
+    import os
+    import time
+    import dask.dataframe as dd
+
+    DIR_STRATA = os.getenv("DIR_SRC_STRATA")
+    DIR_OUTPUT = os.getenv("DIR_DATA_PROCESSED")
+
+    ramdom_schemas_filepath = os.path.join(DIR_STRATA, "data", "schemas_stratified_random_sample.csv")
+    ramdom_taxons_filepath = os.path.join(DIR_STRATA, "data", "taxons_stratified_random_sample.csv")
+    output_filepath = os.path.join(DIR_OUTPUT, "sampled_sentences.jsonl")
+
     df = load_preprocessed_content_store(path_to_gz='/tmp/govukmirror/preprocessed_content_store_250522.csv.gz')
-    base_path_list = get_base_path_sample_list('src/strata/data/schemas_stratified_random_sample.csv', col='base_path')
+    base_path_schema_list = get_base_path_sample_list(ramdom_schemas_filepath, col='base_path')
+    base_path_taxon_list = get_base_path_sample_list(ramdom_taxons_filepath, col='base_path')
+    base_path_list = set(base_path_schema_list + base_path_taxon_list)
     df_filt = filter_content_store_by_basepathlist(df, base_path_col='base_path', base_path_list=base_path_list)
     df_trim = trim_dataframe(df_filt, columns=['base_path', 'content_id', 'text'])
-    df_trim = text_col_to_sents(df_trim, 'text', 'sentences')
-    sentences_to_jsonl(df_trim, sentence_col='sentences', meta_cols=['base_path', 'content_id'], outfile='./data/processed/sampled_sentences.jsonl')
+
+    print(f"Preprocessing sentences...")
+    tic = time.perf_counter()
+    ddf = dd.from_pandas(df_trim, npartitions=os.cpu_count())
+    res = ddf.map_partitions(lambda df: text_col_to_sents(df, 'text'))
+    out = res.compute()
+    df_trim = df_trim.assign(sentences = out)
+    toc = time.perf_counter()
+    print(f"Preprocessing of sentences - Completed in in {toc - tic:0.4f} seconds")
+
+    sentences_to_jsonl(df_trim, sentence_col='sentences', meta_cols=['base_path', 'content_id'], outfile=output_filepath)
