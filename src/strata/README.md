@@ -47,19 +47,20 @@ The samples are saved as CSV in `src/strata/data`.
 The previous steps will output a list of base_paths that are sampled according to the strata.
 The next step is to get sentences from the content on each of these base_paths.
 
-1. Download a copy of the preprocessed_content store to a location on your machine. For example /tmp/govukmirror/
+1. Download a copy of the preprocessed_content store to a location on your machine. We will use: `/tmp/govukmirror/`
 
 ```
-gds aws govuk-integration-datascience --assume-role-ttl 480m aws s3 cp s3://govuk-data-infrastructure-integration/knowledge-graph/2022-05-25/preprocessed_content_store_DDMMYY.csv.gz /tmp/govukmirror
+gds aws govuk-integration-datascience --assume-role-ttl 480m aws s3 cp s3://govuk-data-infrastructure-integration/knowledge-graph/2022-05-25/preprocessed_content_store_DDMMYY.csv.gz /tmp/govukmirror/
 ```
 
-2. Ensure the relative data paths are aligned in src.make_data.make_data and run:
+2. Make sure you have run the `src.strata.sample_paths_by_strata` module, Step 4 above. This will have created two lists of stratified-sampled base_paths, saved as csv files in `src/strata/data` and that will be use in the next step.
+
+3. Ensure the relative data paths are aligned in `src.make_data.make_data` and run:
 
 ```shell
 python -m src.make_data.make_data
 ```
 
-The sentences .jsonl file is saved at './data/processed/sampled_sentences.jsonl'.
+The sentences .jsonl file is saved at `./data/processed/sampled_sentences.jsonl`.
 
 You can then sample the sentences further if required.
-
