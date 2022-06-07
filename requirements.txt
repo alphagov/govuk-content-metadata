@@ -9,10 +9,12 @@ beautifulsoup4==4.11.1
 bs4==0.0.1
 certifi==2021.10.8
 charset-normalizer==2.0.12
+dask
 dill==0.3.4
 flake8==4.0.1
 idna==3.3
 lxml==4.8.0
+notebook
 mccabe==0.6.1
 multiprocess==0.70.12.2
 numpy==1.22.3
