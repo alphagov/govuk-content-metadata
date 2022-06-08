@@ -25,7 +25,13 @@ To be added.
   credentials](#required-secrets-and-credentials)
 - [load environment variables][docs-loading-environment-variables] from `.envrc`
 
-To install the Python requirements, open your terminal and enter:
+To install the Python requirements and pre-commit hooks, open your terminal and enter:
+
+```shell
+make requirements
+```
+
+or, alternatively, to only install the necessary Python packages using pip:
 
 ```shell
 pip install -r requirements.txt
