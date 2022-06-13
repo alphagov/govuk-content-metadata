@@ -5,7 +5,9 @@
 
 # This code addresses this.
 
-# REQUIREMENT: need to have prodigy installed: prodigy>=1.11.0,<2.0.0
+# REQUIREMENT: 
+# - need to have prodigy installed: prodigy>=1.11.0,<2.0.0
+# - input annotated JSON files: `forms_rh_at_3000.jsonl`, `sample_goppepdm_at_correct_1488.jsonl`, `sample_goppepdm_rh_correct_1487.jsonl`
 
 
 from email import generator
@@ -17,7 +19,7 @@ import collections
 import json
 
 # STEP 1 - read original 2975 sentences annotated for FORM
-source = 'data/gold//forms_rh_at_3000.jsonl'
+source = 'data/gold/forms_rh_at_3000.jsonl'
 # unsegmented
 stream = JSONL(source)
 
