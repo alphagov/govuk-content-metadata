@@ -1,0 +1,79 @@
+title: "Content Metadata NER"
+description: "A project for building a lanuage model for HM Governmentt"
+spacy_version: ">=3.0.6,<4.0.0"
+# Variables can be referenced across the project.yml using ${vars.var_name}
+vars:
+  name: "ner_demo_replace"
+  lang: "en"
+  pipeline: "en_core_web_sm"
+  # train: "train.json"
+  # dev: "dev.json"
+  # version: "0.0.0"
+  # # Set your GPU ID, -1 is CPU
+  # gpu_id: -1
+  files:
+    gold_dataset: "mark_goppepdm.jsonl"
+  prodigy:
+    train_dataset: "gold_dataset"
+
+# These are the directories that the project needs. The project CLI will make
+# sure that they always exist.
+directories: ["data", "configs", "src", "packages"]
+
+# Assets that should be downloaded or available in the directory. We're shipping
+# them with the project, so they won't have to be downloaded. But the
+# 'project assets' command still lets you verify that the checksums match.
+assets:
+  - dest: "assets/${vars.files.gold_dataset}"
+    description: "JSONL-formatted training data exported from Prodigy, annotated with `FASHION_BRAND` entities (1235 examples)"
+
+
+# Workflows are sequences of commands (see below) executed in order. You can
+# run them via "spacy project run [workflow]". If a commands's inputs/outputs
+# haven't changed, it won't be re-run.
+workflows:
+  all:
+    - download
+    - db-in
+    - data-to-spacy
+    - train_prodigy
+    - train_curve
+
+# Project commands, specified in a style similar to CI config files (e.g. Azure
+# pipelines). The name is the command name that lets you trigger the command
+# via "spacy project run [command] [path]". The help message is optional and
+# shown when executing "spacy project run [optional command] [path] --help".
+commands:
+  - name: "download"
+    help: "Download the pretrained pipeline"
+    script:
+      - "python -m spacy download ${vars.pipeline}"
+
+  - name: "db-in"
+    help: "Load data into prodigy"
+    script:
+      - "python -m prodigy db-in ${vars.prodigy.train_dataset} assets/${vars.files.gold_dataset}"
+    deps:
+      - "assets/${vars.files.gold_dataset}"
+
+  - name: "data-to-spacy"
+    help: "Merge annotations and create data in spaCy's binary format"
+    script:
+      - "python -m prodigy data-to-spacy corpus/ --ner ${vars.prodigy.train_dataset} --eval-split 0.2"
+
+    outputs:
+      - "corpus/train.spacy"
+      - "corpus/dev.spacy"
+
+  - name: "train_prodigy"
+    help: "Train a named entity recognition model with Prodigy"
+    script:
+      # - "python -m prodigy train training/ --ner ${vars.prodigy.train_dataset},eval:${vars.prodigy.eval_dataset} --config configs/${vars.config} --gpu-id ${vars.gpu_id}"
+      - "python -m prodigy train --ner ${vars.prodigy.train_dataset} ./tmp_mdl_${vars.prodigy.train_dataset} --eval-split 0.2 --label-stats"
+    outputs:
+      - "training/model-best"
+
+  - name: "train_curve"
+    help: "Train the model with Prodigy by using different portions of training examples to evaluate if more annotations can potentially improve the performance"
+    script:
+      - "python -m prodigy train-curve --ner ${vars.prodigy.train_dataset} --show-plot"
