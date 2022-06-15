@@ -1,3 +1,6 @@
+# lock file is automatically generated when the project pipeline is run. You do not need to change anything. It creates hashes of the data so it knows
+# when to run and when not to run certain stages.
+
 db-in:
   cmd: python -m spacy run db-in
   script:
