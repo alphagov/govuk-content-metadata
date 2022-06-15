@@ -71,7 +71,7 @@ project][govcookiecutter].
 
 # 🪐 spaCy Project: Content Metadata NER
 
-A project for building a lanuage model for HM Governmentt
+A project for building a language model for HM Government
 
 ## 📋 project.yml
 
