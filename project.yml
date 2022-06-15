@@ -1,31 +1,28 @@
 title: "Content Metadata NER"
 description: "A project for building a lanuage model for HM Governmentt"
 spacy_version: ">=3.0.6,<4.0.0"
+
 # Variables can be referenced across the project.yml using ${vars.var_name}
 vars:
-  name: "ner_demo_replace"
+  config: "config.cfg"
+  name: "govuk-ner-pipeline"
   lang: "en"
-  pipeline: "en_core_web_sm"
-  # train: "train.json"
-  # dev: "dev.json"
-  # version: "0.0.0"
-  # # Set your GPU ID, -1 is CPU
-  # gpu_id: -1
+  vectors_model: "en_core_web_sm"
   files:
-    gold_dataset: "mark_goppepdm.jsonl"
+    train_file: "mark_goppepdm.jsonl"
   prodigy:
-    train_dataset: "gold_dataset"
+    train_dataset: "mark_goppepdm"
+  models:
+    model: "en_${vars.prodigy.train_dataset}"
 
 # These are the directories that the project needs. The project CLI will make
 # sure that they always exist.
-directories: ["data", "configs", "src", "packages"]
+directories: ["data", "configs", "src", "models", "packages"]
 
-# Assets that should be downloaded or available in the directory. We're shipping
-# them with the project, so they won't have to be downloaded. But the
-# 'project assets' command still lets you verify that the checksums match.
+# Assets that should be downloaded or available in the directory.
 assets:
-  - dest: "assets/${vars.files.gold_dataset}"
-    description: "JSONL-formatted training data exported from Prodigy, annotated with `FASHION_BRAND` entities (1235 examples)"
+  - dest: "data/gold/mark_goppepdm.json"
+    description: "JSONL-formatted training data exported from Prodigy (2970 examples)"
 
 
 # Workflows are sequences of commands (see below) executed in order. You can
@@ -33,11 +30,10 @@ assets:
 # haven't changed, it won't be re-run.
 workflows:
   all:
-    - download
     - db-in
-    - data-to-spacy
+    # - data-to-spacy
     - train_prodigy
-    - train_curve
+    # - train_curve
 
 # Project commands, specified in a style similar to CI config files (e.g. Azure
 # pipelines). The name is the command name that lets you trigger the command
@@ -45,35 +41,26 @@ workflows:
 # shown when executing "spacy project run [optional command] [path] --help".
 commands:
   - name: "download"
-    help: "Download the pretrained pipeline"
+    help: "Download a spaCy model with pretrained vectors"
     script:
-      - "python -m spacy download ${vars.pipeline}"
+      - "python -m spacy download ${vars.vectors_model}"
 
   - name: "db-in"
-    help: "Load data into prodigy"
+    help: "Load data into prodigy (only for example purposes)"
     script:
-      - "python -m prodigy db-in ${vars.prodigy.train_dataset} assets/${vars.files.gold_dataset}"
+      - "python -m prodigy db-in ${vars.prodigy.train_dataset} data/gold/${vars.files.train_file}"
     deps:
-      - "assets/${vars.files.gold_dataset}"
-
-  - name: "data-to-spacy"
-    help: "Merge annotations and create data in spaCy's binary format"
-    script:
-      - "python -m prodigy data-to-spacy corpus/ --ner ${vars.prodigy.train_dataset} --eval-split 0.2"
-
-    outputs:
-      - "corpus/train.spacy"
-      - "corpus/dev.spacy"
+      - "data/gold/${vars.files.train_file}"
 
   - name: "train_prodigy"
     help: "Train a named entity recognition model with Prodigy"
     script:
-      # - "python -m prodigy train training/ --ner ${vars.prodigy.train_dataset},eval:${vars.prodigy.eval_dataset} --config configs/${vars.config} --gpu-id ${vars.gpu_id}"
-      - "python -m prodigy train --ner ${vars.prodigy.train_dataset} ./tmp_mdl_${vars.prodigy.train_dataset} --eval-split 0.2 --label-stats"
+      - "python -m prodigy train --ner ${vars.prodigy.train_dataset} models/${vars.prodigy.train_dataset} --config configs/${vars.config} --eval-split 0.2 --label-stats"
     outputs:
-      - "training/model-best"
+      - "models/${vars.prodigy.train_dataset}/model-best"
 
-  - name: "train_curve"
-    help: "Train the model with Prodigy by using different portions of training examples to evaluate if more annotations can potentially improve the performance"
-    script:
-      - "python -m prodigy train-curve --ner ${vars.prodigy.train_dataset} --show-plot"
+
+  # - name: "train_curve"
+  #   help: "Train the model with Prodigy by using different portions of training examples to evaluate if more annotations can potentially improve the performance"
+  #   script:
+  #     - "python -m prodigy train-curve --ner ${vars.prodigy.train_dataset} --show-plot"
