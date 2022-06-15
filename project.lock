@@ -1,0 +1,24 @@
+# lock file is automatically generated when the project pipeline is run. You do not need to change anything. It creates hashes of the data so it knows
+# when to run and when not to run certain stages.
+
+db-in:
+  cmd: python -m spacy run db-in
+  script:
+    - python -m prodigy db-in mark_goppepdm data/gold/mark_goppepdm.jsonl
+  deps:
+    - path: data/gold/mark_goppepdm.jsonl
+      md5: 4c9b49c3d57ecb2cb946fe840a756c16
+  outs: []
+  spacy_version: 3.2.3
+  spacy_git_version: 99425de36
+train_prodigy:
+  cmd: python -m spacy run train_prodigy
+  script:
+    - python -m prodigy train --ner mark_goppepdm models/mark_goppepdm --config configs/config.cfg
+      --eval-split 0.2 --label-stats
+  deps: []
+  outs:
+    - path: models/mark_goppepdm/model-best
+      md5: 178dc5682225a18174e0e5cbec88db3b
+  spacy_version: 3.2.3
+  spacy_git_version: 99425de36
