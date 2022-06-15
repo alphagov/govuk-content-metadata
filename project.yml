@@ -33,6 +33,7 @@ workflows:
     - db-in
     - train_prodigy
     - train_curve
+    - visualize
 
 # Project commands, specified in a style similar to CI config files (e.g. Azure
 # pipelines). The name is the command name that lets you trigger the command
