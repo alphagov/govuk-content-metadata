@@ -17,6 +17,7 @@ mccabe==0.6.1
 multiprocess==0.70.12.2
 numpy==1.22.3
 pandas==1.4.2
+plotext==4.2.0
 pycodestyle==2.8.0
 pyflakes==2.4.0
 pymongo==4.1.1
@@ -26,5 +27,8 @@ PyYAML==6.0
 requests==2.27.1
 six==1.16.0
 soupsieve==2.3.2.post1
+spacy==3.2.3
+spacy-streamlit=1.0.4
+streamlit==1.10.0
 tqdm==4.64.0
 urllib3==1.26.9
