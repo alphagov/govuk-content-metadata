@@ -88,7 +88,7 @@ Commands are only re-run if their inputs have changed.
 | Command | Description |
 | --- | --- |
 | `download` | Download a spaCy model with pretrained vectors |
-| `db-in` | Load data into prodigy (only for example purposes) |
+| `db-in` | Load labelled .jsonl file data into prodigy |
 | `train_prodigy` | Train a named entity recognition model with Prodigy |
 | `train_curve` | Train the model with Prodigy by using different portions of training examples to evaluate if more annotations can potentially improve the performance |
 
