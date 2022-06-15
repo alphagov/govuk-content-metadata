@@ -111,6 +111,6 @@ in the project directory.
 
 | File | Source | Description |
 | --- | --- | --- |
-| `data/gold/mark_goppepdm.json` | Local | JSONL-formatted training data exported from Prodigy (2970 examples) |
+| `data/gold/mark_goppepdm.jsonl` | Local | JSONL-formatted training data exported from Prodigy (2970 examples) |
 
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS END (do not remove) -->
