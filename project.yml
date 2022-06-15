@@ -21,7 +21,7 @@ directories: ["data", "configs", "src", "models", "packages"]
 
 # Assets that should be downloaded or available in the directory.
 assets:
-  - dest: "data/gold/mark_goppepdm.json"
+  - dest: "data/gold/mark_goppepdm.jsonl"
     description: "JSONL-formatted training data exported from Prodigy (2970 examples)"
 
 
