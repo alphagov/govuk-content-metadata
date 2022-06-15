@@ -63,3 +63,10 @@ commands:
     help: "Train the model with Prodigy by using different portions of training examples to evaluate if more annotations can potentially improve the performance"
     script:
       - "python -m prodigy train-curve --ner ${vars.prodigy.train_dataset} --show-plot"
+
+  - name: visualize
+    help: "Visualize the pipeline's output interactively using Streamlit"
+    script:
+      - 'streamlit run src/make_visualisations/visualize.py models/${vars.prodigy.train_dataset}/model-best "You need to send your P45 form to HM Treasury by 4th April."'
+    deps:
+      - "models/${vars.prodigy.train_dataset}/model-best"
