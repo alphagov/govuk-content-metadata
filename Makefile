@@ -14,6 +14,7 @@
 requirements:
 	python -m pip install -U pip setuptools
 	python -m pip install -r requirements.txt
+	python -m spacy download en_core_web_md
 	pre-commit install
 
 ## Create a `docs/_build` folder, if it does not exist. Otherwise delete any sub-folders and their contents within it

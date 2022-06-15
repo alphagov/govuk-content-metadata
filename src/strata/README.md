@@ -1,6 +1,6 @@
 # Stratified sampling of GOV.UK base_path's
 
-## Restore the content store as a MongoDB database
+## 1. Restore the content store as a MongoDB database
 You will need
 
 - AWS permissions and tools to access the GOV.UK integration environment.
@@ -10,14 +10,14 @@ You will need
 Follow this [guidance](https://github.com/ukgovdatascience/govuk-mongodb-content) to create a MongoDB instance of the GOV.UK content store with Docker.
 
 
-## Produce stratified samples of GOV.UK content
+## 2. Produce stratified samples of GOV.UK content
 
 This module produces two samples of the GOV.UK content:
 - one stratified by level-1 taxons
 - one stratified by schema_name + document_type
 
 
-### Preprocess the content store
+### 3. Preprocess the content store
 
 From the root directory of this project, run:
 
@@ -26,7 +26,7 @@ To preprocess the content store (needed only once)
 python -m  src.strata.strata
 ```
 
-### Produce the samples
+### 4. Produce the samples
 
 To produce the samples:
 
@@ -41,3 +41,26 @@ python -m src.strata.sample_paths_by_strata
 ```
 
 The samples are saved as CSV in `src/strata/data`.
+
+### 5. Get Sentences from sample of base paths
+
+The previous steps will output a list of base_paths that are sampled according to the strata.
+The next step is to get sentences from the content on each of these base_paths.
+
+1. Download a copy of the preprocessed_content store to a location on your machine. We will use: `/tmp/govukmirror/`
+
+```
+gds aws govuk-integration-datascience --assume-role-ttl 480m aws s3 cp s3://govuk-data-infrastructure-integration/knowledge-graph/2022-05-25/preprocessed_content_store_DDMMYY.csv.gz /tmp/govukmirror/
+```
+
+2. Make sure you have run the `src.strata.sample_paths_by_strata` module, Step 4 above. This will have created two lists of stratified-sampled base_paths, saved as csv files in `src/strata/data` and that will be use in the next step.
+
+3. Ensure the relative data paths are aligned in `src.make_data.make_data` and run:
+
+```shell
+python -m src.make_data.make_data
+```
+
+The sentences .jsonl file is saved at `./data/processed/sampled_sentences.jsonl`.
+
+You can then sample the sentences further if required.
