@@ -7,7 +7,7 @@ vars:
   config: "config.cfg"
   name: "govuk-ner-pipeline"
   lang: "en"
-  vectors_model: "en_core_web_sm"
+  vectors_model: "en_core_web_lg"
   files:
     train_file: "mark_goppepdm.jsonl"
   prodigy:
@@ -31,9 +31,8 @@ assets:
 workflows:
   all:
     - db-in
-    # - data-to-spacy
     - train_prodigy
-    # - train_curve
+    - train_curve
 
 # Project commands, specified in a style similar to CI config files (e.g. Azure
 # pipelines). The name is the command name that lets you trigger the command
@@ -60,7 +59,7 @@ commands:
       - "models/${vars.prodigy.train_dataset}/model-best"
 
 
-  # - name: "train_curve"
-  #   help: "Train the model with Prodigy by using different portions of training examples to evaluate if more annotations can potentially improve the performance"
-  #   script:
-  #     - "python -m prodigy train-curve --ner ${vars.prodigy.train_dataset} --show-plot"
+  - name: "train_curve"
+    help: "Train the model with Prodigy by using different portions of training examples to evaluate if more annotations can potentially improve the performance"
+    script:
+      - "python -m prodigy train-curve --ner ${vars.prodigy.train_dataset} --show-plot"
