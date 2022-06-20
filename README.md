@@ -20,7 +20,7 @@ To be added.
 [Contributors have some additional requirements][contributing]!
 ```
 
-- Python 3.6.1+ installed
+- Python 3.9+ installed
 - a `.secrets` file with the [required secrets and
   credentials](#required-secrets-and-credentials)
 - [load environment variables][docs-loading-environment-variables] from `.envrc`
