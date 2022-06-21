@@ -38,4 +38,3 @@ jobs:
     - name: Allow `.envrc`, and execute tests
       run: |
           direnv allow . && eval "$(direnv export bash)"
-          pytest
