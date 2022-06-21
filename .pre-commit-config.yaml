@@ -49,14 +49,11 @@ repos:
         name: nbqa-black - consistent Python code formatting (notebooks; auto-fixes)
         args: [ --nbqa-mutate ]
         additional_dependencies: [ black==22.3.0 ]
-  #     # TODO: Disabled for now until it's clear how to add noqa to specific cells of a Jupyter notebook
-  #     #- id: nbqa-flake8
-  #     #  name: nbqa-flake8 - Python linting (notebooks)
-  #     #  additional_dependencies: [ flake8==3.9.2 ]
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.2.0
-    hooks:
-      - id: detect-secrets
-        name: detect-secrets - Detect secrets in staged code
-        args: [ "--baseline", ".secrets.baseline" ]
-        exclude: .*/tests/.*|^\.cruft\.json$|.*.jsonl$
+  #     # TODO: Disabled until we figure out how to smoothly integrate it with GitHub Actions
+  # - repo: https://github.com/Yelp/detect-secrets
+  #  rev: v1.2.0
+  #  hooks:
+  #    - id: detect-secrets
+  #      name: detect-secrets - Detect secrets in staged code
+  #      args: [ "--baseline", ".secrets.baseline" ]
+  #      exclude: .*/tests/.*|^\.cruft\.json$|.*.jsonl$
