@@ -19,7 +19,6 @@ from transformers import (
     TrainingArguments,
     DataCollatorForTokenClassification,
 )
-from transformers.trainer_utils import get_last_checkpoint
 
 if __name__ == "__main__":
 
@@ -76,14 +75,14 @@ if __name__ == "__main__":
     label_names = list(label_map.keys())
     num_labels = len(label_names)
 
-    train_dataset.features[f"new_label_list_id"] = Sequence(
+    train_dataset.features["new_label_list_id"] = Sequence(
         feature=ClassLabel(
             num_classes=num_labels, names=label_names, names_file=None, id=None
         ),
         length=-1,
         id=None,
     )
-    test_dataset.features[f"new_label_list_id"] = Sequence(
+    test_dataset.features["new_label_list_id"] = Sequence(
         feature=ClassLabel(
             num_classes=num_labels, names=label_names, names_file=None, id=None
         ),
@@ -102,7 +101,7 @@ if __name__ == "__main__":
         )
 
         labels = []
-        for i, label in enumerate(examples[f"new_label_list_id"]):
+        for i, label in enumerate(examples["new_label_list_id"]):
             word_ids = tokenized_inputs.word_ids(
                 batch_index=i
             )  # Map tokens to their respective word.
@@ -112,7 +111,8 @@ if __name__ == "__main__":
                 word_idx
             ) in (
                 word_ids
-            ):  # Set the special tokens to -100. Special tokens have a word id that is None. We set the label to -100 so they are automatically ignored in the loss function.
+            ):  # Set the special tokens to -100. Special tokens have a word id that is None.
+                # We set the label to -100 so they are automatically ignored in the loss function.
                 if word_idx is None:
                     label_ids.append(-100)
                 elif (
@@ -140,11 +140,19 @@ if __name__ == "__main__":
 
         # Remove ignored index (special tokens)
         true_predictions = [
-            [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+            [
+                label_list[pred]
+                for (pred, label_y) in zip(prediction, label)
+                if label_y != -100
+            ]
             for prediction, label in zip(predictions, labels)
         ]
         true_labels = [
-            [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+            [
+                label_list[label_y]
+                for (pred, label_y) in zip(prediction, label)
+                if label_y != -100
+            ]
             for prediction, label in zip(predictions, labels)
         ]
 
@@ -158,7 +166,7 @@ if __name__ == "__main__":
         }
 
     # Prepare model labels - useful in inference API
-    label_list = train_dataset.features[f"new_label_list_id"].feature.names
+    label_list = train_dataset.features["new_label_list_id"].feature.names
     num_labels = len(label_list)
     id2label = {str(i): label for i, label in enumerate(label_list)}
     label2id = {v: k for k, v in id2label.items()}
@@ -209,39 +217,43 @@ if __name__ == "__main__":
     logger.info("***** model saved *****")
 
     # make folder in model folder for metrics if doesn't exist
-    model_metrics_folder = os.path.join(model_folder, f"Metrics")
+    model_metrics_folder = os.path.join(model_folder, "Metrics")
     if not os.path.exists(model_metrics_folder):
         os.mkdir(model_metrics_folder)
 
     # overall results
-    print(f"***** Eval results *****")
+    print("***** Eval results *****")
     eval_result = trainer.evaluate(eval_dataset=tokenized_test_dataset)
     eval_items = eval_result.items()
     eval_list = list(eval_items)
     eval_df = pd.DataFrame(eval_list)
-    excel_path = os.path.join(model_metrics_folder, f"overall_results.xlsx")
+    excel_path = os.path.join(model_metrics_folder, "overall_results.xlsx")
     eval_df.to_excel(excel_path, sheet_name="overall_results")
 
     # detailed results
-    print(f"***** Detail results *****")
+    print("***** Detail results *****")
     predictions, labels, _ = trainer.predict(tokenized_test_dataset)
     predictions = np.argmax(predictions, axis=2)
     # Remove ignored index (special tokens)
     true_predictions = [
-        [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+        [label_list[p] for (p, label_y) in zip(prediction, label) if label_y != -100]
         for prediction, label in zip(predictions, labels)
     ]
     true_labels = [
-        [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+        [
+            label_list[label_y]
+            for (p, label_y) in zip(prediction, label)
+            if label_y != -100
+        ]
         for prediction, label in zip(predictions, labels)
     ]
     results = metric.compute(predictions=true_predictions, references=true_labels)
     results_df = pd.DataFrame(results).T
-    excel_path = os.path.join(model_metrics_folder, f"detailed_results.xlsx")
+    excel_path = os.path.join(model_metrics_folder, "detailed_results.xlsx")
     results_df.to_excel(excel_path, sheet_name="detailed_results")
 
     # confusion matrix
-    print(f"***** Confusion Matrix *****")
+    print("***** Confusion Matrix *****")
     true_labels_flat = [item for sublist in true_labels for item in sublist]
     true_preds_flat = [item for sublist in true_predictions for item in sublist]
 
@@ -254,7 +266,7 @@ if __name__ == "__main__":
     )  # , display_labels=label_names[1:]
     fig, ax = plt.subplots(figsize=(15, 15))
     cmplot.plot(ax=ax, cmap="GnBu")
-    fig_path = os.path.join(model_metrics_folder, f"confusion_matrix_o.png")
+    fig_path = os.path.join(model_metrics_folder, "confusion_matrix_o.png")
     plt.title("Confusion Matrix (With 'O')")
     plt.savefig(fig_path)
 
@@ -265,7 +277,7 @@ if __name__ == "__main__":
     cmplot = ConfusionMatrixDisplay(confmat_2, display_labels=confusion_labels_no_O)
     fig, ax = plt.subplots(figsize=(15, 15))
     cmplot.plot(ax=ax, cmap="GnBu")
-    fig_path = os.path.join(model_metrics_folder, f"confusion_matrix.png")
+    fig_path = os.path.join(model_metrics_folder, "confusion_matrix.png")
     plt.title("Confusion Matrix (Without 'O')")
     plt.savefig(fig_path)
 
