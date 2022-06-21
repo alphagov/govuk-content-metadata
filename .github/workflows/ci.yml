@@ -1,0 +1,40 @@
+name: Test
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9]
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Read Ubuntu version
+      run: echo ::set-output name=UBUNTU_VERSION::$(lsb_release -r -s)
+      id: ubuntu-version
+
+    - name: Setup python (${{ matrix.python-version }})
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Setup Python cache
+      uses: actions/cache@v2
+      id: python-cache
+      with:
+        path: venv
+        key: venv-${{ runner.os }}-${{ steps.ubuntu-version.outputs.UBUNTU_VERSION }}-${{ matrix.python-version }}-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: venv-${{ runner.os }}-${{ steps.ubuntu-version.outputs.UBUNTU_VERSION }}-${{ matrix.python-version }}-
+
+    - name: Install requirements, and pre-commit hooks
+      run: make requirements
+
+    - name: Run pre-commit hooks on all files
+      run: pre-commit run --all-files
+
+    - name: Install direnv package
+      run: sudo apt-get install direnv
+
+    - name: Allow `.envrc`, and execute tests
+      run: |
+          direnv allow . && eval "$(direnv export bash)"

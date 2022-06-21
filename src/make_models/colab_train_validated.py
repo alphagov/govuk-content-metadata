@@ -12,7 +12,13 @@ import numpy as np
 import pandas as pd
 from datetime import date
 from datasets import load_from_disk, load_metric, ClassLabel, Sequence
-from transformers import AutoModelForTokenClassification, AutoTokenizer, Trainer, TrainingArguments, DataCollatorForTokenClassification
+from transformers import (
+    AutoModelForTokenClassification,
+    AutoTokenizer,
+    Trainer,
+    TrainingArguments,
+    DataCollatorForTokenClassification,
+)
 from transformers.trainer_utils import get_last_checkpoint
 
 if __name__ == "__main__":
@@ -31,9 +37,13 @@ if __name__ == "__main__":
     # Data, model, and output directories
     parser.add_argument("--output_dir", type=str, default=os.environ["SM_MODEL_DIR"])
     parser.add_argument("--n_gpus", type=str, default=os.environ["SM_NUM_GPUS"])
-    parser.add_argument("--train_data_dir", type=str, default=os.environ["SM_TRAIN_DATA"])
+    parser.add_argument(
+        "--train_data_dir", type=str, default=os.environ["SM_TRAIN_DATA"]
+    )
     parser.add_argument("--test_data_dir", type=str, default=os.environ["SM_TEST_DATA"])
-    parser.add_argument("--mapping_file", type=str, default=os.environ["SM_MAPPING_FILE"])
+    parser.add_argument(
+        "--mapping_file", type=str, default=os.environ["SM_MAPPING_FILE"]
+    )
     # parser.add_argument("--training_dir", type=str, default=os.environ["SM_CHANNEL_TRAIN"])
     # parser.add_argument("--test_dir", type=str, default=os.environ["SM_CHANNEL_TEST"])
 
@@ -52,42 +62,64 @@ if __name__ == "__main__":
     train_dataset = load_from_disk(args.train_data_dir)
     test_dataset = load_from_disk(args.test_data_dir)
 
-    dataset_name = args.train_data_dir.split('/')[-1]
-    print("Dataset_name: ",dataset_name)
+    dataset_name = args.train_data_dir.split("/")[-1]
+    print("Dataset_name: ", dataset_name)
 
     logger.info(f" loaded train_dataset length is: {len(train_dataset)}")
     logger.info(f" loaded test_dataset length is: {len(test_dataset)}")
 
-    #load label map as dictionary
+    # load label map as dictionary
     with open(args.mapping_file) as json_file:
-      label_map = json.load(json_file)
-    
-    #get list of labels (keys from dictionary)
+        label_map = json.load(json_file)
+
+    # get list of labels (keys from dictionary)
     label_names = list(label_map.keys())
     num_labels = len(label_names)
 
-    train_dataset.features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=num_labels, names=label_names, names_file=None, id=None), length=-1, id=None)
-    test_dataset.features[f"new_label_list_id"] = Sequence(feature=ClassLabel(num_classes=num_labels, names=label_names, names_file=None, id=None), length=-1, id=None)
+    train_dataset.features[f"new_label_list_id"] = Sequence(
+        feature=ClassLabel(
+            num_classes=num_labels, names=label_names, names_file=None, id=None
+        ),
+        length=-1,
+        id=None,
+    )
+    test_dataset.features[f"new_label_list_id"] = Sequence(
+        feature=ClassLabel(
+            num_classes=num_labels, names=label_names, names_file=None, id=None
+        ),
+        length=-1,
+        id=None,
+    )
 
-    #data tokenisation
+    # data tokenisation
     tokenizer = AutoTokenizer.from_pretrained(args.model_id)
 
     label_all_tokens = True
 
     def tokenize_and_align_labels(examples):
-        tokenized_inputs = tokenizer(examples["text_tokens"], truncation=True, is_split_into_words=True)
+        tokenized_inputs = tokenizer(
+            examples["text_tokens"], truncation=True, is_split_into_words=True
+        )
 
         labels = []
         for i, label in enumerate(examples[f"new_label_list_id"]):
-            word_ids = tokenized_inputs.word_ids(batch_index=i) # Map tokens to their respective word.
+            word_ids = tokenized_inputs.word_ids(
+                batch_index=i
+            )  # Map tokens to their respective word.
             previous_word_idx = None
             label_ids = []
-            for word_idx in word_ids:  # Set the special tokens to -100. Special tokens have a word id that is None. We set the label to -100 so they are automatically ignored in the loss function.
+            for (
+                word_idx
+            ) in (
+                word_ids
+            ):  # Set the special tokens to -100. Special tokens have a word id that is None. We set the label to -100 so they are automatically ignored in the loss function.
                 if word_idx is None:
                     label_ids.append(-100)
-                elif word_idx != previous_word_idx: # Only label the first token of a given word.
+                elif (
+                    word_idx != previous_word_idx
+                ):  # Only label the first token of a given word.
                     label_ids.append(label[word_idx])
-                else:                   # For the other tokens in a word, we set the label to either the current label or -100, depending on the label_all_tokens flag.
+                else:  # For the other tokens in a word, we set the label to either the current label or -100, depending on the label_all_tokens flag.
                     label_ids.append(label[word_idx] if label_all_tokens else -100)
                 previous_word_idx = word_idx
 
@@ -107,11 +139,17 @@ if __name__ == "__main__":
         predictions = np.argmax(predictions, axis=2)
 
         # Remove ignored index (special tokens)
-        true_predictions = [[label_list[p] for (p, l) in zip(prediction, label) if l != -100] for prediction, label in zip(predictions, labels)]
-        true_labels = [[label_list[l] for (p, l) in zip(prediction, label) if l != -100]for prediction, label in zip(predictions, labels)]
+        true_predictions = [
+            [label_list[p] for (p, l) in zip(prediction, label) if l != -100]
+            for prediction, label in zip(predictions, labels)
+        ]
+        true_labels = [
+            [label_list[l] for (p, l) in zip(prediction, label) if l != -100]
+            for prediction, label in zip(predictions, labels)
+        ]
 
         results = metric.compute(predictions=true_predictions, references=true_labels)
-        
+
         return {
             "precision": results["overall_precision"],
             "recall": results["overall_recall"],
@@ -143,7 +181,7 @@ if __name__ == "__main__":
 
     train_args = TrainingArguments(
         output_dir=out_path,
-        evaluation_strategy = "epoch",
+        evaluation_strategy="epoch",
         learning_rate=2e-5,
         per_device_train_batch_size=args.train_batch_size,
         per_device_eval_batch_size=args.eval_batch_size,
@@ -159,21 +197,21 @@ if __name__ == "__main__":
         eval_dataset=tokenized_test_dataset,
         data_collator=data_collator,
         tokenizer=tokenizer,
-        compute_metrics=compute_metrics
+        compute_metrics=compute_metrics,
     )
 
     trainer.train()
     logger.info("***** training complete *****")
 
     # save the model to model folder
-    model_folder = os.path.join(args.output_dir ,full_model_name)
+    model_folder = os.path.join(args.output_dir, full_model_name)
     trainer.save_model(model_folder)
     logger.info("***** model saved *****")
 
-    #make folder in model folder for metrics if doesn't exist
+    # make folder in model folder for metrics if doesn't exist
     model_metrics_folder = os.path.join(model_folder, f"Metrics")
     if not os.path.exists(model_metrics_folder):
-      os.mkdir(model_metrics_folder)
+        os.mkdir(model_metrics_folder)
 
     # overall results
     print(f"***** Eval results *****")
@@ -182,7 +220,7 @@ if __name__ == "__main__":
     eval_list = list(eval_items)
     eval_df = pd.DataFrame(eval_list)
     excel_path = os.path.join(model_metrics_folder, f"overall_results.xlsx")
-    eval_df.to_excel(excel_path, sheet_name='overall_results')
+    eval_df.to_excel(excel_path, sheet_name="overall_results")
 
     # detailed results
     print(f"***** Detail results *****")
@@ -209,22 +247,24 @@ if __name__ == "__main__":
 
     confusion_labels = sorted(list(set(true_preds_flat)))
 
-    #with 'O'
+    # with 'O'
     confmat = confusion_matrix(y_true=true_labels_flat, y_pred=true_preds_flat)
-    cmplot = ConfusionMatrixDisplay(confmat, display_labels=confusion_labels) #, display_labels=label_names[1:]
-    fig, ax = plt.subplots(figsize=(15,15))
-    cmplot.plot(ax=ax, cmap='GnBu')
+    cmplot = ConfusionMatrixDisplay(
+        confmat, display_labels=confusion_labels
+    )  # , display_labels=label_names[1:]
+    fig, ax = plt.subplots(figsize=(15, 15))
+    cmplot.plot(ax=ax, cmap="GnBu")
     fig_path = os.path.join(model_metrics_folder, f"confusion_matrix_o.png")
     plt.title("Confusion Matrix (With 'O')")
     plt.savefig(fig_path)
 
-    #without
+    # without
     confmat_2 = [i[:-1] for i in confmat[:-1]]
     confmat_2 = np.array(confmat_2)
     confusion_labels_no_O = confusion_labels[:-1]
     cmplot = ConfusionMatrixDisplay(confmat_2, display_labels=confusion_labels_no_O)
-    fig, ax = plt.subplots(figsize=(15,15))
-    cmplot.plot(ax=ax, cmap='GnBu')
+    fig, ax = plt.subplots(figsize=(15, 15))
+    cmplot.plot(ax=ax, cmap="GnBu")
     fig_path = os.path.join(model_metrics_folder, f"confusion_matrix.png")
     plt.title("Confusion Matrix (Without 'O')")
     plt.savefig(fig_path)
