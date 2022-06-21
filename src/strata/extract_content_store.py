@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 from src.strata.preprocess_content import process_content_item
 
-warnings.filterwarnings('ignore', category=UserWarning, module='bs4')
+warnings.filterwarnings("ignore", category=UserWarning, module="bs4")
 
 EXCLUSION_PUBLISHING_APP = [
     "account-api",
@@ -43,7 +43,7 @@ EXCLUSION_PUBLISHING_APP = [
     "short-url-manager",
     "smartanswers",
     "special-route-publisher",
-    "static"
+    "static",
 ]
 
 EXCLUSION_SCHEMA_NAME = [
@@ -87,13 +87,10 @@ EXCLUSION_SCHEMA_NAME = [
     "travel_advice_index",
     "unpublishing",
     "world_location",
-    "world_location_news_article"
+    "world_location_news_article",
 ]
 
-EXCLUSION_DOCUMENT_TYPE = [
-    "world_news_story",
-    "welsh_language_scheme"
-    ]
+EXCLUSION_DOCUMENT_TYPE = ["world_news_story", "welsh_language_scheme"]
 
 
 class ContentStore:
@@ -107,6 +104,7 @@ class ContentStore:
         2) queries data as per query_db()
         3) returns dataframe as per create_content_dataframe()
     """
+
     def __init__(self, excluded_doctypes=[]):
         """
         Parameters
@@ -115,7 +113,7 @@ class ContentStore:
             List of document types to exclude from query as per config/
         """
         self.logger = logging.getLogger(__name__)
-        self.logger.info('Processing content store...')
+        self.logger.info("Processing content store...")
 
         self.excluded_doctypes = excluded_doctypes
 
@@ -124,14 +122,20 @@ class ContentStore:
         :param address:
         :return:
         """
-        self.logger.info('Connecting to db...')
+        self.logger.info("Connecting to db...")
         mongo_client = pymongo.MongoClient(address)
         content_store_db = mongo_client["content_store"]
         content_store_collection = content_store_db["content_items"]
 
         return content_store_collection
 
-    def query_db(self, mongodb_collection, block_list_pubapp=EXCLUSION_PUBLISHING_APP, block_list_schema=EXCLUSION_SCHEMA_NAME, block_list_doctypes=EXCLUSION_DOCUMENT_TYPE):
+    def query_db(
+        self,
+        mongodb_collection,
+        block_list_pubapp=EXCLUSION_PUBLISHING_APP,
+        block_list_schema=EXCLUSION_SCHEMA_NAME,
+        block_list_doctypes=EXCLUSION_DOCUMENT_TYPE,
+    ):
         """
         :param mongodb_collection:
         :param block_list:
@@ -149,16 +153,20 @@ class ContentStore:
             "public_updated_at": 1,
             "updated_at": 1,
             "withdrawn_notice": 1,
-            "publishing_app": 1}
+            "publishing_app": 1,
+        }
 
-        query = {"$and": [
-            {"publishing_app": {"$nin": block_list_pubapp}},
-            {"schema_name": {"$nin": block_list_schema}},
-            {"document_type": {"$nin": block_list_doctypes}},
-            {"locale": "en"},
-            {"phase": "live"}]}
+        query = {
+            "$and": [
+                {"publishing_app": {"$nin": block_list_pubapp}},
+                {"schema_name": {"$nin": block_list_schema}},
+                {"document_type": {"$nin": block_list_doctypes}},
+                {"locale": "en"},
+                {"phase": "live"},
+            ]
+        }
 
-        self.logger.info('Querying db...')
+        self.logger.info("Querying db...")
         content_items = mongodb_collection.find(query, fields, no_cursor_timeout=True)
         num_docs = mongodb_collection.count_documents(query)
 
@@ -169,21 +177,26 @@ class ContentStore:
         :param content_item_cursor:
         :return:
         """
-        self.logger.info('Computing cursor size...')
+        self.logger.info("Computing cursor size...")
         num_docs = num_docs
         num_work = int(multiprocessing.cpu_count() / 2)
         chunksize, extra = divmod(num_docs, num_work * 4)
         if extra:
             chunksize += 1
 
-        self.logger.info('Got {num_docs} documents. {num_work} workers, {chunksize} items per worker cycle.')
-        self.logger.info('Working...')
+        self.logger.info(
+            "Got {num_docs} documents. {num_work} workers, {chunksize} items per worker cycle."
+        )
+        self.logger.info("Working...")
         pool = multiprocessing.Pool(processes=num_work)
-        results = pool.imap(process_content_item, (content_item for content_item in tqdm(content_item_cursor)),
-                            chunksize=chunksize)
+        results = pool.imap(
+            process_content_item,
+            (content_item for content_item in tqdm(content_item_cursor)),
+            chunksize=chunksize,
+        )
         pool.close()
         pool.join()
-        self.logger.info('Finished...')
+        self.logger.info("Finished...")
         return results
 
     def create_content_dataframe(self, content_item_list, num_docs):
@@ -192,21 +205,33 @@ class ContentStore:
         :return:
         """
 
-        cols = ['base_path', 'content_id', 'title',
-                'publishing_app', 'locale', 'schema_name',
-                'document_type',  'organisations', 'taxons',
-                'first_published_at', 'public_updated_at', 'updated_at',
-                'withdrawn', 'withdrawn_at', 'withdrawn_explanation']
+        cols = [
+            "base_path",
+            "content_id",
+            "title",
+            "publishing_app",
+            "locale",
+            "schema_name",
+            "document_type",
+            "organisations",
+            "taxons",
+            "first_published_at",
+            "public_updated_at",
+            "updated_at",
+            "withdrawn",
+            "withdrawn_at",
+            "withdrawn_explanation",
+        ]
 
-        self.logger.info(f'Creating content_store dataframe with columns {cols}...')
+        self.logger.info(f"Creating content_store dataframe with columns {cols}...")
 
         df = pd.DataFrame(self.multiprocess_content_items(content_item_list, num_docs))
 
-        self.logger.info('Actually got columns: {df.columns}...')
+        self.logger.info("Actually got columns: {df.columns}...")
 
-        self.logger.info(f'Got {df.shape[0]} rows...')
+        self.logger.info(f"Got {df.shape[0]} rows...")
 
-        df.rename(columns={'_id': 'base_path'}, inplace=True)
+        df.rename(columns={"_id": "base_path"}, inplace=True)
         df.dropna(subset=["document_type"], inplace=True)
 
         return df[cols]

@@ -25,13 +25,13 @@ jobs:
         path: venv
         key: venv-${{ runner.os }}-${{ steps.ubuntu-version.outputs.UBUNTU_VERSION }}-${{ matrix.python-version }}-${{ hashFiles('**/requirements*.txt') }}
         restore-keys: venv-${{ runner.os }}-${{ steps.ubuntu-version.outputs.UBUNTU_VERSION }}-${{ matrix.python-version }}-
-    
+
     - name: Install requirements, and pre-commit hooks
       run: make requirements
 
     - name: Run pre-commit hooks on all files
       run: pre-commit run --all-files
-    
+
     - name: Install direnv package
       run: sudo apt-get install direnv
 

@@ -26,8 +26,13 @@ def extract_text_from_content_details(data, keep_html=False):
     """
     if isinstance(data, list):
         # whitespace aggregated as we skip through unsuitable text fragments (slugs, titles, govspeak)
-        return re.sub(" +", " ",
-                      " ".join([extract_text_from_content_details(item, keep_html) for item in data])).strip()
+        return re.sub(
+            " +",
+            " ",
+            " ".join(
+                [extract_text_from_content_details(item, keep_html) for item in data]
+            ),
+        ).strip()
     elif isinstance(data, dict):
         if "content_type" in data.keys() and data["content_type"] != "text/html":
             return " "
@@ -50,7 +55,9 @@ def extract_links_from_content_details(data):
     """
     if isinstance(data, list):
         # could optionally return unique set of links: list(set(links))...
-        return [link for item in data for link in extract_links_from_content_details(item)]
+        return [
+            link for item in data for link in extract_links_from_content_details(item)
+        ]
     elif isinstance(data, dict):
         if "content_type" in data.keys() and data["content_type"] != "text/html":
             return []
@@ -79,20 +86,20 @@ def extract_text(body):
         try:
             # print("this is", body)
             tree = etree.HTML(body)
-            r = tree.xpath('//text()')
-            r = ' '.join(r)
-            r = r.strip().replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
-            r = r.replace('\n', ' ').replace('\\"', '"')
+            r = tree.xpath("//text()")
+            r = " ".join(r)
+            r = r.strip().replace("\n", " ").replace("\r", " ").replace("\t", " ")
+            r = r.replace("\n", " ").replace('\\"', '"')
             # r = r.lower()
-            r = ' '.join(r.split())
+            r = " ".join(r.split())
         except ValueError as e:
             print("exception @ extract:", type(body), body, e)
     if not r:
-        r = ' '
+        r = " "
     return r
 
 
-def extract_links_from_html(text, link_type='internal'):
+def extract_links_from_html(text, link_type="internal"):
     """
     Grab any GOV.UK domain-specific links from page text (looks for a href tags)
 
@@ -105,18 +112,28 @@ def extract_links_from_html(text, link_type='internal'):
             text = str(text)
             return extract_links_from_html(text=text, link_type=link_type)
 
-        soup = BeautifulSoup(text, 'html5lib')
-        links = [link.get('href') for link in soup.findAll('a', href=True)]
+        soup = BeautifulSoup(text, "html5lib")
+        links = [link.get("href") for link in soup.findAll("a", href=True)]
 
-        if link_type == 'internal':
-            link_list = [link.replace('https://www.gov.uk/', '/') for link in links
-                         if (link.startswith('/') or link.startswith('https://www.gov.uk/'))
-                         and "/government/uploads/system/uploads/attachment_data/file/" not in link]
-        elif link_type == 'external':
-            link_list = [link for link in links if not (link.startswith('/') or link.startswith('https://www.gov.uk'))]
-            link_list = [link for link in link_list if link.startswith('http')]
+        if link_type == "internal":
+            link_list = [
+                link.replace("https://www.gov.uk/", "/")
+                for link in links
+                if (link.startswith("/") or link.startswith("https://www.gov.uk/"))
+                and "/government/uploads/system/uploads/attachment_data/file/"
+                not in link
+            ]
+        elif link_type == "external":
+            link_list = [
+                link
+                for link in links
+                if not (link.startswith("/") or link.startswith("https://www.gov.uk"))
+            ]
+            link_list = [link for link in link_list if link.startswith("http")]
         else:
-            print(f"{link_type} should take one of the following ['internal', 'external'].")
+            print(
+                f"{link_type} should take one of the following ['internal', 'external']."
+            )
         return link_list
     # might be fine to except all exceptions here, as it's a low-level function
     except Exception as e:
