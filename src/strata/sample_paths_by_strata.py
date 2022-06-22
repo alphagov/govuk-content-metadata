@@ -56,12 +56,21 @@ if __name__ == "__main__":
     SCHEMA_DOCS_SAMPLE_SIZE = strata_args.doctype_size
     TAXONS_SAMPLE_SIZE = strata_args.taxons_size
 
+    # Define outputs
     today = date.today().strftime("%Y%m%d")
     STRATA_TAXON_OUTPUT = f"{today}_taxons_stratified_random_sample.csv"
     STRATA_DOCTYPE_OUTPUT = f"{today}_schemas_stratified_random_sample.csv"
     STRATA_TAXON_OUTPATH = os.path.join("src/strata/data", STRATA_TAXON_OUTPUT)
     STRATA_DOCTYPE_OUTPATH = os.path.join("src/strata/data", STRATA_DOCTYPE_OUTPUT)
 
+    META_WEIGHTS_DOCTYPE_OUTPATH = os.path.join(
+        "src/strata/data", f"{today}_META_schemas_weights.csv"
+    )
+    META_WEIGHTS_TAXON_OUTPATH = os.path.join(
+        "src/strata/data", f"{today}_META_taxons_weights.csv"
+    )
+
+    # Get input files
     STRATA_INPUT_FILEPATH = "src/strata/data/strata_schema_docs_taxons.csv"
     strata_df = pd.read_csv(STRATA_INPUT_FILEPATH)
 
@@ -92,11 +101,12 @@ if __name__ == "__main__":
     print(
         "Stratified random sample by Schema name/Document type: sample sizes by strata"
     )
-    print(
+    actual_sample_doctypes = dict(
         schemas_stratified_random_sample_df.groupby(
             "schema_strata_name"
         ).base_path.count()
     )
+    print(actual_sample_doctypes)
     schemas_stratified_random_sample_df[
         ["schema_name", "document_type", "schema_strata_name", "base_path"]
     ].to_csv(STRATA_DOCTYPE_OUTPATH, index=False)
@@ -107,6 +117,19 @@ if __name__ == "__main__":
     )
     print("Stratified random sample by Taxons: sample sizes by strata")
     print(taxons_stratified_random_sample_df.groupby("taxon_level1").base_path.count())
+    actual_sample_taxons = dict(
+        taxons_stratified_random_sample_df.groupby("taxon_level1").base_path.count()
+    )
     taxons_stratified_random_sample_df[["taxon_level1", "base_path"]].to_csv(
         STRATA_TAXON_OUTPATH, index=False
+    )
+
+    # Save metadata about used weights and actual sample
+    meta_doctypes = [SCHEMAS_WEIGHTS, actual_sample_doctypes]
+    meta_taxons = [TAXONS_WEIGHTS, actual_sample_taxons]
+    pd.DataFrame(meta_taxons).T.rename(columns={0: "weights", 1: "n"}).to_csv(
+        META_WEIGHTS_TAXON_OUTPATH
+    )
+    pd.DataFrame(meta_doctypes).T.rename(columns={0: "weights", 1: "n"}).to_csv(
+        META_WEIGHTS_DOCTYPE_OUTPATH
     )

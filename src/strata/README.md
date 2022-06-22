@@ -43,6 +43,8 @@ where `XXX` is the aimed-at sample size for the sample of page_path's stratified
 
 The samples are saved as CSV in `src/strata/data` as `YYYYMMDD_schemas_stratified_random_sample.csv` and `YYYYMMDD_schemas_stratified_random_sample.csv` where `YYYYMMDD` is today's date.
 
+Together with the samples of base_path's, two metadata files are also saved in `src/strata/data/`, containing the used weights and the actual sample sizes obtained for each strata: `YYYYMMDD_META_schemas_weights.csv` and `YYYYMMDD_META_taxons_weights.csv`.
+
 
 ### 5. Get Sentences from sample of base paths
 
