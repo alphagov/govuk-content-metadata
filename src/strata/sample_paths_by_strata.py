@@ -24,6 +24,16 @@ def get_stratified_sample(
 
 if __name__ == "__main__":
 
+    import os
+    from datetime import date
+
+    today = date.today().strftime("%Y%m%d")
+
+    STRATA_TAXON_OUTPUT = f"{today}_taxons_stratified_random_sample.csv"
+    STRATA_DOCTYPE_OUTPUT = f"{today}_schemas_stratified_random_sample.csv"
+    STRATA_TAXON_OUTPATH = os.path.join("src/strata/data", STRATA_TAXON_OUTPUT)
+    STRATA_DOCTYPE_OUTPATH = os.path.join("src/strata/data", STRATA_DOCTYPE_OUTPUT)
+
     STRATA_INPUT_FILEPATH = "src/strata/data/strata_schema_docs_taxons.csv"
     strata_df = pd.read_csv(STRATA_INPUT_FILEPATH)
 
@@ -66,7 +76,7 @@ if __name__ == "__main__":
     )
     schemas_stratified_random_sample_df[
         ["schema_name", "document_type", "schema_strata_name", "base_path"]
-    ].to_csv("src/strata/data/schemas_stratified_random_sample.csv", index=False)
+    ].to_csv(STRATA_DOCTYPE_OUTPATH, index=False)
 
     # stratified random sample by taxons
     taxons_stratified_random_sample_df = get_stratified_sample(
@@ -75,5 +85,5 @@ if __name__ == "__main__":
     print("Stratified random sample by Taxons: sample sizes by strata")
     print(taxons_stratified_random_sample_df.groupby("taxon_level1").base_path.count())
     taxons_stratified_random_sample_df[["taxon_level1", "base_path"]].to_csv(
-        "src/strata/data/taxons_stratified_random_sample.csv", index=False
+        STRATA_TAXON_OUTPATH, index=False
     )
