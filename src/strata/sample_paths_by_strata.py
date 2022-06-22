@@ -27,8 +27,36 @@ if __name__ == "__main__":
     import os
     from datetime import date
 
-    today = date.today().strftime("%Y%m%d")
+    import argparse
 
+    strata_parser = argparse.ArgumentParser(
+        description="Run src.strata.sample_paths_by_strata"
+    )
+
+    # Define the positional arguments we want to get from the user
+    strata_parser.add_argument(
+        "-sample_size_taxons",
+        type=int,
+        action="store",
+        dest="taxons_size",
+        required=True,
+        help="specify number of pages to sample from strata by taxons",
+    )
+
+    strata_parser.add_argument(
+        "-sample_size_doctype",
+        type=int,
+        action="store",
+        dest="doctype_size",
+        required=True,
+        help="specify number of pages to sample from strata by doc types",
+    )
+
+    strata_args = strata_parser.parse_args()
+    SCHEMA_DOCS_SAMPLE_SIZE = strata_args.doctype_size
+    TAXONS_SAMPLE_SIZE = strata_args.taxons_size
+
+    today = date.today().strftime("%Y%m%d")
     STRATA_TAXON_OUTPUT = f"{today}_taxons_stratified_random_sample.csv"
     STRATA_DOCTYPE_OUTPUT = f"{today}_schemas_stratified_random_sample.csv"
     STRATA_TAXON_OUTPATH = os.path.join("src/strata/data", STRATA_TAXON_OUTPUT)
@@ -44,11 +72,6 @@ if __name__ == "__main__":
         SCHEMAS_WEIGHTS = yaml.safe_load(file)
     with open("src/strata/taxons_weights.yaml", "r") as file:
         TAXONS_WEIGHTS = yaml.safe_load(file)
-    with open("src/strata/sample_sizes.yaml", "r") as file:
-        SAMPLES = yaml.safe_load(file)
-
-    SCHEMA_DOCS_SAMPLE_SIZE = SAMPLES["schema_and_docs_sample_size"]
-    TAXONS_SAMPLE_SIZE = SAMPLES["taxons_sample_size"]
 
     # add "schema_strata_name" (i.e., the schema/docs strata) as column to strata_df
     strata_df = strata_df.merge(

@@ -30,17 +30,19 @@ python -m  src.strata.strata
 
 To produce the samples:
 
-- Specify the size for the two samples in `src/strata/sample_sizes.yaml`.
 - Specify the weights for the strata in: `src/strata/schemas_weights.yaml` and `src/strata/taxons_weights.yaml`. Weight < 1 means you’ll under sample that strata. Weight > 1 means you’ll over sample that strata.
 
 
 Then, from the root directory of this project, run:
 
 ```shell
-python -m src.strata.sample_paths_by_strata
+python -m src.strata.sample_paths_by_strata -sample_size_taxons XXX -sample_size_doctype YYY
 ```
 
-The samples are saved as CSV in `src/strata/data`.
+where `XXX` is the aimed-at sample size for the sample of page_path's stratified by taxons, and `YYY` is the aimed at sample size for the sample stratified by schema name/ document types.
+
+The samples are saved as CSV in `src/strata/data` as `YYYYMMDD_schemas_stratified_random_sample.csv` and `YYYYMMDD_schemas_stratified_random_sample.csv` where `YYYYMMDD` is today's date.
+
 
 ### 5. Get Sentences from sample of base paths
 
