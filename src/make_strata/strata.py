@@ -67,7 +67,7 @@ def dictcolumn_to_col(df: pd.DataFrame, dict_col: str, dict_value: str):
 
 if __name__ == "__main__":
 
-    from src.strata.extract_content_store import ContentStore
+    from src.make_strata.extract_content_store import ContentStore
 
     content_store = ContentStore()
     content_store_df = content_store.extract()
@@ -80,11 +80,11 @@ if __name__ == "__main__":
     print(f"number of unique base_path in strata_df: {strata_df.base_path.nunique()}")
 
     STRATA_COUNTS_OUTPUT_FILEPATH = (
-        "src/strata/data/strata_counts_schema_docs_pubapp_taxons.csv"
+        "src/make_strata/data/strata_counts_schema_docs_pubapp_taxons.csv"
     )
     strata_df.groupby(
         ["publishing_app", "schema_name", "document_type", "taxon_level1"]
     )["base_path"].count().to_csv(STRATA_COUNTS_OUTPUT_FILEPATH, index=False)
 
-    STRATA_OUTPUT_FILEPATH = "src/strata/data/strata_schema_docs_taxons.csv"
+    STRATA_OUTPUT_FILEPATH = "src/make_strata/data/strata_schema_docs_taxons.csv"
     strata_df.to_csv(STRATA_OUTPUT_FILEPATH, index=False)

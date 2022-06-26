@@ -30,7 +30,7 @@ if __name__ == "__main__":
     import argparse
 
     strata_parser = argparse.ArgumentParser(
-        description="Run src.strata.sample_paths_by_strata"
+        description="Run src.make_strata.sample_paths_by_strata"
     )
 
     # Define the positional arguments we want to get from the user
@@ -60,26 +60,26 @@ if __name__ == "__main__":
     today = date.today().strftime("%Y%m%d")
     STRATA_TAXON_OUTPUT = f"{today}_taxons_stratified_random_sample.csv"
     STRATA_DOCTYPE_OUTPUT = f"{today}_schemas_stratified_random_sample.csv"
-    STRATA_TAXON_OUTPATH = os.path.join("src/strata/data", STRATA_TAXON_OUTPUT)
-    STRATA_DOCTYPE_OUTPATH = os.path.join("src/strata/data", STRATA_DOCTYPE_OUTPUT)
+    STRATA_TAXON_OUTPATH = os.path.join("src/make_strata/data", STRATA_TAXON_OUTPUT)
+    STRATA_DOCTYPE_OUTPATH = os.path.join("src/make_strata/data", STRATA_DOCTYPE_OUTPUT)
 
     META_WEIGHTS_DOCTYPE_OUTPATH = os.path.join(
-        "src/strata/data", f"{today}_META_schemas_weights.csv"
+        "src/make_strata/data", f"{today}_META_schemas_weights.csv"
     )
     META_WEIGHTS_TAXON_OUTPATH = os.path.join(
-        "src/strata/data", f"{today}_META_taxons_weights.csv"
+        "src/make_strata/data", f"{today}_META_taxons_weights.csv"
     )
 
     # Get input files
-    STRATA_INPUT_FILEPATH = "src/strata/data/strata_schema_docs_taxons.csv"
+    STRATA_INPUT_FILEPATH = "src/make_strata/data/strata_schema_docs_taxons.csv"
     strata_df = pd.read_csv(STRATA_INPUT_FILEPATH)
 
-    SCHEMA_STRATA_DEFINITIONS = "src/strata/schema_strata_definition.csv"
+    SCHEMA_STRATA_DEFINITIONS = "src/make_strata/schema_strata_definition.csv"
     schema_strata_defs = pd.read_csv(SCHEMA_STRATA_DEFINITIONS)
 
-    with open("src/strata/schemas_weights.yaml", "r") as file:
+    with open("src/make_strata/schemas_weights.yaml", "r") as file:
         SCHEMAS_WEIGHTS = yaml.safe_load(file)
-    with open("src/strata/taxons_weights.yaml", "r") as file:
+    with open("src/make_strata/taxons_weights.yaml", "r") as file:
         TAXONS_WEIGHTS = yaml.safe_load(file)
 
     # add "schema_strata_name" (i.e., the schema/docs strata) as column to strata_df
