@@ -11,7 +11,7 @@ import pandas as pd
 import pymongo
 from tqdm import tqdm
 
-from src.strata.preprocess_content import (
+from src.make_strata.preprocess_content import (
     process_content_item,
     process_url_and_metadata,
 )

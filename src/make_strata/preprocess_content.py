@@ -1,5 +1,5 @@
-from src.strata.preprocess_text import extract_text_from_content_details
-from src.strata.preprocess_text import extract_text_from_html
+from src.make_strata.preprocess_text import extract_text_from_content_details
+from src.make_strata.preprocess_text import extract_text_from_html
 from src.utils.helpers_arrays import flatten_list_of_lists
 from src.utils.helpers_arrays import flatten_list_of_str_dict
 
