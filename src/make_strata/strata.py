@@ -70,7 +70,7 @@ if __name__ == "__main__":
     from src.make_strata.extract_content_store import ContentStore
 
     content_store = ContentStore()
-    content_store_df = content_store.extract()
+    content_store_df = content_store.extract_pagepaths()
     print(f"size of content store: {content_store_df.shape}")
     print(
         f"number of unique base_path in content_store_df: {content_store_df.base_path.nunique()}"
