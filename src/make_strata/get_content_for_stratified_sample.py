@@ -1,30 +1,32 @@
-import os
-import pandas as pd
+if __name__ == "__main__":
 
-from src.make_strata.extract_content_store import ContentStore
+    import os
+    import pandas as pd
 
-pd.set_option("display.max_colwidth", None)
+    from src.make_strata.extract_content_store import ContentStore
 
-SAMPLES_DIR = "src/make_strata/data/"
-SAMPLES_DATE = "20220622"
-SAMPLE_DOCTYPES = f"{SAMPLES_DATE}_schemas_stratified_random_sample.csv"
-SAMPLE_TAXONS = f"{SAMPLES_DATE}_taxons_stratified_random_sample.csv"
+    pd.set_option("display.max_colwidth", None)
 
-OUTPUTFILE = os.path.join(
-    SAMPLES_DIR, f"{SAMPLES_DATE}_stratified_sample_all_content.csv"
-)
+    SAMPLES_DIR = "src/make_strata/data/"
+    SAMPLES_DATE = "20220622"
+    SAMPLE_DOCTYPES = f"{SAMPLES_DATE}_schemas_stratified_random_sample.csv"
+    SAMPLE_TAXONS = f"{SAMPLES_DATE}_taxons_stratified_random_sample.csv"
 
-sample_doctypes = pd.read_csv(os.path.join(SAMPLES_DIR, SAMPLE_DOCTYPES))
-sample_taxons = pd.read_csv(os.path.join(SAMPLES_DIR, SAMPLE_TAXONS))
+    OUTPUTFILE = os.path.join(
+        SAMPLES_DIR, f"{SAMPLES_DATE}_stratified_sample_all_content.csv"
+    )
 
-sample_all_pagepaths = set(
-    list(sample_doctypes.base_path) + list(sample_taxons.base_path)
-)
-print(f"Number of unique page_paths: {len(sample_all_pagepaths)}")
-pagepaths_list = list(sample_all_pagepaths)
+    sample_doctypes = pd.read_csv(os.path.join(SAMPLES_DIR, SAMPLE_DOCTYPES))
+    sample_taxons = pd.read_csv(os.path.join(SAMPLES_DIR, SAMPLE_TAXONS))
 
-content_store = ContentStore()
-content_store_df = content_store.extract_content()
-print(f"size of content store extract: {content_store_df.shape}")
+    sample_all_pagepaths = set(
+        list(sample_doctypes.base_path) + list(sample_taxons.base_path)
+    )
+    print(f"Number of unique page_paths: {len(sample_all_pagepaths)}")
+    pagepaths_list = list(sample_all_pagepaths)
 
-content_store_df.to_csv(OUTPUTFILE, index=False)
+    content_store = ContentStore(pagepaths_list)
+    content_store_df = content_store.extract_content()
+    print(f"size of content store extract: {content_store_df.shape}")
+
+    content_store_df.to_csv(OUTPUTFILE, index=False)
