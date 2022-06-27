@@ -113,17 +113,17 @@ class ContentStore:
         3) returns dataframe as per create_content_dataframe()
     """
 
-    def __init__(self, excluded_doctypes=[]):
+    def __init__(self, selected_pagepaths=[]):
         """
         Parameters
         ----------
-        excluded_doctypes : list
-            List of document types to exclude from query as per config/
+        selected_pagepaths [optional]: list
+            List of pagepath's to extract contect for
         """
         self.logger = logging.getLogger(__name__)
         self.logger.info("Processing content store...")
 
-        self.excluded_doctypes = excluded_doctypes
+        self.selected_pagepaths = selected_pagepaths
 
     def init_client(self, address="mongodb://localhost:27017/"):
         """
@@ -367,7 +367,9 @@ class ContentStore:
 
     def extract_content(self):
         content_db = self.init_client()
-        content_items, num_docs = self.query_db_get_content(content_db)
+        content_items, num_docs = self.query_db_get_content(
+            content_db, self.selected_pagepaths
+        )
         content_item_df = self.create_content_dataframe(content_items, num_docs)
 
         return content_item_df
