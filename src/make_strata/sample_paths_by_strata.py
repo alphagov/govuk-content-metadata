@@ -4,7 +4,11 @@ from typing import Dict
 
 
 def get_stratified_sample(
-    df: pd.DataFrame, strata_col: str, weights: Dict[str, int], sample_size: int
+    df: pd.DataFrame,
+    strata_col: str,
+    weights: Dict[str, int],
+    sample_size: int,
+    seed: int,
 ) -> pd.DataFrame:
     """ """
     df = df.copy()
@@ -16,8 +20,10 @@ def get_stratified_sample(
     }
 
     df = df.groupby(strata_col, as_index=False).apply(
-        lambda x: x.sample(n=weighted_size_strata[x.name])
+        lambda x: x.sample(n=weighted_size_strata[x.name], random_state=seed)
     )
+
+    df["seed"] = seed
 
     return df
 
@@ -52,9 +58,19 @@ if __name__ == "__main__":
         help="specify number of pages to sample from strata by doc types",
     )
 
+    strata_parser.add_argument(
+        "-set_seed",
+        type=int,
+        action="store",
+        dest="seed",
+        required=True,
+        help="set random seed",
+    )
+
     strata_args = strata_parser.parse_args()
     SCHEMA_DOCS_SAMPLE_SIZE = strata_args.doctype_size
     TAXONS_SAMPLE_SIZE = strata_args.taxons_size
+    SEED = strata_args.seed
 
     # Define outputs
     today = date.today().strftime("%Y%m%d")
@@ -96,7 +112,7 @@ if __name__ == "__main__":
 
     # stratified random sample by schemas/document_types
     schemas_stratified_random_sample_df = get_stratified_sample(
-        strata_df, "schema_strata_name", SCHEMAS_WEIGHTS, SCHEMA_DOCS_SAMPLE_SIZE
+        strata_df, "schema_strata_name", SCHEMAS_WEIGHTS, SCHEMA_DOCS_SAMPLE_SIZE, SEED
     )
     print(
         "Stratified random sample by Schema name/Document type: sample sizes by strata"
@@ -108,19 +124,19 @@ if __name__ == "__main__":
     )
     print(actual_sample_doctypes)
     schemas_stratified_random_sample_df[
-        ["schema_name", "document_type", "schema_strata_name", "base_path"]
+        ["seed", "schema_name", "document_type", "schema_strata_name", "base_path"]
     ].to_csv(STRATA_DOCTYPE_OUTPATH, index=False)
 
     # stratified random sample by taxons
     taxons_stratified_random_sample_df = get_stratified_sample(
-        strata_df, "taxon_level1", TAXONS_WEIGHTS, TAXONS_SAMPLE_SIZE
+        strata_df, "taxon_level1", TAXONS_WEIGHTS, TAXONS_SAMPLE_SIZE, SEED
     )
     print("Stratified random sample by Taxons: sample sizes by strata")
     print(taxons_stratified_random_sample_df.groupby("taxon_level1").base_path.count())
     actual_sample_taxons = dict(
         taxons_stratified_random_sample_df.groupby("taxon_level1").base_path.count()
     )
-    taxons_stratified_random_sample_df[["taxon_level1", "base_path"]].to_csv(
+    taxons_stratified_random_sample_df[["seed", "taxon_level1", "base_path"]].to_csv(
         STRATA_TAXON_OUTPATH, index=False
     )
 

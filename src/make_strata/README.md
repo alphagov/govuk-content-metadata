@@ -36,10 +36,10 @@ To produce the samples:
 Then, from the root directory of this project, run:
 
 ```shell
-python -m src.make_strata.sample_paths_by_strata -sample_size_taxons XXX -sample_size_doctype YYY
+python -m src.make_strata.sample_paths_by_strata -sample_size_taxons XXX -sample_size_doctype YYY -set_seed 000
 ```
 
-where `XXX` is the aimed-at sample size for the sample of page_path's stratified by taxons, and `YYY` is the aimed at sample size for the sample stratified by schema name/ document types.
+where `XXX` is the aimed-at sample size for the sample of page_path's stratified by taxons, `YYY` is the aimed at sample size for the sample stratified by schema name/ document types, and `000` is the random seed to replicate results (it can be any sequence of digits).
 
 The samples are saved as CSV in `src/make_strata/data` as `YYYYMMDD_schemas_stratified_random_sample.csv` and `YYYYMMDD_schemas_stratified_random_sample.csv` where `YYYYMMDD` is today's date.
 

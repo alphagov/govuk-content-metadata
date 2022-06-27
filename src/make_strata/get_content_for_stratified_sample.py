@@ -8,7 +8,7 @@ if __name__ == "__main__":
     pd.set_option("display.max_colwidth", None)
 
     SAMPLES_DIR = "src/make_strata/data/"
-    SAMPLES_DATE = "20220622"
+    SAMPLES_DATE = "20220627"
     SAMPLE_DOCTYPES = f"{SAMPLES_DATE}_schemas_stratified_random_sample.csv"
     SAMPLE_TAXONS = f"{SAMPLES_DATE}_taxons_stratified_random_sample.csv"
 
