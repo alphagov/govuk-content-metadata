@@ -894,5 +894,5 @@ src/credential_test.py
 docs/_linkcheck/
 
 # temporarily
-src/strata/data/*
-!src/strata/data/.gitkeep
+src/make_strata/data/*
+!src/make_strata/data/.gitkeep
