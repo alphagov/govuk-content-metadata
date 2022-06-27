@@ -3,7 +3,17 @@ import json
 import spacy
 import pandas as pd
 
-nlp = spacy.load("en_core_web_md")
+# disabled unnecessary spacy NLP pipeline components
+disabled_pipelines = [
+    "tok2vec",
+    "tagger",
+    "parser",
+    "lemmatizer",
+    "attribute_ruler",
+]
+added_pipeline = "sentencizer"
+nlp = spacy.load("en_core_web_lg", disable=disabled_pipelines)
+nlp.add_pipe(added_pipeline)
 
 
 def load_preprocessed_content_store(path_to_gz):
@@ -55,7 +65,7 @@ def text_to_sents(text):
 
     doc = nlp(text)
     assert doc.has_annotation("SENT_START")
-    sent_list = [sent.text for sent in doc.sents]
+    sent_list = [sent.text.strip() for sent in doc.sents]
     return sent_list
 
 
