@@ -896,3 +896,8 @@ docs/_linkcheck/
 # temporarily
 src/make_strata/data/*
 !src/make_strata/data/.gitkeep
+
+#ignore corpus/ folder
+corpus/*
+corpus/**/
+!corpus/README.md
