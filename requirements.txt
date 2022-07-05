@@ -35,3 +35,5 @@ spacy
 tqdm==4.64.0
 urllib3==1.26.9
 wheel
+--extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
+prodigy
