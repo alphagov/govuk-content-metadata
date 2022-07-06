@@ -36,4 +36,4 @@ tqdm==4.64.0
 urllib3==1.26.9
 wheel
 --extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
-prodigy
+prodigy>=1.11.0,<2.0.0
