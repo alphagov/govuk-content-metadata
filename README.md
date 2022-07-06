@@ -45,8 +45,7 @@ secrets/credentials should have the following environment variable name(s):
 
 | Secret/credential | Environment variable name | Description                                |
 |-------------------|---------------------------|--------------------------------------------|
-| Secret 1          | `SECRET_VARIABLE_1`       | Plain English description of Secret 1.     |
-| Credential 1      | `CREDENTIAL_VARIABLE_1`   | Plain English description of Credential 1. |
+| Prodigy License   | `PRODIGY_LICENSE`         | Digit code                                 |
 
 Once you've added, [load these environment variables using
 `.envrc`][docs-loading-environment-variables].
@@ -67,7 +66,7 @@ contributing guidelines][contributing].
 [This project structure is based on the `govcookiecutter` template
 project][govcookiecutter].
 
-[contributing]: ./docs/contributor_guide/CONTRIBUTING.md
+[contributing]: CONTRIBUTING.md
 [govcookiecutter]: https://github.com/best-practice-and-impact/govcookiecutter
 [docs-loading-environment-variables]: ./docs/user_guide/loading_environment_variables.md
 [docs-loading-environment-variables-secrets]: ./docs/user_guide/loading_environment_variables.md#storing-secrets-and-credentials
