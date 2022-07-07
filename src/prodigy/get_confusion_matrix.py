@@ -5,13 +5,13 @@ It produces an overview of False Positive and False Negative cases
 The script allows for the following positional arguments:
 
 Args:
-    ``--eval``: (required) The name of your evaluation data (without extension), as a stream JSONL object,
+    ``-eval``: (required) The name of your evaluation data (without extension), as a stream JSONL object,
         the output of annotation with Prodigy. To be saved in the `data/gold` folder.
-    ``--model``:   (required) The trained spacy best-model model, saved in the `models` folder.
+    ``-model``:   (required) The trained spacy best-model model, saved in the `models` folder.
 
 To run the script from the root directory (change arguments accordingly):
 ```
-    python -m src.prodigy.get_confusion_matrix --eval "rh_annotations_mark_goggepdm_2" --model-date "mark_goggepdm_2"
+    python -m src.prodigy.get_confusion_matrix -eval "rh_annotations_mark_goggepdm_2" -model "mark_goggepdm_2"
 ```
 
 It returns two CSV files, saved under `data/interim`, containing the False Positive and False Negative cases.
@@ -66,12 +66,26 @@ def confusion_matrix(evaluation_data_jsonl: dict, ner_model) -> Union[list, list
 
         for ent in predicted_ents:
             if ent not in correct_ents:
-                out = (doc, ent, correct_ents)
+                out = (
+                    doc,
+                    ent,
+                    correct_ents,
+                    example["_input_hash"],
+                    example["_task_hash"],
+                    example["meta"]["base_path"],
+                )
                 fp_cases.append(out)
 
         for ent in correct_ents:
             if ent not in predicted_ents:
-                out = (doc, predicted_ents, ent)
+                out = (
+                    doc,
+                    predicted_ents,
+                    ent,
+                    example["_input_hash"],
+                    example["_task_hash"],
+                    example["meta"]["base_path"],
+                )
                 fn_cases.append(out)
 
     return fp_cases, fn_cases
@@ -125,10 +139,24 @@ if __name__ == "__main__":
 
     # export
     fps_df = pd.DataFrame(fps).rename(
-        columns={0: "text", 1: "false_positive", 2: "correct_all"}
+        columns={
+            0: "text",
+            1: "false_positive",
+            2: "correct_all",
+            3: "input_hash",
+            4: "task_hash",
+            5: "base_path",
+        }
     )
     fns_df = pd.DataFrame(fns).rename(
-        columns={0: "text", 1: "predicted_all", 2: "false_negative"}
+        columns={
+            0: "text",
+            1: "predicted_all",
+            2: "false_negative",
+            3: "input_hash",
+            4: "task_hash",
+            5: "base_path",
+        }
     )
 
     # outputs
