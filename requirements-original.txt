@@ -1,14 +1,14 @@
-coverage
-myst-parser
-pre-commit
-pytest
-Sphinx
+coverage==6.4.1
+myst-parser==0.18.0
+pre-commit==2.19.0
+pytest==7.1.2
+Sphinx==5.0.2
 toml
 beautifulsoup4==4.11.1
 bs4==0.0.1
 certifi==2021.10.8
 charset-normalizer==2.0.12
-dask
+dask==2022.6.1
 dill==0.3.4
 flake8==4.0.1
 idna==3.3
@@ -30,11 +30,11 @@ setuptools
 six==1.16.0
 soupsieve==2.3.2.post1
 spacy-streamlit==1.0.4
-spacy-transformers==1.1.6
+spacy-transformers
 streamlit==1.10.0
-spacy
+spacy==3.2.4
 tqdm==4.64.0
-transformers==4.19.2
+transformers
 urllib3==1.26.9
 wheel
 --extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
