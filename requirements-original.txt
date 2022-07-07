@@ -30,9 +30,11 @@ setuptools
 six==1.16.0
 soupsieve==2.3.2.post1
 spacy-streamlit==1.0.4
+spacy-transformers==1.1.6
 streamlit==1.10.0
 spacy
 tqdm==4.64.0
+transformers==4.19.2
 urllib3==1.26.9
 wheel
 --extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
