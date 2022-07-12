@@ -1,12 +1,11 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 import spacy
 import visualizer
 from config import colors, entity_names, default_text
 from util import get_model_metrics
+from collections import Counter
 
-# import displacy
 
 # page config
 st.set_page_config(
@@ -15,14 +14,15 @@ st.set_page_config(
 )
 
 
-# page titles
+# page main titles and description
 st.title("Welcome to GovNER 2.0 🧐")
 st.write("### Demonstration of NER on GOV.UK page")
 st.write(
-    "Data Products have developed a model that can detect entities of interest from 'govspeak' in GOV.UK content. \n\n\
-    Use the tool below on any GOV.UK url to see how it works."
+    "Data Products have developed a model that can detect entities of interest from 'govspeak' in GOV.UK content.",
+    "Use the tool below on any GOV.UK url to see how it works.",
 )
 
+# sidebar component
 with st.sidebar:
     ModelType = st.selectbox(
         "Choose your model",
@@ -53,6 +53,8 @@ with st.sidebar:
     st.metric(label="Precision", value=metrics["model_p"], delta="1st")
     st.metric(label="Recall", value=metrics["model_r"], delta="1st")
 
+
+# text input and processing
 text = st.text_area("Insert text for NER here", value=default_text)
 doc = [nlp(text)]
 
@@ -69,11 +71,19 @@ visualizer.visualize_ner(
     manual=False,
 )
 
-data = np.random.randint(20, 100, 6)
-plt.pie(data)
+# entity and label counts
+ents = [list(i.ents) for i in doc][0]
+labels = [e.label_ for e in ents]
+entity_counts = Counter(labels)
+
+# donut chart
+fig, ax = plt.pie(
+    entity_counts.values(),
+    labels=entity_counts.keys(),
+    wedgeprops={"linewidth": 7, "edgecolor": "white"},
+)
 circle = plt.Circle((0, 0), 0.7, color="white")
 p = plt.gcf()
 p.gca().add_artist(circle)
 plt.show()
-
 st.pyplot(plt)
