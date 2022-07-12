@@ -34,7 +34,8 @@ def confusion_matrix(evaluation_data_jsonl: dict, ner_model) -> Union[list, list
 
     Args:
         evaluation_data_jsonl: your evaluation data, as a stream jsonl object,
-        the output of annotation with Prodigy.
+        the output of annotation with Prodigy. Each entry must contain a "meta" field,
+        and a "base_path" sub-field within it.
         Each dictionary must contain a "text", and a "spans" keys.
 
         ner_model: a ner-model trained with spacy
