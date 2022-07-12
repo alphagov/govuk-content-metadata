@@ -17,25 +17,15 @@ def add_field_to_meta(in_file, out_file):
         .jsonl file with completed 'base_path' field.
     """
 
-    examples = []
-
-    with jsonlines.open(in_file) as f:
-        for line in f.iter():
-            # print(line)
-            examples.append(line)
-
-    # if 'base_path' not in 'meta', add 'Unknown' base path
-    for e in examples:
-        if "meta" in e:
-            if "base_path" in e["meta"]:
-                continue
-            elif "base_path" not in e["meta"]:
-                e["meta"]["base_path"] = "unknown"
-
     with open(out_file, "w") as outfile:
-        for entry in examples:
-            json.dump(entry, outfile)
-            outfile.write("\n")
+        with jsonlines.open(in_file) as f:
+            for line in f.iter():
+                if "meta" in line:
+                    if "base_path" in line["meta"]:
+                        outfile.write(json.dumps(line, ensure_ascii=False) + "\n")
+                    elif "base_path" not in line["meta"]:
+                        line["meta"]["base_path"] = "unknown"
+                        outfile.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 
 if __name__ == "__main__":
