@@ -30,7 +30,7 @@ def add_field_to_meta(in_file, out_file):
             if "base_path" in e["meta"]:
                 continue
             elif "base_path" not in e["meta"]:
-                e["meta"]["base_path"] = "Unknown"
+                e["meta"]["base_path"] = "unknown"
 
     with open(out_file, "w") as outfile:
         for entry in examples:
