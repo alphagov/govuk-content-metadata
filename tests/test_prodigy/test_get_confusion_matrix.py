@@ -14,6 +14,9 @@ args_correct_eval = (
             {"start": 40, "end": 48, "text": "Scotland", "label": "GPE"},
             {"start": 53, "end": 58, "text": "Wales", "label": "GPE"},
         ],
+        "_input_hash": 1234,
+        "_task_hash": 789,
+        "meta": {"base_path": "govuk/abc"},
     },
     {
         "text": "Paul Smith can be reached on 17 August 2022.",
@@ -21,6 +24,9 @@ args_correct_eval = (
             {"start": 0, "end": 10, "text": "Paul Smith", "label": "PERSON"},
             {"start": 29, "end": 43, "text": "17 August 2022", "label": "DATE"},
         ],
+        "_input_hash": 345,
+        "_task_hash": 789,
+        "meta": {"base_path": "govuk/xyz"},
     },
 )
 
@@ -32,6 +38,9 @@ args_incorrect_eval = (
             {"start": 40, "end": 48, "text": "Scotland", "label": "GPE"},
             {"start": 53, "end": 58, "text": "Wales", "label": "GPE"},
         ],
+        "_input_hash": 1234,
+        "_task_hash": 789,
+        "meta": {"base_path": "govuk/abc"},
     },
     {
         "text": "Paul Smith can be reached on 17 August 2022.",
@@ -39,6 +48,9 @@ args_incorrect_eval = (
             {"start": 5, "end": 10, "text": "Paul Smith", "label": "PERSON"},
             {"start": 29, "end": 43, "text": "17 August 2022", "label": "DATE"},
         ],
+        "_input_hash": 345,
+        "_task_hash": 789,
+        "meta": {"base_path": "govuk/xyz"},
     },
 )
 
