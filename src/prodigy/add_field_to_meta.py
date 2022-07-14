@@ -3,29 +3,29 @@
 # meaning that scripts such as `get_confusion_matrix.py` could not run.
 
 import json
-import jsonlines
+from src.prodigy.utils import load_stream
 
 
-def add_field_to_meta(in_file, out_file):
+def add_field_to_meta(in_stream_list):
+    """This function takes a JSONL stream as input, and adds 'Unknown' to the 'base_path' meta if
+        there is no 'base_path' present.
+
+    :param in_stream_list: Input jsonl stream
+    :type in_stream_list: List
+    :return: Input jsonl stream
+    :rtype: List
     """
-    This function takes a .jsonl file for Prodigy as input, and adds 'Unknown' to the 'base_path' meta if
-    there is no 'base_path' present.
-    Args:
-        in_file: dataset as a .jsonl file,
-        out_file: dataset location for .jsonl
-    Returns:
-        .jsonl file with completed 'base_path' field.
-    """
-
-    with open(out_file, "w") as outfile:
-        with jsonlines.open(in_file) as f:
-            for line in f.iter():
-                if "meta" in line:
-                    if "base_path" in line["meta"]:
-                        outfile.write(json.dumps(line, ensure_ascii=False) + "\n")
-                    elif "base_path" not in line["meta"]:
-                        line["meta"]["base_path"] = "unknown"
-                        outfile.write(json.dumps(line, ensure_ascii=False) + "\n")
+    out_lines = []
+    for line in in_stream_list:
+        if "meta" not in line:
+            line["meta"] = {}
+        if "meta" in line:
+            if "base_path" in line["meta"]:
+                out_lines.append(line)
+            elif "base_path" not in line["meta"]:
+                line["meta"]["base_path"] = "unknown"
+                out_lines.append(line)
+    return out_lines
 
 
 if __name__ == "__main__":
@@ -58,4 +58,11 @@ if __name__ == "__main__":
 
     argparse_args = arg_parser.parse_args()
 
-    add_field_to_meta(in_file=argparse_args.in_file, out_file=argparse_args.out_file)
+    jsonl_stream = load_stream(argparse_args.in_file)
+    jsonl_stream_list = list(jsonl_stream)
+    out_stream_list = add_field_to_meta(jsonl_stream_list)
+
+    with open(argparse_args.out_file, "w") as outfile:
+        for entry in out_stream_list:
+            json.dump(entry, outfile)
+            outfile.write("\n")
