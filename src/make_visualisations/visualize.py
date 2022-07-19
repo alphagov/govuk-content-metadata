@@ -7,15 +7,12 @@ import altair as alt
 import spacy
 import visualizer
 from config import colors, entity_names, default_text
-from util import get_model_metrics
+from util import get_model_metrics, get_model_ents_metrics, url_get_sents
 from collections import Counter
 
 
 # page configuration
-st.set_page_config(
-    page_title="GovNER 2.0",
-    page_icon="🧐",
-)
+st.set_page_config(page_title="GovNER 2.0", page_icon="🧐", layout="wide")
 
 
 # page main titles and description
@@ -52,54 +49,76 @@ with st.sidebar:
 
     # displacy metric for loaded model in sidebar
     metrics = get_model_metrics(nlp)
-    st.metric(label="F-Score", value=metrics["model_f"], delta="1st")
-    st.metric(label="Precision", value=metrics["model_p"], delta="1st")
-    st.metric(label="Recall", value=metrics["model_r"], delta="1st")
+    st.metric(label="F-Score", value=metrics["model_f"])
+    st.metric(label="Precision", value=metrics["model_p"])
+    st.metric(label="Recall", value=metrics["model_r"])
 
+    ents_metrics = get_model_ents_metrics(nlp)
+    st.table(ents_metrics)
 
 # text input and processing
-text = st.text_area("Insert text for NER here", value=default_text)
-doc = [nlp(text)]
-
-# ner visualisations
-visualizer.visualize_ner(
-    doc,
-    labels=entity_names,
-    show_table=False,
-    displacy_options={
-        "colors": colors,
-        "kb_url_template": "https://www.wikidata.org/wiki/{}",
-    },
-    title=None,
-    manual=False,
-)
-
-# entity and label counts
-ents = [list(i.ents) for i in doc][0]
-labels = [e.label_ for e in ents]
-entity_counts = Counter(labels)
-
-data = pd.DataFrame(
-    {
-        "Entity": [i for i in entity_counts.keys()],
-        "Count": [i for i in entity_counts.values()],
-    }
-)
-
-c = (
-    alt.Chart(data)
-    .mark_arc(innerRadius=75)
-    .encode(
-        theta=alt.Theta(field="Count", type="quantitative"),
-        color=alt.Color(
-            field="Entity",
-            type="nominal",
-            scale=alt.Scale(
-                domain=[i for i in colors.keys()], range=[i for i in colors.values()]
-            ),
-        ),
-        tooltip=["Entity", "Count"],
+with st.expander("Input text"):
+    input_type = st.radio(
+        "Would you like to run NER on free text or a GOV.UK page?",
+        ("Free Text", "GOV.UK URL"),
     )
-)
 
-st.altair_chart(c, use_container_width=True)
+    if input_type == "Free Text":
+        text_area = st.text_area(
+            "Insert text for NER here", value=default_text, height=150, max_chars=600
+        )
+        doc = [nlp(text_area)]
+    else:
+        text_input = st.text_input(
+            "Insert GOV.UK url", value="http://www.gov.uk/random"
+        )
+        text = url_get_sents(text_input)
+        text = " ".join(text)
+        doc = [nlp(text)]
+
+# visualisations
+col1, col2 = st.columns([2, 1])
+with col1:
+
+    # ner visualisations
+    visualizer.visualize_ner(
+        doc,
+        labels=entity_names,
+        show_table=False,
+        displacy_options={
+            "colors": colors,
+            "kb_url_template": "https://www.wikidata.org/wiki/{}",
+        },
+        title=None,
+        manual=False,
+    )
+
+with col2:
+    # entity and label counts
+    ents = [list(i.ents) for i in doc][0]
+    labels = [e.label_ for e in ents]
+    entity_counts = Counter(labels)
+    data = pd.DataFrame(
+        {
+            "Entity": [i for i in entity_counts.keys()],
+            "Count": [i for i in entity_counts.values()],
+        }
+    )
+    # create altair donut chart
+    c = (
+        alt.Chart(data)
+        .mark_arc(innerRadius=60)
+        .encode(
+            theta=alt.Theta(field="Count", type="quantitative"),
+            color=alt.Color(
+                field="Entity",
+                type="nominal",
+                scale=alt.Scale(
+                    domain=[i for i in colors.keys()],
+                    range=[i for i in colors.values()],
+                ),
+            ),
+            tooltip=["Entity", "Count"],
+        )
+    )
+    st.altair_chart(c, use_container_width=True)

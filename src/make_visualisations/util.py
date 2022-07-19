@@ -3,8 +3,11 @@
 # because a bug would't allow direct installation
 
 import streamlit as st
+import pandas as pd
 import spacy
 import base64
+import requests
+from bs4 import BeautifulSoup
 
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
@@ -42,6 +45,12 @@ def get_model_metrics(nlp_model):
     return {"model_f": model_f, "model_p": model_p, "model_r": model_r}
 
 
+def get_model_ents_metrics(nlp_model):
+    ents_per_type = nlp_model.meta["performance"]["ents_per_type"]
+    df = pd.DataFrame(ents_per_type)
+    return df.T
+
+
 LOGO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 900 500 175" width="150" height="53"><path fill="#09A3D5" \
                 d="M64.8 970.6c-11.3-1.3-12.2-16.5-26.7-15.2-7 0-13.6 2.9-13.6 9.4 0 9.7 15 10.6 24.1 13.1 15.4 4.7 30.4 7.9 30.4 24.7 0 \
                 21.3-16.7 28.7-38.7 28.7-18.4 0-37.1-6.5-37.1-23.5 0-4.7 4.5-8.4 8.9-8.4 5.5 0 7.5 2.3 9.4 6.2 4.3 7.5 9.1 11.6 21 11.6 7.5 \
@@ -61,3 +70,26 @@ LOGO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 900 500 175" wi
                 4.7-10.4 11-10.4 7 0 9.8 5.5 11.6 11.6l18.3 54.3 18.3-50.2c2.7-7.8 3-15.7 12.3-15.7z" /> </svg>"""
 
 LOGO = get_svg(LOGO_SVG, wrap=False, style="max-width: 100%; margin-bottom: 25px")
+
+
+# get a html response from a page of interest
+def _get_page_soup(url):
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, "html.parser")
+    return soup
+
+
+# get text data from html and return list of sentences
+def _get_sents_from_soup(soup):
+    body = soup.findAll(attrs={"class": "gem-c-govspeak"})
+    sents = [i.text.split("\n") for i in body]
+    sents_clean = [list(filter(None, i)) for i in sents]
+    return sents_clean
+
+
+# get html and sentences from url
+def url_get_sents(url):
+    soup = _get_page_soup(url)
+    sents_clean = _get_sents_from_soup(soup)
+    sents_clean = sents_clean[0]
+    return sents_clean
