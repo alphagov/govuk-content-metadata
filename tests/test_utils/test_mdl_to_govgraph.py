@@ -1,3 +1,6 @@
+from src.utils.mdl_to_govgraph import mdl_to_govgraph
+
+
 example_ins = {
     "base_path": "/example1",
     "title_ents": [("UK", "GPE", 1, 2), ("EU", "ORG", 5, 6)],
@@ -82,3 +85,9 @@ example_outs_2 = {
         {"entity_name": "£34 million", "entity_type": "MONEY", "weight": [0, 0, 1]},
     ],
 }
+
+
+# @pytest.mark.parametrize("test_input, test_expected")
+def test_simple_case():
+    """Assert the ``input_dict`` returns correctly."""
+    assert mdl_to_govgraph(example_ins) == example_outs_2
