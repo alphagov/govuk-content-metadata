@@ -1,3 +1,7 @@
+"""
+This script contains a function that is used for wrangling outputs into format for Neo4j ingestion.
+"""
+
 from collections import OrderedDict
 
 

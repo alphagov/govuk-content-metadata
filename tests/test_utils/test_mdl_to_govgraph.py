@@ -20,60 +20,6 @@ example_ins = {
     ],
 }
 
-example_outs_1 = {
-    "base_path": "/example1",
-    "entities": {
-        {
-            "entity_name": "UK",
-            "entity_type": "GPE",
-            "weight": 4,
-            "in_title": True,
-            "in_desc": True,
-            "in_text": True,
-        },
-        {
-            "entity_name": "EU",
-            "entity_type": "ORG",
-            "weight": 3,
-            "in_title": True,
-            "in_desc": True,
-            "in_text": True,
-        },
-        {
-            "entity_name": "2016",
-            "entity_type": "DATE",
-            "weight": 2,
-            "in_title": False,
-            "in_desc": True,
-            "in_text": True,
-        },
-        {
-            "entity_name": "Theresa May",
-            "entity_type": "PERSON",
-            "weight": 1,
-            "in_title": False,
-            "in_desc": False,
-            "in_text": True,
-        },
-        {
-            "entity_name": "President Tusk",
-            "entity_type": "PERSON",
-            "weight": 1,
-            "in_title": False,
-            "in_desc": False,
-            "in_text": True,
-        },
-        {
-            "entity_name": "£34 million",
-            "entity_type": "MONEY",
-            "weight": 1,
-            "in_title": False,
-            "in_desc": False,
-            "in_text": True,
-        },
-    },
-}
-
 example_outs_2 = {
     "base_path": "/example1",
     "entities": [
@@ -88,6 +34,14 @@ example_outs_2 = {
 
 
 # @pytest.mark.parametrize("test_input, test_expected")
-def test_simple_case():
+def test_same_base_path():
     """Assert the ``input_dict`` returns correctly."""
-    assert mdl_to_govgraph(example_ins) == example_outs_2
+    out = mdl_to_govgraph(example_ins)
+    assert out["base_path"] == example_outs_2["base_path"]
+
+
+# @pytest.mark.parametrize("test_input, test_expected")
+def test_same_keys():
+    """Assert the ``input_dict`` returns correctly."""
+    out = mdl_to_govgraph(example_ins)
+    assert out.keys() == example_outs_2.keys()
