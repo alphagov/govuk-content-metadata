@@ -3,37 +3,32 @@ This script contains a function that is used for wrangling outputs into format f
 """
 
 from collections import OrderedDict
+import re
+import json
 
 
-def mdl_to_govgraph(json_in):
-    """Wrangle a dictionary into format for ingestion into Neo4j format.
-
-    :param json_in: Input dictionary
-    :type json_in: dict
-    :return: Wrangled dictionary
-    :rtype: dict
-    """
-    base_path = json_in["base_path"]  # base path is base path
-    title_ents = [
-        (a, b) for (a, b, _, _) in json_in["title_ents"]
-    ]  # entity name and type from tuples only
-    description_ents = [(a, b) for (a, b, _, _) in json_in["description_ents"]]
-    text_ents = [(a, b) for (a, b, _, _) in json_in["text_ents"]]
-    uniques = list(
-        OrderedDict.fromkeys(title_ents + description_ents + text_ents)
-    )  # get a set of unique tuples
-    entities = []  # instantiate list
-    for i in uniques:
-        title_count, desc_count, text_count = (
-            title_ents.count(i),
-            description_ents.count(i),
-            text_ents.count(i),
-        )  # count occurences of tuple in each location
-        weight = [title_count, desc_count, text_count]  # create weight array
-        entry = {
-            "entity_name": i[0],
-            "entity_type": i[1],
-            "weight": weight,
-        }  # convert entry to dict
-        entities.append(entry)  # append disct to list
-    return {"base_path": base_path, "entities": entities}  # return dictionary
+def jsonl_to_govgraph(in_jsonl, out_jsonl):
+    unit = re.findall(r"title|description|text", in_jsonl)
+    if unit:
+        unit = unit[0]
+    else:
+        raise ValueError(
+            "Input file must have ['title, 'description', 'text'] in title."
+        )
+    with open(out_jsonl, "w") as outfile:
+        with open(in_jsonl, "r") as json_file:
+            json_list = list(json_file)
+            for json_str in json_list:
+                result = json.loads(json_str)
+                base_path = result.keys()[0]
+                entities = result.values()[0]
+                ents = [(i[0], i[1]) for i in entities]
+                ents = [(i, ents.count(i)) for i in ents]
+                ents = list(OrderedDict.fromkeys(ents))
+                ents = [
+                    {"entity_name": j[0], "entity_type": j[1], "weight": k}
+                    for (j, k) in ents
+                ]
+                out = {"base_path": base_path, "entities": ents}
+                json.dump(out, outfile)
+                outfile.write("\n")
