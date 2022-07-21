@@ -8,6 +8,14 @@ import json
 
 
 def jsonl_to_govgraph(in_jsonl, out_jsonl):
+    """Wrangles input jsonl file into Neo4j output.
+
+    :param in_jsonl: input jsonl file
+    :type in_jsonl: .jsonl
+    :param out_jsonl: output jsonl file
+    :type out_jsonl: .jsonl
+    :raises ValueError: Raise if ['title, 'description', 'text'] not in in_file
+    """
     unit = re.findall(r"title|description|text", in_jsonl)
     if unit:
         unit = unit[0]
