@@ -1,47 +1,55 @@
-from src.utils.mdl_to_govgraph import mdl_to_govgraph
+import pytest
+from src.utils.mdl_to_govgraph import jsonl_to_govgraph, list_wrangle
 
 
-example_ins = {
-    "base_path": "/example1",
-    "title_ents": [("UK", "GPE", 1, 2), ("EU", "ORG", 5, 6)],
-    "description_ents": [
-        ("UK", "GPE", 6, 7),
-        ("EU", "ORG", 9, 10),
-        ("2016", "DATE", 11, 12),
-    ],
-    "text_ents": [
-        ("UK", "GPE", 16, 17),
-        ("EU", "ORG", 19, 20),
-        ("2016", "DATE", 11, 12),
-        ("UK", "GPE", 19, 20),
-        ("Teresa May", "PERSON", 21, 23),
-        ("President Tusk", "PERSON", 33, 35),
-        ("£34 million", "MONEY", 76, 78),
-    ],
-}
+in_data = "data/processed/entities_title_10000.jsonl"
+out_data = "data/processed/entities_title_10000_out.jsonl"
 
-example_outs_2 = {
-    "base_path": "/example1",
-    "entities": [
-        {"entity_name": "UK", "entity_type": "GPE", "weight": [1, 1, 2]},
-        {"entity_name": "EU", "entity_type": "ORG", "weight": [1, 1, 1]},
-        {"entity_name": "2016", "entity_type": "DATE", "weight": [0, 1, 1]},
-        {"entity_name": "Theresa May", "entity_type": "PERSON", "weight": [0, 0, 1]},
-        {"entity_name": "President Tusk", "entity_type": "PERSON", "weight": [0, 0, 1]},
-        {"entity_name": "£34 million", "entity_type": "MONEY", "weight": [0, 0, 1]},
-    ],
-}
+in_list = [
+    {"/": [["GOV.UK", "ORG", 0, 6], ["GOV.UK", "ORG", 9, 10], ["EU", "GPE", 20, 21]]},
+    {
+        "/aaib-reports/aerospatiale-as332l-super-puma-g-tigo-22-february-1992": [
+            ["22 February 1992", "DATE", 40, 56]
+        ]
+    },
+    {
+        "/aaib-reports/aerospatiale-as350b-ecureuil-g-marc-and-bell-206b-g-bnit-13-november-1990": [
+            ["13 November 1990", "DATE", 60, 76]
+        ]
+    },
+    {
+        "/aaib-reports/aerospatiale-as350b-squirrel-g-maho-14-march-1983": [
+            ["14 March 1983", "DATE", 38, 51]
+        ]
+    },
+    {
+        "/aaib-reports/aerospatiale-as350b1-g-roin-27-june-1998": [
+            ["27 June 1998", "DATE", 30, 42]
+        ]
+    },
+]
 
 
 # @pytest.mark.parametrize("test_input, test_expected")
-def test_same_base_path():
-    """Assert the ``input_dict`` returns correctly."""
-    out = mdl_to_govgraph(example_ins)
-    assert out["base_path"] == example_outs_2["base_path"]
+def test_in_out_len_files():
+    """Assert the in and out files are the same len."""
+    in_data = "data/processed/entities_title_10000.jsonl"
+    out_data = "data/processed/entities_title_10000_out.jsonl"
+    jsonl_to_govgraph(in_data, out_data)
+    assert sum(1 for line in open(in_data)) == sum(1 for line in open(out_data))
 
 
 # @pytest.mark.parametrize("test_input, test_expected")
-def test_same_keys():
-    """Assert the ``input_dict`` returns correctly."""
-    out = mdl_to_govgraph(example_ins)
-    assert out.keys() == example_outs_2.keys()
+def test_in_out_len_lists():
+    """Assert the in and out lists are the same len."""
+    out = list_wrangle(in_list)
+    assert len(in_list) == len(out)
+
+
+@pytest.mark.parametrize(
+    "input_file, output_file",
+    [("turnip.jsonl", "turnip_out.jsonl"), ("desk.jsonl", "desk_out.jsonl")],
+)
+def test_value_error_is_raised(input_file, output_file):
+    with pytest.raises(ValueError):
+        jsonl_to_govgraph(input_file, output_file)
