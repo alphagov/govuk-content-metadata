@@ -2,7 +2,7 @@
 Script to download the preprocessed content store from S3.
 
 It takes one (optional) argument:
-- d: [OPTIONAL, default is yestreday] "YYYY-MM-DD" date for which to download the copy of the content store
+- d: [OPTIONAL, default is yesterday] "YYYY-MM-DD" date for which to download the copy of the content store
 
 How to run:
 python src/make_data/get_preproc_content.py -d "2022-07-20"
@@ -81,8 +81,7 @@ if __name__ == "__main__":
         print(f"File {OUTPUT_CONTENT_PATH} already exists.")
         exit()
 
-    # Get the cross-account credentials, then use them to create
-    # an S3 Client and list buckets in the account.
+    # Get the cross-account credentials, then use them to create an S3 Client
     # Finally download the specified file.
     datascienceuser_creds = assume_role_with_mfa(
         username=AWS_USERNAME,

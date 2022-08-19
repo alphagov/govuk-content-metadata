@@ -77,18 +77,15 @@ def source_filter_content_gen(
     fields_to_keep: List[str] = None,
     doctypes_to_keep: List[str] = None,
     pubapps_to_keep: List[str] = None,
-    **kwargs
-    # delimiter="\t",
-    # quoting=csv.QUOTE_MINIMAL,
-    # skipinitialspace=True,
+    **kwargs,
 ):
     """
     Sources the preprocessed content store gzipped csv file as a generator of `n` elements.
-    It filters for the specified document_types and publishing_apps, and [optinal] only returns
+    It filters for the specified document_types and publishing_apps, and [optional] only returns
     the selected fields.
     This is useful if you do not need/want to source the whole content store.
 
-    #TODO: admittingly, not a very elegant solution, but wanted to avoid too many `if... else...`
+    #TODO: admittingly, not a very elegant general solution, but wanted to avoid too many `if... else...`
 
     Args:
         n: number of rows to source from the gzipped csv file
@@ -121,7 +118,7 @@ def source_filter_content_gen(
 
 def chunks(iterable, size=10):
     """
-    Splits a generator into chunks without pre-walking it.
+    Splits a generator into chunks without pre-walking it. Each chunk is a generator.
 
     Args:
         iterable: the generator to be splitted
@@ -161,11 +158,11 @@ def to_tuples(
 
     Args:
         lines: generator yielding dictionaries containing content
-        key_with_text: name of the key containing text (e.g., "title")
-        key_id: name of the key uniquely identifying each generator element (e.g., "base_path")
+        key_with_text: name of the dictionary key containing text (e.g., "title")
+        key_id: name of the dictionary key uniquely identifying each generator element (e.g., "base_path")
 
     Returns:
-        A generator of the reformatted content as tuples (text, "id": id_value).
+        A generator of the reformatted content yiedling tuples (text, "key_id": id_value).
     """
 
     for line in lines:
@@ -371,7 +368,6 @@ if __name__ == "__main__":  # noqa: C901
             skipinitialspace=True,
         )
     else:
-        # content_stream = gzipped_csv_to_stream(INPUT_CONTENT)
         content_stream = gzipped_csv_to_stream(
             filename=INPUT_CONTENT,
             fields_to_keep=KEEP_FIELDS,
