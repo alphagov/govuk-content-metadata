@@ -1,20 +1,24 @@
 """
 Script to download the preprocessed content store from S3.
 
-It takes two arguments:
+It takes one (optional) argument:
 - d: [OPTIONAL, default is yestreday] "YYYY-MM-DD" date for which to download the copy of the content store
-- u: username for your AWS account, usually name.surname of your gds email address.
 
 How to run:
-python src/make_data/get_preproc_content.py -d "2022-07-20" -u "paul.smith"
+python src/make_data/get_preproc_content.py -d "2022-07-20"
 
 Requirements:
-The following environment variables needs to be defined in the `.secrets` files
+
+1. The following environment variables needs to be defined in the `.secrets` files
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
+- `AWS_USERNAME`: Your AWS username, usually NAME.SURNAME in your @digital.cabinet.office.gov.uk
 - `AWS_GDSUSER_ACCOUNTID`: Account ID for gds-users account
 - `AWS_DATASCIENCEUSERS_ACCOUNTID`: Account ID for the datascienceusers role
 - `AWS_DATASCIENCEUSERS_NAME`: Full name of the datascience user role
+
+2. Ensure there is a copy of the preprocessed content store saved in the S3 bucket for the selected date.
+
 """
 
 
@@ -38,16 +42,6 @@ if __name__ == "__main__":
 
     # Define the positional arguments we want to get from the user
     parser.add_argument(
-        "--username",
-        "-u",
-        type=str,
-        action="store",
-        dest="username",
-        required=True,
-        help="specify your AWS username, usually <name.surname>",
-    )
-
-    parser.add_argument(
         "--date",
         "-d",
         type=str,
@@ -59,7 +53,7 @@ if __name__ == "__main__":
 
     parsed_args = parser.parse_args()
 
-    # Default is yesterday unless superseded
+    # Default is yesterday unless a date is provided by the user
     if parsed_args.date:
         TARGET_DATE = parsed_args.date
     else:
@@ -68,15 +62,11 @@ if __name__ == "__main__":
 
     TARGET_DATE_SHORT = shorten_date_format(TARGET_DATE)
 
-    print(TARGET_DATE)
-    print(TARGET_DATE_SHORT)
-
     # AWS S3 info
     CONTENT_S3_BUCKET = "govuk-data-infrastructure-integration"
     CONTENT_DIR = f"knowledge-graph/{TARGET_DATE}"
     CONTENT_FILENAME = f"preprocessed_content_store_{TARGET_DATE_SHORT}.csv.gz"
     CONTENT_PATH = os.path.join(CONTENT_DIR, CONTENT_FILENAME)
-    print(CONTENT_PATH)
 
     # Outputs
     OUTPUT_CONTENT_PATH = os.path.join(os.getenv("DIR_DATA_RAW"), CONTENT_FILENAME)
@@ -85,6 +75,7 @@ if __name__ == "__main__":
     AWS_GDSUSER_ACCOUNTID = os.getenv("AWS_GDSUSER_ACCOUNTID")
     AWS_DATASCIENCEUSERS_ACCOUNTID = os.getenv("AWS_DATASCIENCEUSERS_ACCOUNTID")
     AWS_DATASCIENCEUSERS_NAME = os.getenv("AWS_DATASCIENCEUSERS_NAME")
+    AWS_USERNAME = os.getenv("AWS_USERNAME")
 
     if os.path.isfile(OUTPUT_CONTENT_PATH):
         print(f"File {OUTPUT_CONTENT_PATH} already exists.")
@@ -94,7 +85,7 @@ if __name__ == "__main__":
     # an S3 Client and list buckets in the account.
     # Finally download the specified file.
     datascienceuser_creds = assume_role_with_mfa(
-        username=parsed_args.username,
+        username=AWS_USERNAME,
         user_account_id=AWS_GDSUSER_ACCOUNTID,
         role_account_id=AWS_DATASCIENCEUSERS_ACCOUNTID,
         role_name=AWS_DATASCIENCEUSERS_NAME,
