@@ -35,6 +35,7 @@ spacy-streamlit==1.0.4
 spacy-transformers==1.1.7
 streamlit==1.10.0
 spacy==3.2.4
+# thinc-apple-ops==0.0.7
 tqdm==4.64.0
 transformers==4.20.1
 urllib3==1.26.9
@@ -94,6 +95,7 @@ ipywidgets==7.7.0
 jedi==0.18.1
 Jinja2==3.1.2
 jmespath==1.0.1
+joblib==1.1.0
 jsonlines==3.1.0
 jsonschema==4.6.0
 jupyter==1.0.0
@@ -107,9 +109,11 @@ langcodes==3.3.0
 locket==1.0.0
 markdown-it-py==2.1.0
 MarkupSafe==2.1.1
+matplotlib==3.5.2
 matplotlib-inline==0.1.3
 mdit-py-plugins==0.3.0
 mdurl==0.1.1
+memory-profiler==0.60.0
 mistune==0.8.4
 more-itertools==8.13.0
 murmurhash==1.0.7
@@ -175,7 +179,6 @@ stack-data==0.2.0
 starlette==0.14.2
 terminado==0.15.0
 thinc==8.0.17
-thinc-apple-ops==0.0.7
 tinycss2==1.1.1
 tokenizers==0.12.1
 tomli==1.2.3
