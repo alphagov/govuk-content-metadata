@@ -46,7 +46,6 @@ if __name__ == "__main__":
         "-d",
         type=str,
         action="store",
-        dest="date",
         required=False,
         help="specify the date 'YYYY-MM-DD' of the preprocessed content store copy; default is yesterday",
     )
