@@ -136,6 +136,8 @@ def upload_file_to_s3(
 def download_files_from_s3_folder(s3_resource, s3_bucket, folder_path, output_folder):
     bucket = s3_resource.Bucket(s3_bucket)
     objs = bucket.objects.filter(Prefix=folder_path)
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     for obj in objs:
         file_name = obj.key.split("/")[-1]
         output_filepath = os.path.join(output_folder, file_name)

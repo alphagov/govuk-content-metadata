@@ -1,5 +1,13 @@
 """
 This script contains a function that is used for wrangling outputs into format for Neo4j ingestion.
+
+TO RUN:
+```
+python src/utils/mdl_to_govgraph.py
+-s3_bucket govuk-data-infrastructure-integration
+-s3_folder knowledge-graph-static/entities_intermediate
+-out_filepath /Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/for_merge/ner_phase1_roberta_entities.csv
+```
 """
 
 # import argparse
@@ -54,6 +62,8 @@ def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
 
 def process_and_save_files(download_path, processed_path):
     # for each file in the downloaded path, process...
+    if not os.path.exists(processed_path):
+        os.makedirs(processed_path)
     for i in os.listdir(download_path):
         in_file = os.path.join(download_path, i)
         base_name = os.path.basename(in_file).split(".")[0]
@@ -66,6 +76,8 @@ def process_and_save_files(download_path, processed_path):
 
 
 def concatenate_csv_per_unit(processed_path, concat_path):
+    if not os.path.exists(concat_path):
+        os.makedirs(concat_path)
     # load each files as a dataframe and concatenate into one, save to csv
     all_files = glob.glob(os.path.join(processed_path, "*.csv"))
     for unit in ["title", "description", "text"]:
@@ -183,6 +195,34 @@ if __name__ == "__main__":
         role_name=AWS_DATASCIENCEUSERS_NAME,
     )
 
+    import argparse
+
+    argparser = argparse.ArgumentParser(description="Run src.utils.mdl_to_govgraph")
+    # Define the positional arguments we want to get from the user
+    argparser.add_argument(
+        "-s3_bucket",
+        type=str,
+        action="store",
+        required=True,
+        help="S3 Bucket.",
+    )
+    argparser.add_argument(
+        "-s3_folder",
+        type=str,
+        action="store",
+        required=True,
+        help="S3 Folder.",
+    )
+    argparser.add_argument(
+        "-out_filepath",
+        type=str,
+        action="store",
+        required=True,
+        help="Output filepath.",
+    )
+
+    argparser_args = argparser.parse_args()
+
     print("Connecting to S3...")
 
     resource = temporary_connect_to_s3(creds)
@@ -193,9 +233,9 @@ if __name__ == "__main__":
 
     download_files_from_s3_folder(
         resource,
-        s3_bucket="govuk-data-infrastructure-integration",
-        folder_path="knowledge-graph-static/entities_intermediate",
-        output_folder="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/download",
+        s3_bucket=argparser_args.s3_bucket,
+        folder_path=argparser_args.s3_folder,
+        output_folder="/tmp/govuk-content-metadata/data/download",
     )
 
     print("Downloaded files from S3.")
@@ -203,8 +243,8 @@ if __name__ == "__main__":
     print("Processing and saving files...")
 
     process_and_save_files(
-        download_path="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/download",
-        processed_path="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/processed",
+        download_path="/tmp/govuk-content-metadata/data/download",
+        processed_path="/tmp/govuk-content-metadata/data/processed",
     )
 
     print("Processed and saved files.")
@@ -212,8 +252,8 @@ if __name__ == "__main__":
     print("Concatenating and saving files...")
 
     concatenate_csv_per_unit(
-        processed_path="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/processed",
-        concat_path="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/for_merge",
+        processed_path="/tmp/govuk-content-metadata/data/processed",
+        concat_path="/tmp/govuk-content-metadata/data/for_merge",
     )
 
     print("Concatenated and saved files.")
@@ -221,9 +261,9 @@ if __name__ == "__main__":
     print("Loading and merging files...")
 
     merge_df = load_merge_csv_files(
-        title_path="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/for_merge/all_title.csv",
-        description_path="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/for_merge/all_description.csv",
-        text_path="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/for_merge/all_text.csv",
+        title_path="/tmp/govuk-content-metadata/data/for_merge/all_title.csv",
+        description_path="/tmp/govuk-content-metadata/data/for_merge/all_description.csv",
+        text_path="/tmp/govuk-content-metadata/data/for_merge/all_text.csv",
     )
 
     print("Loaded and merging files.")
@@ -232,7 +272,7 @@ if __name__ == "__main__":
 
     preprocess_merged_df(
         merge_df,
-        outfile_path="/Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/for_merge/ner_phase1_roberta_entities.csv",
+        outfile_path=argparser_args.out_filepath,
     )
 
     print("Data preprocessed.")
