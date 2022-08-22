@@ -3,6 +3,8 @@ Utilities functions to access an S3 bucket to downlaod and upload files,
 using the AWS SDK for Python boto3.
 """
 
+
+import os
 import boto3
 import botocore
 
@@ -86,3 +88,39 @@ def download_file_from_s3(s3_resource, s3_bucket, file_key, output_filepath):
             print("Session has expired - Please re-authenticate")
         else:
             raise
+
+
+def upload_file_to_s3(
+    s3_resource, file_name, file_folder, s3_bucket, s3_folder, object_name=None
+):
+    """Upload a file to an S3 bucket
+
+    Args:
+        s3_resource: An S3 resource object
+        file_name: Name of the file to upload
+        file_folder: Path to the file to upload
+        s3_bucket: Name of S3 bucket to upload to
+        s3_folder: Name of the bucket folder to upload to
+        object_name: S3 object name; if not specified then file_name is used
+
+    Returns:
+        True if file was uploaded, else False
+    """
+
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = os.path.join(s3_folder, file_name)
+    else:
+        object_name = os.path.join(s3_folder, object_name)
+
+    file_name_full = os.path.join(file_folder, file_name)
+
+    # Upload the file
+    try:
+        s3_resource.meta.client.upload_file(
+            Filename=file_name_full, Bucket=s3_bucket, Key=object_name
+        )
+    except botocore.exceptions.ClientError as e:
+        print(e)
+        return False
+    return True
