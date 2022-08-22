@@ -119,3 +119,10 @@ in the project directory.
 | `data/gold/mark_goppepdm.jsonl` | Local | JSONL-formatted training data exported from Prodigy (2970 examples) |
 
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS END (do not remove) -->
+
+# Inference pipeline [local machine]
+
+To use a trained Spacy NER model to extract Named Entities from GOV.UK content, please follow
+the instructions in: [src/make_data/infer_entities.sh][infer-entities-sh]
+
+[infer-entities-sh]: ./src/make_data/infer_entities.sh

@@ -10,7 +10,12 @@ usage="Script to extract entities from pages on GOV.UK and upload outputs to S3.
 #  -b    batch size; number of texts to be batched processed by the Spacy pipeline (Optional)
 #  -n    number of cores for the parallel processing of texts (Optional)
 
-# See the docstring in `src/make_data/infer_entities.py` for more details.
+# IMPORTANT: See the docstring in `src/make_data/infer_entities.py` for more details.
+
+# The script consists of 3 steps:
+# - Downlowding copy of preprocessed content store from AWS S3
+# - Running NER inferential pipeline
+# - Uploading files with extracted entities to AWS S3
 
 # Set default values for optional arguments
 DATE=$(date -v-1d +%F)
