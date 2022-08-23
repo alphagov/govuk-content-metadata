@@ -154,7 +154,6 @@ def load_model(path_to_model: str):
 
 def gzipped_csv_to_stream(
     filename: str,
-    n: int = None,
     fields_to_keep: List[str] = None,
     encoding: str = "utf-8",
     **kwargs,
@@ -177,7 +176,8 @@ def gzipped_csv_to_stream(
         for row in reader:
             if fields_to_keep:
                 yield {k: v for k, v in row.items() if k in fields_to_keep}
-            yield {k: v for k, v in row.items()}
+            else:
+                yield {k: v for k, v in row.items()}
 
 
 def source_filter_content_gen(
