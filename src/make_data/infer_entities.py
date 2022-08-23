@@ -218,7 +218,8 @@ def source_filter_content_gen(
             ):
                 if fields_to_keep:
                     yield {k: v for k, v in row.items() if k in fields_to_keep}
-                yield {k: v for k, v in row.items()}
+                else:
+                    yield {k: v for k, v in row.items()}
             else:
                 pass
 
