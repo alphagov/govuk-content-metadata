@@ -28,7 +28,8 @@ from src.utils.helpers_aws import (
 
 
 def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
-    """_summary_
+    """Converts .JSONL input (basepath-entity-entity_instance-occurrence) lines into format CSV format with
+    number of occurences at different units.
 
     :param in_jsonl: Input .jsonl file
     :type in_jsonl: JSONL
@@ -61,6 +62,13 @@ def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
 
 
 def process_and_save_files(download_path, processed_path):
+    """Process files from one location, and save in another.
+
+    :param download_path: Path to files from S3.
+    :type download_path: str
+    :param processed_path: Path to processed files.
+    :type processed_path: str
+    """
     # for each file in the downloaded path, process...
     if not os.path.exists(processed_path):
         os.makedirs(processed_path)
@@ -76,6 +84,13 @@ def process_and_save_files(download_path, processed_path):
 
 
 def concatenate_csv_per_unit(processed_path, concat_path):
+    """Concatenates/merges files in the same folder and saves in new folder location.
+
+    :param processed_path: Path to processed files
+    :type processed_path: str
+    :param concat_path: Path to saved conatenated files
+    :type concat_path: str
+    """
     if not os.path.exists(concat_path):
         os.makedirs(concat_path)
     # load each files as a dataframe and concatenate into one, save to csv
@@ -91,6 +106,17 @@ def concatenate_csv_per_unit(processed_path, concat_path):
 
 
 def load_merge_csv_files(title_path, description_path, text_path):
+    """Loads files for each unit type in, and merges them, aggregating counts in the process.
+
+    :param title_path: Path to title file.
+    :type title_path: str
+    :param description_path: Path to description file.
+    :type description_path: str
+    :param text_path: Path to text file.
+    :type text_path: str
+    :return: Merged, aggregated DataFrame
+    :rtype: Pandas DataFrame
+    """
     # load concatednated files separately,
     df_titles = pd.read_csv(title_path, encoding="utf-8")
     df_descriptions = pd.read_csv(description_path, encoding="utf-8")
@@ -114,10 +140,24 @@ def load_merge_csv_files(title_path, description_path, text_path):
 
 # functions to filter out erroneous names
 def contains_alphanum(string):
+    """Flag if any string characters are alphanumeric
+
+    :param string: Input string.
+    :type string: str
+    :return: Boolean.
+    :rtype: bool
+    """
     return any([c for c in string if c.isalnum()])
 
 
 def is_latin(uchr):
+    """Check to see if latter is latin.
+
+    :param uchr: Charater.
+    :type uchr: str
+    :return: Boolean.
+    :rtype: bool
+    """
     latin_letters = {}
     try:
         return latin_letters[uchr]
@@ -126,10 +166,25 @@ def is_latin(uchr):
 
 
 def only_roman_chars(unistr):
+    """Check if string contains only roman characters.
+
+    :param unistr: Input string.
+    :type unistr: str
+    :return: Boolean.
+    :rtype: bool
+    """
     return all(is_latin(uchr) for uchr in unistr if uchr.isalpha())
 
 
 def preprocess_merged_df(merge_df, outfile_path):
+    """Takes in merged DataFrame, performs processing steps, such as converting data types, flagging non-alphanumeric/non-latin
+    names, fill n/a with '0', hashing of unique names, and aggregation of counts.
+
+    :param merge_df: Merged DataFrame.
+    :type merge_df: Pandas DataFrame
+    :param outfile_path: Path to output file.
+    :type outfile_path: str
+    """
 
     # force columns to string type
     merge_df["base_path"] = merge_df["base_path"].astype(str)
