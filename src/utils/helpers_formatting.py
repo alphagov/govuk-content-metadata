@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Union
 
 
@@ -12,8 +12,16 @@ def shorten_date_format(date_original: Union[date, str]) -> str:
     Returns:
         the same data as "DDMMYY"
     """
+
+    validate_date(str(date_original), "%Y-%m-%d")
+
     elements_array = str(date_original).split("-")
     return elements_array[2] + elements_array[1] + elements_array[0][2:]
 
 
-# shorten_date_format("2022-07-20")
+def validate_date(date_text: str, format: str):
+    """Validate date is in the correct format"""
+    try:
+        datetime.strptime(date_text, format)
+    except ValueError:
+        raise ValueError(f"Incorrect date format, should be {format}")
