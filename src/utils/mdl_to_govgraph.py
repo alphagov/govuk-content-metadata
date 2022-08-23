@@ -37,6 +37,7 @@ def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
     :type out_jsonl: JSONL
     :raises ValueError: ValueErrory if none of ['title', 'description', 'text'] in title of `in_jsonl`"
     """
+    # check if unit is in file name
     unit = re.findall(r"title|description|text", in_jsonl)
     if unit:
         unit = unit[0]
@@ -44,12 +45,13 @@ def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
         raise ValueError(
             "Input file must have ['title, 'description', 'text'] in title."
         )
-    # MAIN FUNCTION
+    # wrangle output into correct format
     with open(out_jsonl, "w") as f:
         write = csv.writer(f, delimiter=",")
         write.writerow(
             ["base_path", "entity_inst", "entity_type", "{}_weight".format(unit)]
         )
+        # for each row in jsonl, wrangle into correct format
         for line in open(in_jsonl):
             test_ex_json = json.loads(line)
             base_path = list(test_ex_json.keys())[0]
@@ -58,6 +60,7 @@ def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
             ents = [(i[0], i[1], ents.count(i)) for i in ents]
             ents = list(OrderedDict.fromkeys(ents))
             out = [[base_path, ent[0], ent[1], ent[2]] for ent in ents]
+            # write each row
             write.writerows(out)
 
 
@@ -75,6 +78,7 @@ def process_and_save_files(download_path, processed_path):
     for i in os.listdir(download_path):
         in_file = os.path.join(download_path, i)
         base_name = os.path.basename(in_file).split(".")[0]
+        # invoke `json_to_csv_wrangle` function
         jsonl_to_csv_wrangle(
             in_jsonl=in_file,
             out_jsonl=os.path.join(
@@ -127,7 +131,7 @@ def load_merge_csv_files(title_path, description_path, text_path):
     df_descriptions = df_descriptions.sort_values(by=["base_path"], ascending=True)
     df_text = df_text.sort_values(by=["base_path"], ascending=True)
 
-    # merge all dataframes
+    # merge all dataframes, aggregating counts per unit
     merge_df = reduce(
         lambda x, y: pd.merge(
             x, y, on=["base_path", "entity_inst", "entity_type"], how="outer"
