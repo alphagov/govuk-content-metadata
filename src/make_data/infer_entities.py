@@ -2,9 +2,9 @@
 Script to extract Named Entities from GOV.UK pages using a trained Spacy NER pipeline model,
 on a local MacOS machine.
 
-The script saves the extracted entities in a number of .jsonl files, in the `data/processed/entities` folder.
+The script saves the extracted entities to a number of .jsonl files, to the `data/processed/entities` folder.
 
-The entities are extracted separately from titles, description and text, based on the user's input.
+The entities are extracted separately from titles, descriptions and texts, based on the user's input.
 
 For each "part of page" (title, description, text), the number of saved files depends on the chosen `chunk_size` value and
 the total number of texts to be processed.
@@ -27,10 +27,11 @@ To optimise memory usage (so your laptop does not crash) and processing time, th
     after the execution of each chunk, thus avoiding RAM overload;
 - support sequential batch processing for NER inference, with specified `batch_size`;
 - support parallel processing, if `n_process` is set > 1.
+The content store is never loaded wholly into memory.
 
 See below for more details.
 
-The scripts takes the following arguments:
+The script takes the following arguments:
 
 - "--ner_model", "-m":
         Full path to NER model to use for inference.
@@ -45,37 +46,38 @@ The scripts takes the following arguments:
         Chunk size; number of texts to be streamed before memory is released.
         The ideal value depends on the total number and length of texts being processed.
         Example. The preprocessed content store contains something between 500,000 and 650,000 texts.
-        Setting a chunk_size of 40,000 and loading the whole content means processing e.g.
-        600,000/40,000 = 15 chunks.
+        Setting a chunk_size of 40,000 would mean processing e.g. 600,000/40,000 = 15 chunks.
 
 - "--batch_size", "-b" [OPTIONAL, default is 30]:
         Batch size; number of texts to be batched processed by the Spacy pipeline.
         The ideal value depends on the texts being processed, in particular how long they are.
-        For some suggestions, see:
-        https://prrao87.github.io/blog/spacy/nlp/performance/2020/05/02/spacy-multiprocess.html#Option-1:-Sequentially-process-DataFrame-column
-        For reasonably long-sized text such as news articles, it makes sense to keep the batch size reasonably small
+        For reasonably long-sized text such as news articles or guidances, it makes sense to keep the batch size reasonably small
         (so that each batch doesn't contain really long texts); for instance, 20 or 30.
-        For shorter texts (e.g. titles, descriptions, tweets) where each document is much shorter in length,
+        For shorter texts (e.g. titles, descriptions) where each document is much shorter in length,
         a larger batch size can be used; for instance, between 5,000-10,000.
+        For more suggestions, see:
+        https://prrao87.github.io/blog/spacy/nlp/performance/2020/05/02/spacy-multiprocess.html#Option-1:-Sequentially-process-DataFrame-column
+
 
 - "--n_proc", "-n" [OPTIONAL, default is 1]:
         Number of cores for the parallel processing of texts.
         Note that multiprocessing has a lot of overhead when starting child processes,
-        thus the choice of value may require some consideration that takes into account
+        thus the choice of value may require to carefully consider both
         the chosen `batch_size` value and the overall number of texts to be processed.
 
-Example, to extract entities from the titles of the all the pages in the
-2022-07-20 copy of the preprocessed content store, from the root directory you can run:
+Example, to extract entities from the titles of all the pages in the
+2022-07-20 copy of the preprocessed content store using a trained NER model saved in the "models/"
+folder, from the root directory you can run:
 
-with default values for optional arguments
+a) with default values for the optional arguments
 ```
 python src/make_data/infer_entities.py -p "title" -m "models/mdl_ner_trf_b1_b4/model-best"
 ```
 
-with some chosen values for optional arguments (recommended)
+b) with user-defined values for the optional arguments (recommended)
 ```
 python src/make_data/infer_entities.py \
-    -p "text" \
+    -p "title" \
         -m "models/mdl_ner_trf_b1_b4/model-best" \
             -d "2022-07-20" \
                 --chunk_size 10000 \
@@ -85,19 +87,20 @@ python src/make_data/infer_entities.py \
 
 Additional Notes:
 
-- The current pipeline extracts entities from Title and Description of ** all ** GOV.UK pages in the preprocessed content store; but
-    only extract entities from the body text of a subset of GOV.UK pages, included in certain document_type or publishing_app.
-    This still amounts for 30-40% of all pages on GOV.UK. We hope to remove this caveat once the pipeline is moved to the cloud.
+- The current pipeline extracts entities from Title and Description of ** all ** the GOV.UK pages in the preprocessed content store;
+    but it only extract entities from the body Text of a subset of GOV.UK pages, those with the specified document_type or publishing_app.
+    This still amounts for 30-40% of all pages on GOV.UK. We hope to remove this caveat once the pipeline is moved to the cloud and we
+    have fewer memory and processing constraints.
 
 - Finding a suitable compromise between "--batch_size" and "n_proc".
     `batch_size` determines the size of each batch of texts being worked on by each process.
-    If the `batch_size` value is too small, then a large number of workers (as available for your CPU cores, and according to
+    If the `batch_size` value is too small, then a large number of workers (as available given your CPU cores and
     your set value for `n_proc` when > 1) will spin up to deal with the large number of batches overall. This can slow down execution.
     Yet, sometimes you want `batch_size` to be relatively small when the length of the texts being process is long.
     See "--batch_size", "-b" above for more info.
 
-- Suitable values for "--chunk_size", "--batch_size" and "n_proc" requires some thinking and iterations.
-    What has worked when training on a M1 Pro processor, but could potentially improve by iterating on values:
+- Choosing suitable values for "--chunk_size", "--batch_size" and "n_proc" requires some thinking and iterations.
+    What has worked when training on a M1 Pro processor, but could potentially be improved further by experimenting on values:
     - Title (very short texts): --chunk_size 40000 --batch_size 6000 --n_proc 8
     - Description (short texts): --chunk_size 20000 --batch_size 6000 --n_proc 8
     - Text (long/very-long texts): --chunk_size 15000 --batch_size 30 --n_proc 5

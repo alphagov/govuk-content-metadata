@@ -1,5 +1,5 @@
 """
-Utilities functions to access an S3 bucket to downlaod and upload files,
+Utility functions to access an S3 bucket to downlaod and upload files,
 using the AWS SDK for Python boto3.
 """
 
@@ -13,7 +13,6 @@ def assume_role_with_mfa(username, user_account_id, role_account_id, role_name):
 
     """
     Assume role (e.g., govuk-datascienceusers) with MFA and return the temporary cross-account credentials.
-    The function assumes the Account ID of your IAM is `622626885786` (i.e. gds-user)
 
     Args:
         username: the username in the your personal AWS user account, usually <name>.<surname> as in your @digital.cabinet-office.gov.uk email.
@@ -27,7 +26,7 @@ def assume_role_with_mfa(username, user_account_id, role_account_id, role_name):
 
     # Create an STS client object, representing a live connection to the STS service
     sts_client = boto3.client("sts")
-    # ARN of the govuk-datascienceusers role we want to assume
+    # ARN of the role we want to assume
     role_arn = f"arn:aws:iam::{role_account_id}:role/{role_name}"
 
     MFA_OPT = input("Enter the MFA code: ")
@@ -35,7 +34,7 @@ def assume_role_with_mfa(username, user_account_id, role_account_id, role_name):
     # Call the assume_role method of the STSConnection object and pass the role ARN and a role session name.
     assumedRoleObject = sts_client.assume_role(
         RoleArn=role_arn,
-        RoleSessionName="AccessPreprocContentStore",
+        RoleSessionName="AccessS3Metadata",
         SerialNumber=f"arn:aws:iam::{user_account_id}:mfa/{username}@digital.cabinet-office.gov.uk",
         DurationSeconds=3600,
         TokenCode=MFA_OPT,
@@ -96,7 +95,7 @@ def upload_file_to_s3(
     """Upload a file to an S3 bucket
 
     Args:
-        s3_resource: An S3 resource object
+        s3_resource: An Amazon S3 resource object configured to have access to S3 buckets
         file_name: Name of the file to upload
         file_folder: Path to the file to upload
         s3_bucket: Name of S3 bucket to upload to
