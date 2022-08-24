@@ -7,6 +7,7 @@ using the AWS SDK for Python boto3.
 import os
 import boto3
 import botocore
+import tqdm
 
 
 def assume_role_with_mfa(username, user_account_id, role_account_id, role_name):
@@ -78,8 +79,15 @@ def download_file_from_s3(s3_resource, s3_bucket, file_key, output_filepath):
         The downloaded file in the specified location
     """
 
+    object_size = s3_resource.Object(s3_bucket, file_key).content_length
+
     try:
-        s3_resource.Bucket(s3_bucket).download_file(file_key, output_filepath)
+        with tqdm.tqdm(total=object_size, unit="B", unit_scale=True) as pbar:
+            s3_resource.Bucket(s3_bucket).download_file(
+                file_key,
+                output_filepath,
+                Callback=lambda bytes_transferred: pbar.update(bytes_transferred),
+            )
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "404":
             print("The object does not exist.")
