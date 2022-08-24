@@ -2,7 +2,15 @@ import pytest
 import types
 import gzip
 from io import BytesIO
-from src.make_data.infer_entities import chunks, to_tuples, gzipped_csv_to_stream
+from unittest.mock import patch, mock_open, call
+
+from src.make_data.infer_entities import (
+    chunks,
+    to_tuples,
+    gzipped_csv_to_stream,
+    write_output,
+    extract_entities,
+)
 
 
 def test_chunks_output_type_1():
@@ -183,3 +191,59 @@ class TestGzippedCsvToStream:
             {"text": "Some text.", "id": "base_path1"},
             {"text": "More text!", "id": "base_path2"},
         ]
+
+
+def test_write_output():
+    input_generator = (x for x in [{"t": "abc"}, {"t": "def"}])
+    expected = [call({"t": "abc"}), call({"t": "def"})]
+    open_mock = mock_open()
+    with patch("builtins.open", open_mock, create=True):
+        write_output("test_out.jsonl", input_generator)
+    open_mock.assert_called_with("test_out.jsonl", "w")
+    open_mock.call_args_list == expected
+
+
+"""
+texts: Tuple[str, Dict[str, str]],
+    ner_model: spacy.Language,
+    id_key: str,
+    batch_size=5000,
+    n_process=1,
+    -> Generator dict[list(tuples)]
+"""
+
+args_extract_entities_input = [
+    ("The UK is an entity and so is Spain.", {"id": "abc/"}),
+    ("Serena Williams is also an entity", {"id": "def/"}),
+]
+args_extract_entities_expected = [
+    {"abc/": [("UK", "GPE", 4, 6), ("Spain", "GPE", 30, 35)]},
+    {"def/": [("Serena Williams", "PERSON", 0, 15)]},
+]
+
+
+def test_extract_entities_output_type(en_core_web_lg):
+    input_generator = (x for x in args_extract_entities_input)
+    output = extract_entities(
+        input_generator, en_core_web_lg, id_key="id", batch_size=1, n_process=1
+    )
+    assert isinstance(output, types.GeneratorType)
+
+
+def test_extract_entities_output_structure(en_core_web_lg):
+    input_generator = (x for x in args_extract_entities_input)
+    output = extract_entities(
+        input_generator, en_core_web_lg, id_key="id", batch_size=1, n_process=1
+    )
+    output_element_1 = next(output)
+    assert isinstance(output_element_1, dict)
+    assert [k in output_element_1.keys() for k in ["abc/", "def/"]]
+    assert [isinstance(v, tuple) for v in output_element_1.values()]
+
+
+def test_extract_entities_correct(en_core_web_lg):
+    input_generator = (x for x in args_extract_entities_input)
+    output = extract_entities(
+        input_generator, en_core_web_lg, id_key="id", batch_size=1, n_process=1
+    )
+    assert list(output) == args_extract_entities_expected
