@@ -83,7 +83,7 @@ def download_file_from_s3(s3_resource, s3_bucket, file_key, output_filepath):
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "404":
             print("The object does not exist.")
-        if e.respone["Error"]["Code"] == "400":
+        if e.response["Error"]["Code"] == "400":
             print("Session has expired - Please re-authenticate")
         else:
             raise
