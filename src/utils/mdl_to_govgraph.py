@@ -144,7 +144,7 @@ def load_merge_csv_files(title_path, description_path, text_path):
 
 # functions to filter out erroneous names
 def contains_alphanum(string):
-    """Flag if any string characters are alphanumeric
+    """Flag if any string characters are alphanumeric, including non-latin words
 
     :param string: Input string.
     :type string: str
