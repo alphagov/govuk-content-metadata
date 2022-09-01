@@ -27,14 +27,14 @@ from src.utils.helpers_aws import (
 )
 
 
-def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
+def jsonl_to_csv_wrangle(in_jsonl, out_csv):
     """Converts .JSONL input into a format with number of occurrences of each combination of (entity_instance, entity_type)
     in each base_path".
 
     :param in_jsonl: Input .jsonl file
     :type in_jsonl: str
-    :param out_jsonl: Output .jsonl file
-    :type out_jsonl: str
+    :param out_csv: Output .csv file
+    :type out_csv: str
     :raises ValueError: ValueErrory if none of ['title', 'description', 'text'] in title of `in_jsonl`"
     """
     # check if unit is in file name
@@ -44,7 +44,7 @@ def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
     except IndexError:
         print(f"Invalid file name: '{in_jsonl}' is skipped.")
     # wrangle output into correct format
-    with open(out_jsonl, "w") as f:
+    with open(out_csv, "w") as f:
         write = csv.writer(f, delimiter=",")
         write.writerow(["base_path", "entity_inst", "entity_type", f"{unit}_weight"])
         # for each row in jsonl, wrangle into correct format
