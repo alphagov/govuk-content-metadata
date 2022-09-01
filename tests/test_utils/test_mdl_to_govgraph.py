@@ -1,58 +1,10 @@
 import pytest
-import pandas as pd
-from io import BytesIO
 from src.utils.mdl_to_govgraph import (
-    jsonl_to_csv_wrangle,
-    # process_and_save_files,
-    # concatenate_csv_per_unit,
-    # load_merge_csv_files,
+    count_entity_occurrence,
     contains_alphanum,
     is_latin,
     only_roman_chars,
-    # preprocess_merged_df,
 )
-
-
-def test_jsonl_to_csv_wrangle_output_type():
-    """Assert error raised if bad input name."""
-    with pytest.raises(ValueError):
-        assert jsonl_to_csv_wrangle(
-            in_jsonl="badname.jsonl", out_jsonl="finename.jsonl"
-        )
-        assert jsonl_to_csv_wrangle(
-            in_jsonl="anothername.jsonl", out_jsonl="finename.jsonl"
-        )
-
-
-# # tests for process_and_save_files()
-# def test_process_and_save_files():
-
-# # tests for concatenate_csv_per_unit()
-# def test_concatenate_csv_per_unit():
-
-# mock a gzipped csv file
-mock_rows_byte = b"base_path\tentity_inst\tentity_type\tdescription_weight\n\
-    /some path \tSome text.\tORG\t1\n\
-    /another/path\tMore text!\tPER\t2"
-
-
-@pytest.fixture()
-def in_memory_csv():
-    stream = BytesIO()
-    with open(stream, "wb") as f:
-        f.write(mock_rows_byte)
-    stream.seek(0)
-    return stream
-
-
-# tests for load_merge_csv_files()
-class TestLoadMergeCsvFiles:
-    """Tests for load_merge_csv_files function"""
-
-    def test_load_merge_csv_files(self, in_memory_csv):
-        """Assert output of test_load_merge_csv_files is DataFrame"""
-
-        assert isinstance(in_memory_csv, pd.DataFrame)
 
 
 # tests contains_alphanum()
@@ -103,3 +55,23 @@ def test_is_latin(char, bool):
 )
 def test_only_roman_chars(string, bool):
     assert only_roman_chars(string) == bool
+
+
+ent_input = {
+    "/cma-cases/continental-veyance": [
+        ["CMA", "ORG", 4, 7],
+        ["cma", "ORG", 12, 15],
+        ["Continental AG", "ORG", 52, 66],
+        ["Veyance Technologies Inc.", "ORG", 70, 95],
+    ]
+}
+# should return
+expected_output = [
+    ["/cma-cases/continental-veyance", "cma", "ORG", 2],
+    ["/cma-cases/continental-veyance", "continental ag", "ORG", 1],
+    ["/cma-cases/continental-veyance", "veyance technologies inc.", "ORG", 1],
+]
+
+
+def test_count_entity_occurrence():
+    assert count_entity_occurrence(ent_input) == expected_output
