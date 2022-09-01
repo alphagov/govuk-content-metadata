@@ -38,9 +38,6 @@ case "${unameOut}" in
     *)          DATE="UNKNOWN:${unameOut}"
 esac
 
-# date in YYYY-MM-DD format
-DATE_LONG=20${DATE:(-2)}-${DATE:2:2}-${DATE:0:2}
-echo "Selected date: ${DATE_LONG}"
 
 while getopts ":m:p:d:c:b:n:" opt; do
     case $opt in
@@ -73,6 +70,11 @@ while getopts ":m:p:d:c:b:n:" opt; do
             ;;
   esac
 done
+
+
+# date in YYYY-MM-DD format
+DATE_LONG=20${DATE:(-2)}-${DATE:2:2}-${DATE:0:2}
+echo "Selected date: ${DATE_LONG}"
 
 echo "Getting copy of preprocessed content store from AWS S3"
 FILE=${LOCAL_FOLDER_CONTENT}/preprocessed_content_store_${DATE}.csv.gz
