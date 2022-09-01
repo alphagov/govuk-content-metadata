@@ -28,13 +28,13 @@ from src.utils.helpers_aws import (
 
 
 def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
-    """Converts .JSONL input (basepath-entity-entity_instance-occurrence) lines into format CSV format with
-    number of occurences at different units.
+    """Converts .JSONL input into a format with number of occurrences of each combination of (entity_instance, entity_type)
+    in each base_path".
 
     :param in_jsonl: Input .jsonl file
-    :type in_jsonl: JSONL
+    :type in_jsonl: str
     :param out_jsonl: Output .jsonl file
-    :type out_jsonl: JSONL
+    :type out_jsonl: str
     :raises ValueError: ValueErrory if none of ['title', 'description', 'text'] in title of `in_jsonl`"
     """
     # check if unit is in file name
