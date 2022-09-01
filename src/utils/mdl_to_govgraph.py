@@ -14,6 +14,7 @@ python src/utils/mdl_to_govgraph.py
 import csv
 import json
 import re
+import argparse
 from collections import Counter
 from typing import Dict, List, Union
 import os
@@ -237,11 +238,11 @@ def preprocess_merged_df(merge_df, outfile_path):
         ["inst_has_alphanum", "only_roman_chars", "entity_combo"], axis=1
     )
 
-    # calculate total weight across all units
-    df_master["total_weight"] = (
-        df_master["title_weight"]
-        + df_master["description_weight"]
-        + df_master["text_weight"]
+    # calculate total count across all units
+    df_master["total_count"] = (
+        df_master["title_count"]
+        + df_master["description_count"]
+        + df_master["text_count"]
     )
 
     # save to csv
@@ -255,15 +256,6 @@ AWS_DATASCIENCEUSERS_NAME = os.getenv("AWS_DATASCIENCEUSERS_NAME")
 
 
 if __name__ == "__main__":
-
-    creds = assume_role_with_mfa(
-        username=AWS_USERNAME,
-        user_account_id=AWS_GDSUSER_ACCOUNTID,
-        role_account_id=AWS_DATASCIENCEUSERS_ACCOUNTID,
-        role_name=AWS_DATASCIENCEUSERS_NAME,
-    )
-
-    import argparse
 
     argparser = argparse.ArgumentParser(description="Run src.utils.mdl_to_govgraph")
     # Define the positional arguments we want to get from the user
@@ -290,6 +282,13 @@ if __name__ == "__main__":
     )
 
     argparser_args = argparser.parse_args()
+
+    creds = assume_role_with_mfa(
+        username=AWS_USERNAME,
+        user_account_id=AWS_GDSUSER_ACCOUNTID,
+        role_account_id=AWS_DATASCIENCEUSERS_ACCOUNTID,
+        role_name=AWS_DATASCIENCEUSERS_NAME,
+    )
 
     print("Connecting to S3...")
 
