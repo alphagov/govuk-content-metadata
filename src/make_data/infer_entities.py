@@ -493,7 +493,7 @@ if __name__ == "__main__":  # noqa: C901
         start = time.time()
         try:
 
-            OUTPUT_FILENAME = f"JUNK_entities_{TARGET_DATE_SHORT}_{POSITION}_{i}.jsonl"
+            OUTPUT_FILENAME = f"entities_{TARGET_DATE_SHORT}_{POSITION}_{i}.jsonl"
             OUTPUT_FILEPATH = OUTPUT_FOLDER + OUTPUT_FILENAME
             make_inference(
                 content_stream=chunk_stream,
