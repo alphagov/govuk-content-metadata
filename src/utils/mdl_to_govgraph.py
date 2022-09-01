@@ -14,7 +14,8 @@ python src/utils/mdl_to_govgraph.py
 import csv
 import json
 import re
-from collections import OrderedDict
+from collections import Counter
+from typing import Dict, List, Union
 import os
 import pandas as pd
 import glob
@@ -27,6 +28,25 @@ from src.utils.helpers_aws import (
 )
 
 
+def count_entity_occurrence(
+    line: Dict[str, List[list]]
+) -> List[List[Union[str, str, str, int]]]:
+    """
+    Counts the number of occurrences of each (entity string, entity tag) combination in input line,
+    after lowercasing the entity string.
+
+    Args:
+        A line in a JSONL file, of the format {base_path: [[entity string, entity tag, start, end], [...]}
+
+    Returns:
+        A list of sublists, each sublist of the form [base_path, entity string, entity tag, number occurrences]
+    """
+    for base_path, entities_list in line.items():
+        ents = [ent[:2] for ent in entities_list]
+        c = Counter((inst.lower(), tag) for inst, tag in ents)
+        return [[base_path, k[0], k[1], v] for k, v in c.items()]
+
+
 def jsonl_to_csv_wrangle(in_jsonl, out_csv):
     """Converts .JSONL input into a format with number of occurrences of each combination of (entity_instance, entity_type)
     in each base_path".
@@ -37,27 +57,22 @@ def jsonl_to_csv_wrangle(in_jsonl, out_csv):
     :type out_csv: str
     :raises ValueError: ValueErrory if none of ['title', 'description', 'text'] in title of `in_jsonl`"
     """
-    # check if unit is in file name
     unit = re.findall(r"title|description|text", in_jsonl)
     try:
         unit = unit[0]
     except IndexError:
         print(f"Invalid file name: '{in_jsonl}' is skipped.")
-    # wrangle output into correct format
+
     with open(out_csv, "w") as f:
         write = csv.writer(f, delimiter=",")
-        write.writerow(["base_path", "entity_inst", "entity_type", f"{unit}_weight"])
-        # for each row in jsonl, wrangle into correct format
+        write.writerow(["base_path", "entity_inst", "entity_type", "{unit}_weight"])
+        # for each row in jsonl, wrangle into correct format and save to csv
         for line in open(in_jsonl):
-            test_ex_json = json.loads(line)
-            base_path = list(test_ex_json.keys())[0]
-            entities = list(test_ex_json.values())[0]
-            ents = [(i[0], i[1]) for i in entities]
-            ents = [(i[0], i[1], ents.count(i)) for i in ents]
-            ents = list(OrderedDict.fromkeys(ents))
-            out = [[base_path, ent[0], ent[1], ent[2]] for ent in ents]
-            # write each row
-            write.writerows(out)
+            input_dict = json.loads(line)
+            try:
+                write.writerows(count_entity_occurrence(input_dict))
+            except json.JSONDecodeError:
+                print(f"Could not process contents of file: {in_jsonl}")
 
 
 def process_and_save_files(download_path, processed_path):
@@ -77,9 +92,7 @@ def process_and_save_files(download_path, processed_path):
         # invoke `json_to_csv_wrangle` function
         jsonl_to_csv_wrangle(
             in_jsonl=in_file,
-            out_jsonl=os.path.join(
-                processed_path, "processed_{}.csv".format(base_name)
-            ),
+            out_csv=os.path.join(processed_path, f"processed_{base_name}.csv"),
         )
 
 
