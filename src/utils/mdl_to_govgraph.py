@@ -136,11 +136,6 @@ def load_merge_csv_files(title_path, description_path, text_path):
     df_descriptions = pd.read_csv(description_path, encoding="utf-8")
     df_text = pd.read_csv(text_path, encoding="utf-8")
 
-    # sort each by base_path
-    df_titles = df_titles.sort_values(by=["base_path"], ascending=True)
-    df_descriptions = df_descriptions.sort_values(by=["base_path"], ascending=True)
-    df_text = df_text.sort_values(by=["base_path"], ascending=True)
-
     # merge all dataframes, aggregating counts per unit
     merge_df = reduce(
         lambda x, y: pd.merge(
