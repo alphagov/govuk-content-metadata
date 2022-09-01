@@ -4,8 +4,6 @@ This script contains a function that is used for wrangling outputs into format f
 TO RUN:
 ```
 python src/utils/mdl_to_govgraph.py
--s3_bucket govuk-data-infrastructure-integration
--s3_folder knowledge-graph-static/entities_intermediate
 -out_filepath /Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/for_merge/ner_phase1_roberta_entities.csv
 ```
 """
@@ -256,7 +254,7 @@ if __name__ == "__main__":
         "-s3_bucket",
         type=str,
         action="store",
-        required=True,
+        required=False,
         default=S3_BUCKET_INPUT,
         help="S3 Bucket.",
     )
@@ -264,7 +262,7 @@ if __name__ == "__main__":
         "-s3_folder",
         type=str,
         action="store",
-        required=True,
+        required=False,
         default=S3_FOLDER_INPUT,
         help="S3 Folder.",
     )
