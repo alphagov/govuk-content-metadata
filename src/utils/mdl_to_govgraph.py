@@ -200,7 +200,6 @@ def preprocess_merged_df(merge_df, outfile_path):
 
     # force columns to lower case
     merge_df["entity_inst"] = merge_df["entity_inst"].str.lower()
-    merge_df["base_path"] = merge_df["base_path"].str.lower()
 
     # use helper functions to extract flag erroneous names
     merge_df["inst_has_alphanum"] = [
