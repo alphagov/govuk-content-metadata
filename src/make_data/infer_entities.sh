@@ -10,21 +10,37 @@ usage="Script to extract entities from pages on GOV.UK and upload outputs to S3.
 #  -b    batch size; number of texts to be batched processed by the Spacy pipeline (Optional)
 #  -n    number of cores for the parallel processing of texts (Optional)
 
-# IMPORTANT: See the docstring in `src/make_data/infer_entities.py` for more details.
+# IMPORTANT: See the docstring in `src/make_data/infer_entities.py` for more details on
+# which values to choose for the Optional arguments.
+
+# Requirements:
+# - Ensure you meet all the `README.md/Inference pipeline [local machine]/Requirements`.
 
 # The script consists of 3 steps:
-# - Downlowding copy of preprocessed content store from AWS S3
+# - Downlowding copy of the preprocessed content store from AWS S3
 # - Running NER inferential pipeline
 # - Uploading files with extracted entities to AWS S3
 
 # Set default values for optional arguments
-DATE=$(date -v-1d +%F)
 CHUNK_SIZE=40000
 BATCH_SIZE=30
 N_PROC=1
 
-# echo ${DATE_YESTERDAY}
-# echo ${CHUNK_SIZE}
+S3_BUCKET=govuk-data-infrastructure-integration
+LOCAL_FOLDER_CONTENT=data/raw
+LOCAL_FOLDER_ENTITIES=data/processed/entities
+
+# Set default value for `date` to yesterday in the format `DDMMYY`
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     DATE=$(date -d '-1 day' '+%d%m%y');;
+    Darwin*)    DATE=$(date -v '-1d' '+%d%m%y');;
+    *)          DATE="UNKNOWN:${unameOut}"
+esac
+
+# date in YYYY-MM-DD format
+DATE_LONG=20${DATE:(-2)}-${DATE:2:2}-${DATE:0:2}
+echo "Selected date: ${DATE_LONG}"
 
 while getopts ":m:p:d:c:b:n:" opt; do
     case $opt in
@@ -58,11 +74,18 @@ while getopts ":m:p:d:c:b:n:" opt; do
   esac
 done
 
-echo "Downlowding copy of preprocessed content store from AWS S3"
-python3 -m src.make_data.get_preproc_content --date ${DATE}
+echo "Getting copy of preprocessed content store from AWS S3"
+FILE=${LOCAL_FOLDER_CONTENT}/preprocessed_content_store_${DATE}.csv.gz
+if [ -f "${FILE}" ]; then
+    echo "File ${FILE} already downloaded."
+else
+    echo "Downloading ${FILE}..."
+	aws s3 cp s3://${S3_BUCKET}/knowledge-graph/${DATE_LONG}/preprocessed_content_store_${DATE}.csv.gz ${LOCAL_FOLDER_CONTENT}/preprocessed_content_store_${DATE}.csv.gz --profile govuk-datascience
+    echo "Successfully downloaded ${FILE}."
+fi
 
 echo "Running NER inferential pipeline"
-python3 -m src.make_data.infer_entities -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${DATE} -c ${CHUNK_SIZE} -b ${BATCH_SIZE} -n ${N_PROC}
+python3 -m src.make_data.infer_entities -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${DATE_LONG} -c ${CHUNK_SIZE} -b ${BATCH_SIZE} -n ${N_PROC}
 
 echo "Uploading files with extracted entities to AWS S3"
-python3 -m src/make_data/upload_entities_to_s3
+aws s3 cp ${LOCAL_FOLDER_ENTITIES} s3://${S3_BUCKET}/knowledge-graph-static/entities_intermediate/ --recursive --exclude "*" --include "*.jsonl" --profile govuk-datascience
