@@ -249,13 +249,14 @@ def preprocess_merged_df(merge_df, outfile_path):
     df_master.to_csv(outfile_path, index=None)
 
 
-AWS_USERNAME = os.getenv("AWS_USERNAME")
-AWS_DATASCIENCEUSERS_ACCOUNTID = os.getenv("AWS_DATASCIENCEUSERS_ACCOUNTID")
-AWS_GDSUSER_ACCOUNTID = os.getenv("AWS_GDSUSER_ACCOUNTID")
-AWS_DATASCIENCEUSERS_NAME = os.getenv("AWS_DATASCIENCEUSERS_NAME")
-
-
 if __name__ == "__main__":
+
+    AWS_USERNAME = os.getenv("AWS_USERNAME")
+    AWS_DATASCIENCEUSERS_ACCOUNTID = os.getenv("AWS_DATASCIENCEUSERS_ACCOUNTID")
+    AWS_GDSUSER_ACCOUNTID = os.getenv("AWS_GDSUSER_ACCOUNTID")
+    AWS_DATASCIENCEUSERS_NAME = os.getenv("AWS_DATASCIENCEUSERS_NAME")
+    S3_BUCKET_INPUT = "govuk-data-infrastructure-integration"
+    S3_FOLDER_INPUT = "knowledge-graph-static/entities_intermediate"
 
     argparser = argparse.ArgumentParser(description="Run src.utils.mdl_to_govgraph")
     # Define the positional arguments we want to get from the user
@@ -264,6 +265,7 @@ if __name__ == "__main__":
         type=str,
         action="store",
         required=True,
+        default=S3_BUCKET_INPUT,
         help="S3 Bucket.",
     )
     argparser.add_argument(
@@ -271,6 +273,7 @@ if __name__ == "__main__":
         type=str,
         action="store",
         required=True,
+        default=S3_FOLDER_INPUT,
         help="S3 Folder.",
     )
     argparser.add_argument(
