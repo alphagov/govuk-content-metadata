@@ -39,12 +39,10 @@ def jsonl_to_csv_wrangle(in_jsonl, out_jsonl):
     """
     # check if unit is in file name
     unit = re.findall(r"title|description|text", in_jsonl)
-    if unit:
+    try:
         unit = unit[0]
-    else:
-        raise ValueError(
-            "Input file must have ['title, 'description', 'text'] in title."
-        )
+    except IndexError:
+        print(f"Invalid file name: '{in_jsonl}' is skipped.")
     # wrangle output into correct format
     with open(out_jsonl, "w") as f:
         write = csv.writer(f, delimiter=",")
