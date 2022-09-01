@@ -65,7 +65,7 @@ def jsonl_to_csv_wrangle(in_jsonl, out_csv):
 
     with open(out_csv, "w") as f:
         write = csv.writer(f, delimiter=",")
-        write.writerow(["base_path", "entity_inst", "entity_type", "{unit}_weight"])
+        write.writerow(["base_path", "entity_inst", "entity_type", "{unit}_count"])
         # for each row in jsonl, wrangle into correct format and save to csv
         for line in open(in_jsonl):
             input_dict = json.loads(line)
