@@ -227,16 +227,13 @@ def preprocess_merged_df(merge_df, outfile_path):
     # make entity instance lower case
     merge_df["entity_inst"] = merge_df["entity_inst"].str.lower()
 
-    # create new field by combining instance and type
-    merge_df["entity_combo"] = merge_df["entity_inst"] + merge_df["entity_type"]
-
-    # create a unique has for each entity combo
-    merge_df["entity_hash"] = merge_df["entity_combo"].apply(lambda x: hash(x))
+    # create entity_hash for (entity_inst, entity_type) tuples
+    merge_df["entity_hash"] = merge_df[["entity_inst", "entity_type"]].apply(
+        lambda x: hash(tuple(x)), axis=1
+    )
 
     # drop fields not needed
-    df_master = merge_df.drop(
-        ["inst_has_alphanum", "only_roman_chars", "entity_combo"], axis=1
-    )
+    df_master = merge_df.drop(["inst_has_alphanum", "only_roman_chars"], axis=1)
 
     # calculate total count across all units
     df_master["total_count"] = (
