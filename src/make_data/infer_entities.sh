@@ -5,7 +5,7 @@ usage="Script to extract entities from pages on GOV.UK and upload outputs to S3.
 # The following options are available:
 #  -m    full path to NER model to use for inference.  (Required)
 #  -p    one of 'title', 'description', 'text' (Required)
-#  -d    date 'YYYY-MM-DD' of the preprocessed content store copy (Optional)
+#  -d    date 'DDMMYY' of the preprocessed content store copy (Optional)
 #  -c    chunk size; number of texts to be streamed before memory is released (Optional)
 #  -b    batch size; number of texts to be batched processed by the Spacy pipeline (Optional)
 #  -n    number of cores for the parallel processing of texts (Optional)
