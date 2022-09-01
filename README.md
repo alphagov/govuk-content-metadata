@@ -122,7 +122,54 @@ in the project directory.
 
 # Inference pipeline [local machine]
 
-To use a trained Spacy NER model to extract Named Entities from GOV.UK content, please follow
-the instructions in: [src/make_data/infer_entities.sh][infer-entities-sh]
+To use a trained Spacy NER model to extract Named Entities from GOV.UK content:
+- Ensure you meet the [AWS Requirements][## AWS Requirements] below.
+- You will be asked for your AWS account MFA code, so have it ready!
+- Follow the instructions in [src/make_data/infer_entities.sh][infer-entities-sh] to know how to specify optional arguments.
+
+Example: to run the bash script with default values for the optional arguments and extract entities from all the "titles" of yesterday's GOV.UK pages using a pre-trained model saved in `models/mdl_ner_trf_b1_b4/model-best`, from the project root directory run
+
+```shell
+bash src/make_data/infer_entities.sh -p "title" -m "models/mdl_ner_trf_b1_b4/model-best"
+```
+
+## AWS Requirements
+
+1. AWS Access; see https://docs.publishing.service.gov.uk/manual/get-started.html#8-get-aws-access on how to create your AWS user account, and create an access key ID and secret access key.
+
+2. STS Permission to AssumeRole with MFA for the [`govuk-datascienceusers` AWS IAM Role][ds-role] (ask on #data-engineering Slack channel)
+
+3. `AWS CLI` installed; it should have gotten installed as part of 1. To verify, in your terminal run:
+```shell
+which aws
+aws --version
+```
+If it is not available, please [follow the official installation instructions] [awscli-install].
+
+4. Configure your `AWS CLI`. In your terminal, run:
+```shell
+aws configure
+```
+and follow the prompts (N.B. you will be asked to provide your access key ID and secret access key).
+
+Your credentials should have now been added to the `~/.aws/credentials` file, under `[default]`.
+
+5. Create a profile for the `govuk-datascienceusers` Role in your `~/.aws/config`. If the file does not exist, you'll need to create it. In your `~/.aws/config` file, add:
+```
+[profile govuk-datascience]
+source_profile = default
+role_arn = arn:aws:iam::<ROLE ACCOUNT NUM>:role/govuk-datascienceusers
+mfa_serial = arn:aws:iam::<YOUR USER ACCOUNT NUMBER>:mfa/<YOUR NAME>.<YOUR SURNAME>@digital.cabinet-office.gov.uk
+```
+
+You can now assume the `govuk-datascienceusers` role and its permissions to interact with AWS S3 by adding `--profile govuk-datascience` at the end of your `aws cli` commands.
+For instance:
+```shell
+aws s3 ls --profile govuk-datascience
+```
+
+6. You are good to go and infer entities!
 
 [infer-entities-sh]: ./src/make_data/infer_entities.sh
+[ds-role]: https://us-east-1.console.aws.amazon.com/iamv2/home?region=eu-west-1#/roles/details/govuk-datascienceusers?section=permissions
+[awscli-install]: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
