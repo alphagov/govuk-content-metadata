@@ -1,10 +1,11 @@
 import pytest
 from src.utils.mdl_to_govgraph import (
     count_entity_occurrence,
-    jsonl_to_csv_wrangle,
     contains_alphanum,
     is_latin,
     only_roman_chars,
+    begins_with_alphanumeric,
+    clean_erroneous_names,
 )
 
 
@@ -39,6 +40,22 @@ def test_contains_alphanum(string, bool):
 )
 def test_is_latin(char, bool):
     assert is_latin(char) == bool
+
+
+# tests begins_with_alphanumeric()
+@pytest.mark.parametrize(
+    "string, bool",
+    [
+        ("hello", True),
+        ("world", True),
+        ("- org", False),
+        ("*per", False),
+        ("/foo", False),
+        ("9bar", True),
+    ],
+)
+def test_begins_with_alphanumeric(string, bool):
+    assert begins_with_alphanumeric(string) == bool
 
 
 # tests only_roman_chars()
@@ -78,6 +95,27 @@ def test_count_entity_occurrence():
     assert count_entity_occurrence(ex_input_1) == ex_output_1
 
 
-def test_jsonl_to_csv_wrangle_input():
-    with pytest.raises(Exception):
-        jsonl_to_csv_wrangle("fake.jsonl", "fake.csv")
+ex_input_2 = {
+    "/cma-cases/continental-veyance": [
+        ["CMA", "ORG", 4, 7],
+        ["cma", "ORG", 12, 15],
+        ["Continental AG", "ORG", 52, 66],
+        ["Veyance Technologies Inc.", "ORG", 70, 95],
+        ["المملكة العربية السعودية", "ORG", 100, 101],
+        ["-hello world", "PER", 105, 110],
+    ]
+}
+
+# should return
+ex_output_2 = {
+    "/cma-cases/continental-veyance": [
+        ["CMA", "ORG", 4, 7],
+        ["cma", "ORG", 12, 15],
+        ["Continental AG", "ORG", 52, 66],
+        ["Veyance Technologies Inc.", "ORG", 70, 95],
+    ]
+}
+
+
+def test_clean_erroneous_names():
+    assert clean_erroneous_names(ex_input_2) == ex_output_2
