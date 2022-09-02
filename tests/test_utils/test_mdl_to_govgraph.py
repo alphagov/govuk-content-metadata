@@ -1,6 +1,7 @@
 import pytest
 from src.utils.mdl_to_govgraph import (
     count_entity_occurrence,
+    jsonl_to_csv_wrangle,
     contains_alphanum,
     is_latin,
     only_roman_chars,
@@ -57,7 +58,7 @@ def test_only_roman_chars(string, bool):
     assert only_roman_chars(string) == bool
 
 
-ent_input = {
+ex_input_1 = {
     "/cma-cases/continental-veyance": [
         ["CMA", "ORG", 4, 7],
         ["cma", "ORG", 12, 15],
@@ -66,7 +67,7 @@ ent_input = {
     ]
 }
 # should return
-expected_output = [
+ex_output_1 = [
     ["/cma-cases/continental-veyance", "cma", "ORG", 2],
     ["/cma-cases/continental-veyance", "continental ag", "ORG", 1],
     ["/cma-cases/continental-veyance", "veyance technologies inc.", "ORG", 1],
@@ -74,4 +75,9 @@ expected_output = [
 
 
 def test_count_entity_occurrence():
-    assert count_entity_occurrence(ent_input) == expected_output
+    assert count_entity_occurrence(ex_input_1) == ex_output_1
+
+
+def test_jsonl_to_csv_wrangle_input():
+    with pytest.raises(Exception):
+        jsonl_to_csv_wrangle("fake.jsonl", "fake.csv")

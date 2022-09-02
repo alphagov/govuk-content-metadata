@@ -46,6 +46,27 @@ def count_entity_occurrence(
         return [[base_path, k[0], k[1], v] for k, v in c.items()]
 
 
+def clean_erroneous_names(input_line: Dict[str, List[list]]) -> Dict[str, List[list]]:
+    """Removes strings from a JSON line if there is no alpha-numeric characters or non-roman characters.
+
+    :param input_line: Line from JSONL
+    :type input_line: Dict[str, List[list]]
+    :return: Input line without erroneous names.
+    :rtype: Dict[str, List[list]]
+    """
+    for k, v in input_line.items():
+        filt_line = [
+            sublist
+            for sublist in v
+            if (
+                contains_alphanum(sublist[0])
+                and (only_roman_chars(sublist[0]))
+                and begins_with_alphanumeric(sublist[0])
+            )
+        ]
+    return {k: filt_line}
+
+
 def jsonl_to_csv_wrangle(in_jsonl, out_csv):
     """Converts .JSONL input into a format with number of occurrences of each combination of (entity_instance, entity_type)
     in each base_path".
@@ -59,19 +80,19 @@ def jsonl_to_csv_wrangle(in_jsonl, out_csv):
     unit = re.findall(r"title|description|text", in_jsonl)
     try:
         unit = unit[0]
+        with open(out_csv, "w") as f:
+            write = csv.writer(f, delimiter=",")
+            write.writerow(["base_path", "entity_inst", "entity_type", f"{unit}_count"])
+            # for each row in jsonl, wrangle into correct format and save to csv
+            for line in open(in_jsonl):
+                input_dict = json.loads(line)
+                clean_dict = clean_erroneous_names(input_dict)
+                try:
+                    write.writerows(count_entity_occurrence(clean_dict))
+                except json.JSONDecodeError:
+                    print(f"Could not process contents of file: {in_jsonl}")
     except IndexError:
         print(f"Invalid file name: '{in_jsonl}' is skipped.")
-
-    with open(out_csv, "w") as f:
-        write = csv.writer(f, delimiter=",")
-        write.writerow(["base_path", "entity_inst", "entity_type", "{unit}_count"])
-        # for each row in jsonl, wrangle into correct format and save to csv
-        for line in open(in_jsonl):
-            input_dict = json.loads(line)
-            try:
-                write.writerows(count_entity_occurrence(input_dict))
-            except json.JSONDecodeError:
-                print(f"Could not process contents of file: {in_jsonl}")
 
 
 def process_and_save_files(download_path, processed_path):
@@ -145,6 +166,20 @@ def load_merge_csv_files(title_path, description_path, text_path):
     return merge_df
 
 
+def begins_with_alphanumeric(string):
+    """Flag to check if string starts with alphanumeric character.
+
+    :param string: Input string.
+    :type string: str
+    :return: Boolean.
+    :rtype: bool
+    """
+    if string[0].isalnum():
+        return True
+    else:
+        return False
+
+
 # functions to filter out erroneous names
 def contains_alphanum(string):
     """Flag if any string characters are alphanumeric, including non-latin words
@@ -201,20 +236,8 @@ def preprocess_merged_df(merge_df, outfile_path):
     # force columns to lower case
     merge_df["entity_inst"] = merge_df["entity_inst"].str.lower()
 
-    # use helper functions to extract flag erroneous names
-    merge_df["inst_has_alphanum"] = [
-        contains_alphanum(line) for line in merge_df["entity_inst"]
-    ]
-    merge_df["only_roman_chars"] = merge_df["entity_inst"].apply(
-        lambda x: only_roman_chars(x)
-    )
-
     # fill missing values with na
     merge_df = merge_df.fillna(0)
-
-    # filter any erroneous names
-    merge_df = merge_df[merge_df["inst_has_alphanum"]]
-    merge_df = merge_df[merge_df["only_roman_chars"]]
 
     # make entity instance lower case
     merge_df["entity_inst"] = merge_df["entity_inst"].str.lower()
@@ -224,18 +247,13 @@ def preprocess_merged_df(merge_df, outfile_path):
         lambda x: hash(tuple(x)), axis=1
     )
 
-    # drop fields not needed
-    df_master = merge_df.drop(["inst_has_alphanum", "only_roman_chars"], axis=1)
-
     # calculate total count across all units
-    df_master["total_count"] = (
-        df_master["title_count"]
-        + df_master["description_count"]
-        + df_master["text_count"]
+    merge_df["total_count"] = (
+        merge_df["title_count"] + merge_df["description_count"] + merge_df["text_count"]
     )
 
     # save to csv
-    df_master.to_csv(outfile_path, index=None)
+    merge_df.to_csv(outfile_path, index=None)
 
 
 if __name__ == "__main__":
