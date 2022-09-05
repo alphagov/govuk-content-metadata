@@ -16,6 +16,7 @@ flake8==4.0.1
 idna==3.3
 lxml==4.8.0
 notebook
+matplotlib==3.5.2
 mccabe==0.6.1
 multiprocess==0.70.12.2
 numpy==1.22.3

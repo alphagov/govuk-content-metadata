@@ -1,3 +1,7 @@
+# this file, along with src.make_visualisations.util.py is the source code taken from
+# https://github.com/explosion/spacy-streamlit/tree/master/spacy_streamlit
+# because a bug would't allow direct installation
+
 from typing import List, Sequence, Tuple, Optional, Dict, Union, Callable
 import streamlit as st
 import spacy

@@ -1,3 +1,6 @@
+# This script builds and runs a streamlit web-app to allow interrogation of NER outputs
+
+# imports
 import matplotlib.pyplot as plt
 import streamlit as st
 import spacy
@@ -7,7 +10,7 @@ from util import get_model_metrics
 from collections import Counter
 
 
-# page config
+# page configuration
 st.set_page_config(
     page_title="GovNER 2.0",
     page_icon="🧐",
@@ -31,8 +34,7 @@ with st.sidebar:
     )
 
     if ModelType == "Transformer":
-        # kw_model = KeyBERT(model=roberta)
-
+        # load transformer model and cache
         @st.cache(allow_output_mutation=True)
         def load_model():
             return spacy.load("models/mdl_ner_trf_b1_b4/model-best")
@@ -40,14 +42,14 @@ with st.sidebar:
         nlp = load_model()
 
     else:
-
+        # load 'basic' model and cache
         @st.cache(allow_output_mutation=True)
         def load_model():
             return spacy.load("models/mark_goppepdm/model-best")
 
         nlp = load_model()
 
-    # metrics
+    # displacy metric for loaded model in sidebar
     metrics = get_model_metrics(nlp)
     st.metric(label="F-Score", value=metrics["model_f"], delta="1st")
     st.metric(label="Precision", value=metrics["model_p"], delta="1st")

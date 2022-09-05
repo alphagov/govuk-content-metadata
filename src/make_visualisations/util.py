@@ -1,3 +1,7 @@
+# this file, along with src.make_visualisations.visualize.py is the source code taken from
+# https://github.com/explosion/spacy-streamlit/tree/master/spacy_streamlit
+# because a bug would't allow direct installation
+
 import streamlit as st
 import spacy
 import base64

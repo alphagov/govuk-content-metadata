@@ -1,3 +1,5 @@
+# this is a config file which controls some of the variables used in src.make_visualisations.visualise.py
+
 colors = {
     "FORM": "#79dd6f",
     "GPE": "#00ffcc",
