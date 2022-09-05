@@ -131,3 +131,23 @@ def upload_file_to_s3(
         print(e)
         return False
     return True
+
+
+def download_files_from_s3_folder(s3_resource, s3_bucket, folder_path, output_folder):
+    bucket = s3_resource.Bucket(s3_bucket)
+    objs = bucket.objects.filter(Prefix=folder_path)
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    for obj in objs:
+        file_name = obj.key.split("/")[-1]
+        output_filepath = os.path.join(output_folder, file_name)
+        if output_filepath[-1] != "/":
+            try:
+                s3_resource.Bucket(s3_bucket).download_file(obj.key, output_filepath)
+            except botocore.exceptions.ClientError as e:
+                if e.response["Error"]["Code"] == "404":
+                    print("The object does not exist.")
+                if e.respone["Error"]["Code"] == "400":
+                    print("Session has expired - Please re-authenticate")
+                else:
+                    raise
