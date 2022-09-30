@@ -15,6 +15,7 @@ dill==0.3.4
 flake8==4.0.1
 idna==3.3
 lxml==4.8.0
+joblib==1.2.0
 notebook==6.4.11
 mccabe==0.6.1
 multiprocess==0.70.12.2
@@ -35,7 +36,6 @@ spacy-streamlit==1.0.4
 spacy-transformers==1.1.7
 streamlit==1.10.0
 spacy==3.2.4
-# thinc-apple-ops==0.0.7
 tqdm==4.64.0
 transformers==4.20.1
 urllib3==1.26.9
@@ -73,6 +73,7 @@ detect-secrets==1.0.3
 distlib==0.3.4
 docutils==0.17.1
 en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.2.0/en_core_web_lg-3.2.0-py3-none-any.whl
+en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.2.0/en_core_web_md-3.2.0-py3-none-any.whl
 entrypoints==0.4
 executing==0.8.3
 fastapi==0.68.2
@@ -95,7 +96,6 @@ ipywidgets==7.7.0
 jedi==0.18.1
 Jinja2==3.1.2
 jmespath==1.0.1
-joblib==1.1.0
 jsonlines==3.1.0
 jsonschema==4.6.0
 jupyter==1.0.0
