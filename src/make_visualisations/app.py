@@ -1,3 +1,4 @@
+from google.cloud import storage
 import spacy
 import visualizer
 import pandas as pd
@@ -6,6 +7,7 @@ import streamlit as st
 from collections import Counter
 from config import colors, entity_names, default_text
 from utils import get_model_metrics, get_model_ents_metrics, url_get_sents
+from download_models import replicate_folder_structure, download_files_from_bucket
 
 
 # page configuration
@@ -31,6 +33,19 @@ with st.sidebar:
         # load transformer model and cache
         @st.cache(allow_output_mutation=True)
         def load_model(model_path):
+            # Instantiates a client
+            # You must have personal access to GCP bucket, or service account credentials saved as ['GOOGLE_APPLICATION_CREDENTIALS'] as a secret
+            # storage_client = storage.Client()
+            storage.Client()
+            # The name for the new bucket
+            bucket_name = "cpto-content-metadata"
+            # download models
+            replicate_folder_structure(
+                bucket_name=bucket_name, folder="models/mdl_ner_trf_b1_b4/model-best"
+            )
+            download_files_from_bucket(
+                bucket_name=bucket_name, folder="models/mdl_ner_trf_b1_b4/model-best"
+            )
             nlp = spacy.load(model_path)
             return nlp
 
