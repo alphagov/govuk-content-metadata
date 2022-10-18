@@ -1,4 +1,3 @@
-from google.cloud import storage
 import spacy
 import visualizer
 import pandas as pd
@@ -7,7 +6,11 @@ import streamlit as st
 from collections import Counter
 from config import colors, entity_names, default_text
 from utils import get_model_metrics, get_model_ents_metrics, url_get_sents
-from download_models import replicate_folder_structure, download_files_from_bucket
+from download_models import (
+    replicate_folder_structure,
+    download_files_from_bucket,
+    instantiate_storage_client,
+)
 
 
 # page configuration
@@ -33,13 +36,17 @@ with st.sidebar:
         # load transformer model and cache
         @st.cache(allow_output_mutation=True)
         def load_model(model_path):
-            # Instantiates a client
-            # You must have personal access to GCP bucket, or service account credentials saved as ['GOOGLE_APPLICATION_CREDENTIALS'] as a secret
-            # storage_client = storage.Client()
-            storage.Client()
-            # The name for the new bucket
-            bucket_name = "cpto-content-metadata"
-            # download models
+            """Load Transformer model.
+
+            :param model_path: Path to Transformer model.
+            :type model_path: str
+            :return: Transformer pipeline.
+            :rtype: Model.
+            """
+            storage_client, bucket_name = instantiate_storage_client(
+                "cpto-content-metadata"
+            )
+
             replicate_folder_structure(
                 bucket_name=bucket_name, folder="models/mdl_ner_trf_b1_b4/model-best"
             )
@@ -64,7 +71,7 @@ with st.sidebar:
 with st.expander("Input text"):
     input_type = st.radio(
         "Would you like to run NER on free text or a GOV.UK page?",
-        ("Free Text", "GOV.UK URL"),
+        ("Free Text", "Custom GOV.UK URL", "Random GOV.UK URL"),
     )
 
     if input_type == "Free Text":
@@ -72,13 +79,25 @@ with st.expander("Input text"):
             "Insert text for NER here", value=default_text, height=150, max_chars=600
         )
         doc = [nlp(text_area)]
-    else:
+
+    if input_type == "Custom GOV.UK URL":
         text_input = st.text_input(
-            "Insert GOV.UK url", value="http://www.gov.uk/random"
+            "Insert GOV.UK URL",
+            value="https://www.gov.uk/government/people/elizabeth-truss",
         )
         text = url_get_sents(text_input)
         text = " ".join(text)
         doc = [nlp(text)]
+
+    if input_type == "Random GOV.UK URL":
+
+        text = ""
+        doc = [nlp(text)]
+
+        if st.button("Generate Random GOV.UK URL"):
+            text = url_get_sents("https://www.gov.uk/random")
+            text = " ".join(text)
+            doc = [nlp(text)]
 
 # visualisations
 col1, col2 = st.columns([2, 1])

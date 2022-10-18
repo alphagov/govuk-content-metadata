@@ -1,15 +1,27 @@
 import os
 from google.cloud import storage
 
-# Instantiates a client
-# You must have personal access to GCP bucket, or service account credentials saved as ['GOOGLE_APPLICATION_CREDENTIALS'] as a secret
-storage_client = storage.Client()
-# The name for the new bucket
-bucket_name = "cpto-content-metadata"
-# Creates the new bucket
+
+def instantiate_storage_client(bucket_name):
+    """Instantiates a client.You must have personal access to GCP bucket, or service account
+    credentials saved as ['GOOGLE_APPLICATION_CREDENTIALS'] as a secret
+    """
+    storage_client = storage.Client()
+    return storage_client, bucket_name
 
 
 def download_file_from_bucket(blob_name, file_path, bucket_name):
+    """Download a file from a GCP bucket.
+
+    :param blob_name: Blob name
+    :type blob_name: file
+    :param file_path: Output file path
+    :type file_path: str
+    :param bucket_name: Bucket name
+    :type bucket_name: str
+    :return: True/False
+    :rtype: Bool
+    """
     try:
         bucket = storage_client.get_bucket(bucket_name)
         blob = bucket.blob(blob_name)
@@ -22,22 +34,43 @@ def download_file_from_bucket(blob_name, file_path, bucket_name):
 
 
 def list_contents_of_bucket(bucket_name, folder):
+    """List the contents of a bucket.
+
+    :param bucket_name: Bucket name.
+    :type bucket_name: str
+    :param folder: Bucket folder
+    :type folder: str
+    :return: List of blobs in bucket/folder
+    :rtype: list
+    """
     bucket = storage_client.get_bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=folder)
     return [blob.name for blob in blobs]
 
 
 def replicate_folder_structure(bucket_name, folder):
+    """Replicate the structure of a GCP Bucket/folder
+
+    :param bucket_name: Bucket name
+    :type bucket_name: str
+    :param folder: Bucket folder
+    :type folder: str
+    """
     contents = list_contents_of_bucket(bucket_name, folder)
     dirnames = {os.path.dirname(i) for i in contents}
     for i in dirnames:
-        # print(os.path.join(str(os.getcwd()), i))
         if not os.path.exists(os.path.join(os.getcwd(), i)):
             os.makedirs(os.path.join(os.getcwd(), i))
 
 
 def download_files_from_bucket(bucket_name, folder):
-    # files = list_contents_of_bucket(bucket_name, folder)
+    """Download files from a bucket.
+
+    :param bucket_name: Bucket name
+    :type bucket_name: str
+    :param folder: Bucket folder
+    :type folder: str
+    """
     bucket = storage_client.get_bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=folder)
     blob_names = [i.name for i in blobs]
@@ -52,6 +85,8 @@ def download_files_from_bucket(bucket_name, folder):
 
 
 if __name__ == "__main__":
+
+    storage_client, bucket_name = instantiate_storage_client("cpto-content-metadata")
 
     replicate_folder_structure(
         bucket_name=bucket_name, folder="models/mdl_ner_trf_b1_b4/model-best"
