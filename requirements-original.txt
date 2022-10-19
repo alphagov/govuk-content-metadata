@@ -36,7 +36,7 @@ spacy-streamlit==1.0.4
 spacy-transformers
 streamlit==1.10.0
 spacy==3.2.4
-thinc-apple-ops==0.0.7;sys_platform=="darwin"
+# thinc-apple-ops==0.0.7;sys_platform=="darwin"
 tqdm==4.64.0
 transformers
 urllib3==1.26.9
