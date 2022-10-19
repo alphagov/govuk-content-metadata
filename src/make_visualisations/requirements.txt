@@ -1,0 +1,8 @@
+streamlit==1.10.0
+google-cloud-storage
+spacy
+spacy-transformers
+beautifulsoup4==4.11.1
+pandas
+typing
+altair==4.2.0

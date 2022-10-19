@@ -17,6 +17,7 @@ idna==3.3
 lxml==4.8.0
 joblib==1.2.0
 notebook
+matplotlib==3.5.2
 mccabe==0.6.1
 multiprocess==0.70.12.2
 numpy==1.22.3
@@ -43,3 +44,5 @@ urllib3==1.26.9
 wheel
 --extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
 prodigy>=1.11.0,<2.0.0
+google-cloud-storage==2.5.0
+altair==4.2.0
