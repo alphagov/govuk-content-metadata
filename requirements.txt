@@ -36,7 +36,7 @@ spacy-streamlit==1.0.4
 spacy-transformers==1.1.7
 streamlit==1.10.0
 spacy==3.2.4
-thinc-apple-ops==0.0.7
+# thinc-apple-ops==0.0.7;sys_platform=="darwin"
 tqdm==4.64.0
 transformers==4.20.1
 urllib3==1.26.9
@@ -197,6 +197,7 @@ starlette==0.14.2
 streamlit-authenticator==0.1.5
 terminado==0.15.0
 thinc==8.0.17
+thinc-apple-ops==0.0.7
 tinycss2==1.1.1
 tokenizers==0.12.1
 tomli==2.0.1
