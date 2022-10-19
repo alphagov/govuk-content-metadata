@@ -2,15 +2,15 @@ import os
 from google.cloud import storage
 
 
-def instantiate_storage_client(bucket_name):
+def instantiate_storage_client():
     """Instantiates a client.You must have personal access to GCP bucket, or service account
     credentials saved as ['GOOGLE_APPLICATION_CREDENTIALS'] as a secret
     """
     storage_client = storage.Client()
-    return storage_client, bucket_name
+    return storage_client
 
 
-def download_file_from_bucket(blob_name, file_path, bucket_name):
+def download_file_from_bucket(blob_name, file_path, bucket_name, storage_client):
     """Download a file from a GCP bucket.
 
     :param blob_name: Blob name
@@ -33,7 +33,7 @@ def download_file_from_bucket(blob_name, file_path, bucket_name):
         return False
 
 
-def list_contents_of_bucket(bucket_name, folder):
+def list_contents_of_bucket(bucket_name, folder, storage_client):
     """List the contents of a bucket.
 
     :param bucket_name: Bucket name.
@@ -48,7 +48,7 @@ def list_contents_of_bucket(bucket_name, folder):
     return [blob.name for blob in blobs]
 
 
-def replicate_folder_structure(bucket_name, folder):
+def replicate_folder_structure(bucket_name, folder, storage_client):
     """Replicate the structure of a GCP Bucket/folder
 
     :param bucket_name: Bucket name
@@ -56,14 +56,14 @@ def replicate_folder_structure(bucket_name, folder):
     :param folder: Bucket folder
     :type folder: str
     """
-    contents = list_contents_of_bucket(bucket_name, folder)
+    contents = list_contents_of_bucket(bucket_name, folder, storage_client)
     dirnames = {os.path.dirname(i) for i in contents}
     for i in dirnames:
         if not os.path.exists(os.path.join(os.getcwd(), i)):
             os.makedirs(os.path.join(os.getcwd(), i))
 
 
-def download_files_from_bucket(bucket_name, folder):
+def download_files_from_bucket(bucket_name, folder, storage_client):
     """Download files from a bucket.
 
     :param bucket_name: Bucket name
@@ -80,18 +80,24 @@ def download_files_from_bucket(bucket_name, folder):
             blob_name=blob_name,
             file_path=os.path.join(os.getcwd(), blob_name),
             bucket_name=bucket_name,
+            storage_client=storage_client,
         )
         print(f"{blob_name} downloaded!")
 
 
 if __name__ == "__main__":
 
-    storage_client, bucket_name = instantiate_storage_client("cpto-content-metadata")
+    storage_client = instantiate_storage_client()
+    bucket_name = "cpto-content-metadata"
 
     replicate_folder_structure(
-        bucket_name=bucket_name, folder="models/mdl_ner_trf_b1_b4/model-best"
+        bucket_name=bucket_name,
+        folder="models/mdl_ner_trf_b1_b4/model-best",
+        storage_client=storage_client,
     )
 
     download_files_from_bucket(
-        bucket_name=bucket_name, folder="models/mdl_ner_trf_b1_b4/model-best"
+        bucket_name=bucket_name,
+        folder="models/mdl_ner_trf_b1_b4/model-best",
+        storage_client=storage_client,
     )

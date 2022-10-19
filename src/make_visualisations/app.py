@@ -1,3 +1,4 @@
+from google.cloud import storage
 import spacy
 import visualizer
 import pandas as pd
@@ -6,11 +7,7 @@ import streamlit as st
 from collections import Counter
 from config import colors, entity_names, default_text
 from utils import get_model_metrics, get_model_ents_metrics, url_get_sents
-from download_models import (
-    replicate_folder_structure,
-    download_files_from_bucket,
-    instantiate_storage_client,
-)
+from download_models import replicate_folder_structure, download_files_from_bucket
 
 
 # page configuration
@@ -33,7 +30,7 @@ with st.sidebar:
     )
 
     if ModelType == "Transformer":
-        # load transformer model and cache
+        # load transformermodel and cache
         @st.cache(allow_output_mutation=True)
         def load_model(model_path):
             """Load Transformer model.
@@ -43,15 +40,20 @@ with st.sidebar:
             :return: Transformer pipeline.
             :rtype: Model.
             """
-            storage_client, bucket_name = instantiate_storage_client(
-                "cpto-content-metadata"
-            )
+
+            # instantiate_storage_client
+            storage_client = storage.Client()
+            bucket_name = "cpto-content-metadata"
 
             replicate_folder_structure(
-                bucket_name=bucket_name, folder="models/mdl_ner_trf_b1_b4/model-best"
+                bucket_name=bucket_name,
+                folder="models/mdl_ner_trf_b1_b4/model-best",
+                storage_client=storage_client,
             )
             download_files_from_bucket(
-                bucket_name=bucket_name, folder="models/mdl_ner_trf_b1_b4/model-best"
+                bucket_name=bucket_name,
+                folder="models/mdl_ner_trf_b1_b4/model-best",
+                storage_client=storage_client,
             )
             nlp = spacy.load(model_path)
             return nlp
