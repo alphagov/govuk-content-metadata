@@ -1,8 +1,6 @@
 name: Docker
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -32,11 +30,8 @@ jobs:
         - name: Build Docker image
           run: docker build -t $IMAGE_NAME ./src/make_visualisations
 
-        # - name: Test Docker image
-        #   run: docker run -d -p 8501:8501 $IMAGE_NAME"
-
         - name: Push Docker image
           run: docker push $IMAGE_NAME
 
         - name: Deploy Docker image
-          run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image $IMAGE_NAME --region europe-west2 --platform managed --port 8501 --allow-unauthenticated --min-instances 0 --max-instances 5 --cpu 1 --memory 4Gi
+          run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image $IMAGE_NAME --region europe-west2 --platform managed --port 8501 --min-instances 0 --max-instances 5 --cpu 1 --memory 4Gi
