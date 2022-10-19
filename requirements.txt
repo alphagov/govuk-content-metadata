@@ -17,6 +17,7 @@ idna==3.3
 lxml==4.8.0
 notebook==6.5.1
 matplotlib==3.5.2
+joblib==1.2.0
 mccabe==0.6.1
 multiprocess==0.70.12.2
 numpy==1.22.3
@@ -74,6 +75,9 @@ decorator==5.1.1
 defusedxml==0.7.1
 distlib==0.3.6
 docutils==0.18.1
+detect-secrets==1.0.3
+en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.2.0/en_core_web_lg-3.2.0-py3-none-any.whl
+en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.2.0/en_core_web_md-3.2.0-py3-none-any.whl
 entrypoints==0.4
 executing==1.1.1
 fastapi==0.74.1
@@ -105,6 +109,8 @@ jsonschema==4.16.0
 jupyter-server==1.21.0
 jupyter_client==7.4.2
 jupyter_core==4.11.2
+jsonlines==3.1.0
+jupyter==1.0.0
 jupyterlab-pygments==0.2.2
 kiwisolver==1.4.4
 langcodes==3.3.0
