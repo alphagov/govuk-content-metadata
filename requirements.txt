@@ -1,5 +1,5 @@
-boto3==1.24.55
-botocore==1.27.55
+boto3==1.24.29
+botocore==1.27.29
 coverage==6.4.1
 myst-parser==0.18.0
 pre-commit==2.19.0
@@ -34,8 +34,9 @@ six==1.16.0
 soupsieve==2.3.2.post1
 spacy-streamlit==1.0.4
 spacy-transformers==1.1.7
-streamlit==1.11.0
-spacy==3.4.1
+streamlit==1.10.0
+spacy==3.2.4
+thinc-apple-ops==0.0.7
 tqdm==4.64.0
 transformers==4.20.1
 urllib3==1.26.9
@@ -195,7 +196,7 @@ stack-data==0.3.0
 starlette==0.14.2
 streamlit-authenticator==0.1.5
 terminado==0.15.0
-thinc==8.1.1
+thinc==8.0.17
 tinycss2==1.1.1
 tokenizers==0.12.1
 tomli==2.0.1
