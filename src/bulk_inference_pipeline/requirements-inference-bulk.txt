@@ -1,0 +1,14 @@
+dill==0.3.4
+flake8==4.0.1
+joblib==1.2.0
+numpy==1.22.3
+pyflakes==2.4.0
+python-dateutil==2.8.2
+PyYAML==6.0
+setuptools
+spacy-transformers
+spacy==3.2.4
+google-auth
+google-cloud
+google.cloud-bigquery
+google.cloud-storage
