@@ -123,7 +123,7 @@ if __name__ == "__main__":  # noqa: C901
 
     import argparse
     import yaml
-    from datetime import date, timedelta
+    from datetime import date
     from utils import load_model, stream_from_bigquery
 
     with open("bulk_inference_config.yml", "r") as file:
@@ -159,16 +159,6 @@ if __name__ == "__main__":  # noqa: C901
         help="Specify: 'title', 'description' or 'text'.",
     )
 
-    parser.add_argument(
-        "-n",
-        "--n_proc",
-        type=int,
-        action="store",
-        required=False,
-        default=1,
-        help="Specify the number of processes for parallel processing; default is 1.",
-    )
-
     parsed_args = parser.parse_args()
 
     # Construct a BigQuery and a Gogle Stoarge client object.
@@ -180,8 +170,7 @@ if __name__ == "__main__":  # noqa: C901
         TARGET_DATE = parsed_args.date
     else:
         today = date.today()
-        yesterday = today - timedelta(days=1)
-        TARGET_DATE = yesterday.strftime("%d%m%y")
+        TARGET_DATE = today.strftime("%d%m%y")
 
     MODEL_PATH = parsed_args.ner_model
     PART_OF_PAGE = parsed_args.part_of_page

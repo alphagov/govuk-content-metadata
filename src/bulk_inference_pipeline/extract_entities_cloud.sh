@@ -15,12 +15,12 @@ usage="Script to extract entities from pages on GOV.UK and stream output upload 
 # - Stream uploading of outcome files with extracted entities to Google Storage
 
 
-# Set default value for `date` to yesterday in the format `DDMMYY`
+# Set default value for `date` to today in the format `DDMMYY`
 unameOut="$(uname -s)"
 case "${unameOut}" in
-    Linux*)     YESTERDAY=$(date -d '-1 day' '+%d%m%y');;
-    Darwin*)    YESTERDAY=$(date -v '-1d' '+%d%m%y');;
-    *)          YESTERDAY="UNKNOWN:${unameOut}"
+    Linux*)     TODAY=$(date '+%d%m%y');;
+    Darwin*)    TODAY=$(date -v '+%d%m%y');;
+    *)          TODAY="UNKNOWN:${unameOut}"
 esac
 
 
@@ -45,7 +45,7 @@ echo "Creating input files in Google Big Query"
 python create_input_files.py
 
 echo "Running NER bulk inferential pipeline and streaming upload to Google Storage"
-python extract_entities_cloud.py -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${YESTERDAY}
+python extract_entities_cloud.py -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${TODAY}
 
 echo "Export entities to Big Query"
-bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.${PART_OF_PAGE} gs://cpto-content-metadata/content_ner/entities_${YESTERDAY}_${PART_OF_PAGE}.jsonl entities_bq_schema
+bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.${PART_OF_PAGE} gs://cpto-content-metadata/content_ner/entities_${TODAY}_${PART_OF_PAGE}.jsonl entities_bq_schema
