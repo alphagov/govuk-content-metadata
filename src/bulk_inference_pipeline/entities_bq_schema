@@ -33,7 +33,7 @@
     },
     {
         "name": "line_number",
-        "type": "STRING",
+        "type": "INTEGER",
         "mode": "NULLABLE"
     }
 ]
