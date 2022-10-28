@@ -42,10 +42,10 @@ done
 
 
 echo "Creating input files in Google Big Query"
-python src/bulk_inference_pipeline/create_input_files.py
+python create_input_files.py
 
 echo "Running NER bulk inferential pipeline and streaming upload to Google Storage"
-python src/bulk_inference_pipeline/extract_entities_cloud.py -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${YESTERDAY}
+python extract_entities_cloud.py -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${YESTERDAY}
 
 echo "Export entities to Big Query"
 bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.${PART_OF_PAGE} gs://cpto-content-metadata/content_ner/entities_${YESTERDAY}_${PART_OF_PAGE}.jsonl entities_bq_schema
