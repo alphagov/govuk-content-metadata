@@ -127,11 +127,15 @@ The pipeline is currently deployed in a Docker container onto a Virtual Machine 
 
 The VM instance is called `bulk_inference_pipeline` in the `cpto-content-metadata` Google Project. **To run the pipeline, simply start the VM instance.**
 
-If you want to know more about how to deploy pipelines in a Docker container onto a Google Compute Engine VM, refer to the Google official codumentation [Deploying containers on VMs](https://cloud.google.com/compute/docs/containers/deploying-containers).
+If you want to know more about how to deploy pipelines in a Docker container onto a Google Compute Engine VM, refer to the Google official documentation [Deploying containers on VMs](https://cloud.google.com/compute/docs/containers/deploying-containers).
 
 ## Pipeline Flow and Components
 
 ![BulkPipelineGCE](images/bulk_inference_pipeline_on_GCE_VM.png)
+
+## Code and configuration files
+
+All the code and configuration files are in the [bulk_inference_pipeline](bulk_inference_pipeline) subdirectory in this repository.
 
 ## VM specs
 
@@ -208,7 +212,7 @@ Then ensure your Project is set to `cpto-content-metedata`.
 
 ## Other Requirements
 
-- Download the spacy NER model from `gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best` and copy it to `models/mdl_ner_trf_b1_b4/model-best` in the `bulk_inference_pipeline` sub-directory. You may need to create the `models/` folder beforehand.
+- Download the spacy NER model from `gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best` to `bulk_inference_pipeline/models/mdl_ner_trf_b1_b4/model-best` local folder. You may need to create the local folder beforehand.
 
 ## Run the pipeline
 
@@ -223,4 +227,4 @@ bash bulk_inference_pipeline/local_run/extract_entities_local.sh \
 
 this will extract entities from all the `"titles"` of yesterday's GOV.UK pages using a pre-trained model saved in `models/mdl_ner_trf_b1_b4/model-best`.
 
-Follow the instructions in [extract_entities_local.sh][bulk_inference_pipeline/local_run/extract_entities_local.sh] to know how to specify optional arguments.
+Follow the instructions in [extract_entities_local.sh](bulk_inference_pipeline/local_run/extract_entities_local.sh) to know how to specify optional arguments.
