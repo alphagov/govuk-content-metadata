@@ -2,10 +2,41 @@ from fastapi import FastAPI
 from typing import List
 import spacy
 from pydantic import BaseModel
+from google.cloud import storage
+from .download_models import replicate_folder_structure, download_files_from_bucket
+
 
 app = FastAPI()
 
-nlp = spacy.load("en_core_web_sm")
+
+def load_model(model_path):
+    """Load Transformer model.
+
+    :param model_path: Path to Transformer model.
+    :type model_path: str
+    :return: Transformer pipeline.
+    :rtype: Model.
+    """
+
+    # instantiate_storage_client
+    storage_client = storage.Client()
+    bucket_name = "cpto-content-metadata"
+
+    replicate_folder_structure(
+        bucket_name=bucket_name,
+        folder="models/mdl_ner_trf_b1_b4/model-best",
+        storage_client=storage_client,
+    )
+    download_files_from_bucket(
+        bucket_name=bucket_name,
+        folder="models/mdl_ner_trf_b1_b4/model-best",
+        storage_client=storage_client,
+    )
+    nlp = spacy.load(model_path)
+    return nlp
+
+
+nlp = load_model(model_path="models/mdl_ner_trf_b1_b4/model-best")
 
 
 class Content(BaseModel):
