@@ -63,12 +63,13 @@ intermediate_query = f"""WITH en_locales AS (
         LEFT JOIN `{source_govgraph_project}.{source_govgraph_dataset}.public_updated_at` pua USING (url)
         ;
         """
+
 title_query = f"""SELECT
   url,
   title
 FROM `{source_govgraph_project}.{source_govgraph_dataset}.title`
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
-LIMIT 100
+LIMIT 1000
 ;
 """
 
@@ -77,7 +78,7 @@ description_query = f"""SELECT
   description
 FROM `{source_govgraph_project}.{source_govgraph_dataset}.description`
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
-LIMIT 100
+LIMIT 1000
 ;
 """
 
@@ -101,6 +102,6 @@ SELECT
 FROM lines
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
 ORDER BY url, line_number
-LIMIT 10000
+LIMIT 1000
 ;
 """

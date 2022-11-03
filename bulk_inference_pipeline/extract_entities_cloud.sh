@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="Script to extract entities from pages on GOV.UK and stream output upload to Google Storage."
+# usage="Script to extract entities from pages on GOV.UK and stream output upload to Google Storage."
 
 # The following options are available:
 #  -m    full path to NER model to use for inference.  (Required)
@@ -42,10 +42,17 @@ done
 
 
 echo "Creating input files in Google Big Query"
-python create_input_files.py
+python src/create_input_files.py
 
 echo "Running NER bulk inferential pipeline and streaming upload to Google Storage"
-python extract_entities_cloud.py -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${TODAY}
+python src/extract_entities_cloud.py -p "title" -m ${NER_MODEL} -d ${TODAY}
+python src/extract_entities_cloud.py -p "description" -m ${NER_MODEL} -d ${TODAY}
+python src/extract_entities_cloud.py -p "text" -m ${NER_MODEL} -d ${TODAY}
+
 
 echo "Export entities to Big Query"
-bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.${PART_OF_PAGE} gs://cpto-content-metadata/content_ner/entities_${TODAY}_${PART_OF_PAGE}.jsonl entities_bq_schema
+# bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.${PART_OF_PAGE} gs://cpto-content-metadata/content_ner/entities_${TODAY}_${PART_OF_PAGE}.jsonl entities_bq_schema
+bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.title gs://cpto-content-metadata/content_ner/entities_${TODAY}_title.jsonl entities_bq_schema
+bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.description gs://cpto-content-metadata/content_ner/entities_${TODAY}_description.jsonl entities_bq_schema
+bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.text gs://cpto-content-metadata/content_ner/entities_${TODAY}_text.jsonl entities_bq_schema
+echo "Entities exported successfully to Big Query"

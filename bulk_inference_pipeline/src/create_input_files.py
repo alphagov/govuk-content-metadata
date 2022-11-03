@@ -27,7 +27,7 @@ if __name__ == "__main__":  # noqa: C901
     import yaml
 
     # from src.infer_entities import sql_queries
-    import sql_queries
+    from src import sql_queries
 
     # local
     # with open('src/bulk_inference_pipeline/bulk_inference_config.yml', 'r') as file:
@@ -48,26 +48,31 @@ if __name__ == "__main__":  # noqa: C901
 
     # intermediate table
     # TODO: uncomment when ready to run whole pipeline ($$$)
-    # write_query(client=client,
-    #   sql_query=sql_queries.intermediate_query,
-    #   dest_project=metadata_project,
-    #   dest_dataset=metadata_dataset,
-    #   dest_table=metadata_intermediate_table)
+    write_query(
+        client=client,
+        sql_query=sql_queries.intermediate_query,
+        dest_project=metadata_project,
+        dest_dataset=metadata_dataset,
+        dest_table=metadata_intermediate_table,
+    )
 
     # title
-    # write_query(
-    #   client=client,
-    #   sql_query=sql_queries.title_query,
-    #   dest_project=metadata_project,
-    #   dest_dataset=metadata_dataset,
-    #   dest_table="title")
+    write_query(
+        client=client,
+        sql_query=sql_queries.title_query,
+        dest_project=metadata_project,
+        dest_dataset=metadata_dataset,
+        dest_table="title",
+    )
 
     # description
-    # write_query(client=client,
-    #   sql_query=sql_queries.description_query,
-    #   dest_project=metadata_project,
-    #   dest_dataset=metadata_dataset,
-    #   dest_table="description")
+    write_query(
+        client=client,
+        sql_query=sql_queries.description_query,
+        dest_project=metadata_project,
+        dest_dataset=metadata_dataset,
+        dest_table="description",
+    )
 
     # text
     write_query(
