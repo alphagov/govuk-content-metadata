@@ -26,14 +26,8 @@ if __name__ == "__main__":  # noqa: C901
 
     import yaml
 
-    # from src.infer_entities import sql_queries
-    from src import sql_queries
+    import sql_queries
 
-    # local
-    # with open('src/bulk_inference_pipeline/bulk_inference_config.yml', 'r') as file:
-    #    config = yaml.safe_load(file)
-
-    # cloud
     with open("bulk_inference_config.yml", "r") as file:
         config = yaml.safe_load(file)
 
