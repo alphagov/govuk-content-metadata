@@ -120,61 +120,107 @@ in the project directory.
 
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS END (do not remove) -->
 
+
+# Inference pipeline [cloud]
+
+The pipeline is currently deployed in a Docker container onto a Virtual Machine (VM) instance on Google Compute Engine (GCE).
+
+The VM instance is called `bulk_inference_pipeline` in the `cpto-content-metadata` Google Project. **To run the pipeline, simply start the VM instance.**
+
+If you want to know more about how to deploy pipelines in a Docker container onto a Google Compute Engine VM, refer to the Google official codumentation [Deploying containers on VMs](https://cloud.google.com/compute/docs/containers/deploying-containers).
+
+## Pipeline Flow and Components
+
+![BulkPipelineGCE](images/bulk_inference_pipeline_on_GCE_VM.png)
+
+## VM specs
+
+- Container-Optimized OS (COS)
+- Boot Disk 100GB
+- Architectire x86/64
+- Machine Type: e2-standard-8
+
+## Other System Requirements
+
+- Google Project `cpto-content-metadata`
+- Artefact Registry repository `europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo`
+- Google Storage bucket `cpto-content-metadata` and folder `cpto-content-metadata/content_ner`
+- Google BigQuery datasets `cpto-content-metadata.content_ner` and `cpto-content-metadata.named_entities_raw`
+
+If you are contributing to / editing the pipeline:
+- Docker
+
+The pipeline is currently bundled into the following Docker image, hosted on Artifact Registry: `europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/entity-inference-bulk:latest`
+
+The pipeline relies on the availability of a spacy NER model which is downloaded when the pipeline's Docker image is built. At the moment, the latest model, which the pipeline is using, is:
+- `cpto-content-metadata/models/mdl_ner_trf_b1_b4`
+
+Please update the Dockerfile and rebuild the image if the model changes.
+
+## Required Permissions
+
+To run the pipeline on GCP, the inference uses the `cpto-content-metadata` service account associated to the `cpto-content-metadata` Google Project. The following permissions must be enabled:
+
+- Storage Object Creator (roles/storage.objects.create) - required to enable writing of pipeline outputs to Google Storage
+- BigQuery Data Editor (roles/bigquery.tables.create) - required to read / create / write to output tables
+- Compute Admin (roles/compute.admin) - required to create / edit / delete Compute Engine VMs and Compute Disks
+
+And, in addition:
+
+- Artifact Registry Reader (roles/artifactregistry.reader) for the `europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo` Artefact Registry repository.
+- BigQuery Data Reader (roles/bigquery.dataViewer) for the `govuk-knolwedge-graph.content dataset` dataset in BigQuery
+
+## Editing and re-deplying the pipeline to GCE
+
+After you have done with your editing to the pipeline, you need to re-build the container image and publish it to the Artefact repository so that this will be pulled from the repository and launched when the VM is started.
+
+Ensure you are in the sub-directory that contains the `Dockerfile`:
+```shell
+cd bulk_inference_pipeline
+```
+
+Re-build and re-publish the container image:
+```shell
+gcloud builds submit --region=europe-west2 --tag europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/entity-inference-bulk:latest
+```
+
 # Inference pipeline [local machine]
 
-To use a trained Spacy NER model to extract Named Entities from GOV.UK content:
-- Ensure you meet the [AWS Requirements](#aws-requirements) below.
-- You will be asked for your AWS account MFA code, so have it ready!
-- Follow the instructions in [src/make_data/infer_entities.sh][infer-entities-sh] to know how to specify optional arguments.
+## Required Permissions
 
-Example: to run the bash script with default values for the optional arguments and extract entities from all the `"titles"` of yesterday's GOV.UK pages using a pre-trained model saved in `models/mdl_ner_trf_b1_b4/model-best`, from the project root directory run
+In order to run the pipeline's computations on a local machine (rather than a GCE VM), it is necessary to have a Google account with the following permissions enabled:
+
+- Storage Object Creator (roles/storage.objects.create) - required to enable writing of pipeline outputs to Google Storage for the `cpto-content-metadata` project;
+- BigQuery Data Editor (roles/bigquery.tables.create) - required to read / create / write to output tables for the `cpto-content-metadata` project;
+- BigQuery Data Reader (roles/bigquery.dataViewer) for the `govuk-knolwedge-graph.content dataset` dataset in BigQuery.
+
+## Google Cloud authentication
+
+The Google Cloud SDK is required to enable authentication with GCP on a local machine. Installation instructions for Mac (Brew) can be found [here](https://formulae.brew.sh/cask/google-cloud-sdk).
+
+The following command can be used to authenticate with GCP:
 
 ```shell
-bash src/make_data/infer_entities.sh -p "title" -m "models/mdl_ner_trf_b1_b4/model-best"
+gcloud auth login
 ```
 
-## AWS Requirements
+Then ensure your Project is set to `cpto-content-metedata`.
 
-1. AWS Access; see https://docs.publishing.service.gov.uk/manual/get-started.html#8-get-aws-access on how to create your AWS user account, and create an access key ID and secret access key.
+## Other Requirements
 
-2. STS Permission to AssumeRole with MFA for the [`govuk-datascienceusers` AWS IAM Role][ds-role] (ask on #data-engineering Slack channel)
+- Download the spacy NER model from `gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best` and copy it to `models/mdl_ner_trf_b1_b4/model-best` in the `bulk_inference_pipeline` sub-directory. You may need to create the `models/` folder beforehand.
 
-3. `aws cli` installed; it should have gotten installed as part of step 1. To verify, in your terminal run:
+## Run the pipeline
+
+From the project root directory run:
+
 ```shell
-which aws
-aws --version
-```
-If it is not available, please [follow the official installation instructions][awscli-install].
-
-4. Configure `aws cli`. In your terminal, run:
-```shell
-aws configure
-```
-and follow the prompts (N.B. you will be asked to provide your access key ID and secret access key).
-
-Your credentials should have now been added to the `~/.aws/credentials` file, under `[default]`.
-
-5. Create a profile for the `govuk-datascienceusers` Role in your `~/.aws/config`. If the file does not exist, you'll need to create it. In your `~/.aws/config` file, add:
-
-```
-[profile govuk-datascience]
-source_profile = default
-role_arn = arn:aws:iam::<ROLE ACCOUNT NUM>:role/govuk-datascienceusers
-mfa_serial = arn:aws:iam::<YOUR USER ACCOUNT NUMBER>:mfa/<YOUR NAME>.<YOUR SURNAME>@digital.cabinet-office.gov.uk
+cd bulk_inference_pipeline
+bash bulk_inference_pipeline/local_run/extract_entities_local.sh \
+    -p "title" \
+    -m "models/mdl_ner_trf_b1_b4/model-best"
 ```
 
-substituting the correct values for `<ROLE ACCOUNT NUM>`, `<YOUR USER ACCOUNT NUMBER>`, `<YOUR NAME>` and `<YOUR SURNAME>`.
+this will extract entities from all the `"titles"` of yesterday's GOV.UK pages using a pre-trained model saved in `models/mdl_ner_trf_b1_b4/model-best`.
 
-You can now assume the `govuk-datascienceusers` role and its permissions to interact with AWS S3 by adding
-`--profile govuk-datascience` at the end of your `aws cli` commands.
-
-For instance:
-```shell
-aws s3 ls --profile govuk-datascience
-```
-
-6. You are good to go and infer entities!
-
-[infer-entities-sh]: ./src/make_data/infer_entities.sh
-[ds-role]: https://us-east-1.console.aws.amazon.com/iamv2/home?region=eu-west-1#/roles/details/govuk-datascienceusers?section=permissions
-[awscli-install]: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+Follow the instructions in [extract_entities_local.sh][bulk_inference_pipeline/local_run/extract_entities_local.sh] to know how to specify optional arguments.

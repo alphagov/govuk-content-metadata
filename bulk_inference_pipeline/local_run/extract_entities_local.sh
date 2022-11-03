@@ -13,7 +13,7 @@ usage="Script to extract entities from pages on GOV.UK and stream output upload 
 # which values to choose for the Optional arguments.
 
 # Requirements:
-# - Access to the Google Cloud Platform (GCP) project cpto-content-metadata
+# - Access to the Google Cloud Platform (GCP) project `cpto-content-metadata``
 # - Ensure you meet all the `README.md/Inference pipeline [local machine]/Requirements`
 # - This bash script must be run from the `bulk_inference_pipeline` sub-directory,
 #       so please ensure you are in that directory:
@@ -21,8 +21,8 @@ usage="Script to extract entities from pages on GOV.UK and stream output upload 
 
 # The script consists of 4 steps:
 # - Create input content data tables in Google Big Query
-# - Run NER (bulk) inferential pipeline
-# - Stream uploading of results to a jsonl file in Google Storage
+# - Run NER (bulk) inferential pipeline on your local machine
+# - Stream uploading of results to a .jsonl file in Google Storage
 # - Transfer the entities from Google Storage to Big Query tables
 
 # Set default values for optional arguments

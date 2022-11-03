@@ -2,7 +2,7 @@
 Script to extract Named Entities from GOV.UK pages using a trained Spacy NER pipeline model,
 on a local MacOS machine.
 
-The script saves the extracted entities to a number of .jsonl files, to the `data/processed/entities` folder.
+The script uploads the extracted entities to a number of .jsonl files, to the `cpto-content-metadata` Google Storage bucket.
 
 The entities are extracted separately from titles, descriptions and texts, based on the user's input.
 
