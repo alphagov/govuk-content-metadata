@@ -7,12 +7,13 @@
 #  -p    one of 'title', 'description', 'text' (Required)
 
 # Requirements:
-# - Ensure you meet all the `README.md/Inference pipeline [local machine]/Requirements`.
+# - Ensure you meet all the `README.md/Inference pipeline [cloud]` requirements.
 
 # The script consists of 3 steps:
 # - Create input content data tables in Google Big Query
 # - Run NER (bulk) inferential pipeline
 # - Stream uploading of outcome files with extracted entities to Google Storage
+# - Transfer the extracted entities files into corresponding BigQuery tables
 
 
 # Set default value for `date` to today in the format `DDMMYY`
@@ -51,7 +52,6 @@ python src/extract_entities_cloud.py -p "text" -m ${NER_MODEL} -d ${TODAY}
 
 
 echo "Export entities to Big Query"
-# bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.${PART_OF_PAGE} gs://cpto-content-metadata/content_ner/entities_${TODAY}_${PART_OF_PAGE}.jsonl entities_bq_schema
 bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.title gs://cpto-content-metadata/content_ner/entities_${TODAY}_title.jsonl entities_bq_schema
 bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.description gs://cpto-content-metadata/content_ner/entities_${TODAY}_description.jsonl entities_bq_schema
 bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.text gs://cpto-content-metadata/content_ner/entities_${TODAY}_text.jsonl entities_bq_schema

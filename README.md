@@ -148,7 +148,7 @@ All the code and configuration files are in the [bulk_inference_pipeline](bulk_i
 
 - Google Project `cpto-content-metadata`
 - Artefact Registry repository `europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo`
-- Google Storage bucket `cpto-content-metadata` and folder `cpto-content-metadata/content_ner`
+- Google Storage bucket `gs://cpto-content-metadata` and folder `gs://cpto-content-metadata/content_ner`
 - Google BigQuery datasets `cpto-content-metadata.content_ner` and `cpto-content-metadata.named_entities_raw`
 
 If you are contributing to / editing the pipeline:
@@ -157,13 +157,13 @@ If you are contributing to / editing the pipeline:
 The pipeline is currently bundled into the following Docker image, hosted on Artifact Registry: `europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/entity-inference-bulk:latest`
 
 The pipeline relies on the availability of a spacy NER model which is downloaded when the pipeline's Docker image is built. At the moment, the latest model, which the pipeline is using, is:
-- `cpto-content-metadata/models/mdl_ner_trf_b1_b4`
+- `gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4`
 
 Please update the Dockerfile and rebuild the image if the model changes.
 
 ## Required Permissions
 
-To run the pipeline on GCP, the inference uses the `cpto-content-metadata` service account associated to the `cpto-content-metadata` Google Project. The following permissions must be enabled:
+To run the pipeline on GCP, the inference uses the `cpto-content-metadata-sa` service account associated to the `cpto-content-metadata` Google Project. The following permissions must be enabled:
 
 - Storage Object Creator (roles/storage.objects.create) - required to enable writing of pipeline outputs to Google Storage
 - BigQuery Data Editor (roles/bigquery.tables.create) - required to read / create / write to output tables
