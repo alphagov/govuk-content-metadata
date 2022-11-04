@@ -28,8 +28,6 @@ python src/bulk_inference_pipeline/extract_entities_cloud.py -p "title" -m "mode
 ```
 """
 
-import time
-
 import spacy
 
 from typing import Generator
@@ -178,18 +176,15 @@ if __name__ == "__main__":  # noqa: C901
     # TODO: move to function?
     SQL_QUERY = f"SELECT * FROM `{config['gcp_metadata']['project_id']}.{config['gcp_metadata']['bq_content_dataset']}.{PART_OF_PAGE}`"
 
-    print("Loading model...")
+    print("loading model...")
     nlp = load_model(MODEL_PATH)
     print(f"Model loaded successfully! Components: {nlp.pipe_names}")
 
-    print("Querying BigQuery...")
+    print("querying BigQuery for input...")
     content_stream = stream_from_bigquery(query=SQL_QUERY, client=BQ_CLIENT)
-    print("Done.")
 
-    print(f"starting inference on {PART_OF_PAGE}...")
+    print(f"starting extracting entities from {PART_OF_PAGE}...")
     OUTPUT_FILENAME = f"entities_{TARGET_DATE}_{PART_OF_PAGE}.jsonl"
-
-    start = time.time()
 
     make_inference_from_stream(
         rows=content_stream,

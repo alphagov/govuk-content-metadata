@@ -25,11 +25,11 @@ case "${unameOut}" in
 esac
 
 
-while getopts ":p:" opt; do
+while getopts ":m:" opt; do
     case $opt in
         p)
-            echo "argument -p called with value $OPTARG" >&2
-            PART_OF_PAGE="${OPTARG}"
+            echo "argument -m called with value $OPTARG" >&2
+            NER_MODEL="${OPTARG}"
             ;;
         *)
             echo "invalid command: no parameter included with argument $OPTARG"
@@ -42,9 +42,15 @@ echo "Creating input files in Google Big Query"
 python -m src.create_input_files
 
 echo "Running NER bulk inferential pipeline and streaming upload to Google Storage"
+echo "Starting NER bulk inferential pipeline for: 'title'"
 python -m src.extract_entities_cloud -p "title" -m ${NER_MODEL} -d ${TODAY}
+echo "Inference completed and data uploaded for: 'title'"
+echo "Starting NER bulk inferential pipeline for: 'description'"
 python -m src.extract_entities_cloud -p "description" -m ${NER_MODEL} -d ${TODAY}
+echo "Inference completed and data uploaded for: 'description'"
+echo "Starting NER bulk inferential pipeline for: 'text'"
 python -m src.extract_entities_cloud -p "text" -m ${NER_MODEL} -d ${TODAY}
+echo "Inference completed and data uploaded for: 'text'"
 
 
 echo "Export entities to Big Query"
