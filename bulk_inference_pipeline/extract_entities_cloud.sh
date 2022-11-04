@@ -25,12 +25,8 @@ case "${unameOut}" in
 esac
 
 
-while getopts ":m:p:" opt; do
+while getopts ":p:" opt; do
     case $opt in
-        m)
-            echo "argument -m called with value $OPTARG" >&2
-            NER_MODEL="${OPTARG}"
-            ;;
         p)
             echo "argument -p called with value $OPTARG" >&2
             PART_OF_PAGE="${OPTARG}"
@@ -43,12 +39,12 @@ done
 
 
 echo "Creating input files in Google Big Query"
-python src/create_input_files.py
+python -m src.create_input_files
 
 echo "Running NER bulk inferential pipeline and streaming upload to Google Storage"
-python src/extract_entities_cloud.py -p "title" -m ${NER_MODEL} -d ${TODAY}
-python src/extract_entities_cloud.py -p "description" -m ${NER_MODEL} -d ${TODAY}
-python src/extract_entities_cloud.py -p "text" -m ${NER_MODEL} -d ${TODAY}
+python -m src.extract_entities_cloud -p "title" -m ${NER_MODEL} -d ${TODAY}
+python -m src.extract_entities_cloud -p "description" -m ${NER_MODEL} -d ${TODAY}
+python -m src.extract_entities_cloud -p "text" -m ${NER_MODEL} -d ${TODAY}
 
 
 echo "Export entities to Big Query"

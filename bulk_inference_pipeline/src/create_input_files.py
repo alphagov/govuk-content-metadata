@@ -26,7 +26,7 @@ if __name__ == "__main__":  # noqa: C901
 
     import yaml
 
-    import sql_queries
+    from src import sql_queries
 
     with open("bulk_inference_config.yml", "r") as file:
         config = yaml.safe_load(file)

@@ -35,7 +35,7 @@ import spacy
 from typing import Generator
 from google.cloud import bigquery, storage
 
-from utils import upload_jsonl_from_stream
+from src.utils import upload_jsonl_from_stream
 
 
 def extract_entities(rows, part_of_page: str, ner_model):
@@ -124,7 +124,7 @@ if __name__ == "__main__":  # noqa: C901
     import argparse
     import yaml
     from datetime import date
-    from utils import load_model, stream_from_bigquery
+    from src.utils import load_model, stream_from_bigquery
 
     with open("bulk_inference_config.yml", "r") as file:
         config = yaml.safe_load(file)
