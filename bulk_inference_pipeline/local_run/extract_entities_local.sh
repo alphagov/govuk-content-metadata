@@ -68,11 +68,8 @@ while getopts ":m:p:c:b:n:" opt; do
 done
 
 
-echo "Creating input files in Google Big Query"
-python -m src.create_input_files.py
-
 echo "Running NER bulk inferential pipeline and streaming upload to Google Storage"
-python -m local_run.extract_entities_local.py -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${YESTERDAY} -c ${CHUNK_SIZE} -b ${BATCH_SIZE} -n ${N_PROC}
+python -m local_run.extract_entities_local -p ${PART_OF_PAGE} -m ${NER_MODEL} -d ${YESTERDAY} -c ${CHUNK_SIZE} -b ${BATCH_SIZE} -n ${N_PROC}
 
 echo "Export entities to Big Query"
-bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.${PART_OF_PAGE} gs://cpto-content-metadata/content_ner/entities_${YESTERDAY}_${PART_OF_PAGE}_*.jsonl src/infer_entities/entities_bq_schema
+bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.${PART_OF_PAGE} gs://cpto-content-metadata/content_ner/entities_${YESTERDAY}_${PART_OF_PAGE}_*.jsonl entities_bq_schema

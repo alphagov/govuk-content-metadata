@@ -70,15 +70,15 @@ folder, from the `bulk_inference_pipeline` directory you can run:
 
 a) with default values for the optional arguments
 ```
-python -m local_run.extract_entities_local.py \
-    -p "title" -m "models/mdl_ner_trf_b1_b4/model-best"
+python -m local_run.extract_entities_local \
+    -p "title" -m "models/model-best"
 ```
 
 b) with user-defined values for the optional arguments (recommended)
 ```
-python -m local_run.extract_entities_local.py \
+python -m local_run.extract_entities_local \
     -p "title" \
-        -m "models/mdl_ner_trf_b1_b4/model-best" \
+        -m "models/model-best" \
                 --chunk_size 10000 \
                     --batch_size 6000 \
                         --n_proc 5
