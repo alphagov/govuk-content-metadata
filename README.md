@@ -121,11 +121,11 @@ in the project directory.
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS END (do not remove) -->
 
 
-# Inference pipeline [cloud]
+# Inference pipeline [run in the cloud]
 
 The pipeline is currently deployed in a Docker container onto a Virtual Machine (VM) instance on Google Compute Engine (GCE).
 
-The VM instance is called `bulk_inference_pipeline` in the `cpto-content-metadata` Google Project. **To run the pipeline, simply start the VM instance.**
+The GCE VM instance is called `bulk_inference_pipeline` in the `cpto-content-metadata` Google Project. **To run the pipeline, simply start the VM instance.**
 
 If you want to know more about how to deploy pipelines in a Docker container onto a Google Compute Engine VM, refer to the Google official documentation [Deploying containers on VMs](https://cloud.google.com/compute/docs/containers/deploying-containers).
 
@@ -188,7 +188,7 @@ Re-build and re-publish the container image:
 gcloud builds submit --region=europe-west2 --tag europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/entity-inference-bulk:latest
 ```
 
-# Inference pipeline [local machine]
+# Inference pipeline [run on a local machine]
 
 ## Required Permissions
 
@@ -212,19 +212,36 @@ Then ensure your Project is set to `cpto-content-metedata`.
 
 ## Other Requirements
 
-- Download the spacy NER model from `gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best` to `bulk_inference_pipeline/models/mdl_ner_trf_b1_b4/model-best` local folder. You may need to create the local folder beforehand.
+- Download the spacy NER model from `gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best` to the `models/` local folder. Note, you may need to create the local folder first.
+
+    ```shell
+    cd bulk_inference_pipeline
+    mkdir models/
+    gsutil -m cp -r gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best models/
+    ```
 
 ## Run the pipeline
+
+1. Create the input files
+
+    Go to the `bulk_inference_pipeline` and create the required input files in BigQuery:
+    ```shell
+    cd bulk_inference_pipeline
+    python -m src.create_input_files
+    ```
+
+2. Extract the entities for a part of page (title, description, text).
+You will need to re-run the computationally and memory expensive pipeline for each part of page separately, by re-running the bash script with the appropriate `-p` argument.
 
 From the project root directory run:
 
 ```shell
 cd bulk_inference_pipeline
-bash bulk_inference_pipeline/local_run/extract_entities_local.sh \
+bash local_run/extract_entities_local.sh \
     -p "title" \
-    -m "models/mdl_ner_trf_b1_b4/model-best"
+    -m "models/model-best"
 ```
 
-this will extract entities from all the `"titles"` of yesterday's GOV.UK pages using a pre-trained model saved in `models/mdl_ner_trf_b1_b4/model-best`.
+this will extract entities from all the `"titles"` of yesterday's GOV.UK pages using a pre-trained model saved in `models/model-best`, upload the .jsonl files to Google Storage and then transfer the data to BigQuery.
 
 Follow the instructions in [extract_entities_local.sh](bulk_inference_pipeline/local_run/extract_entities_local.sh) to know how to specify optional arguments.
