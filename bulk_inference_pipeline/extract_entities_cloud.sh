@@ -27,7 +27,7 @@ esac
 
 while getopts ":m:" opt; do
     case $opt in
-        p)
+        m)
             echo "argument -m called with value $OPTARG" >&2
             NER_MODEL="${OPTARG}"
             ;;
@@ -40,6 +40,7 @@ done
 
 echo "Creating input files in Google Big Query"
 python -m src.create_input_files
+echo "Input files created."
 
 echo "Running NER bulk inferential pipeline and streaming upload to Google Storage"
 echo "Starting NER bulk inferential pipeline for: 'title'"
