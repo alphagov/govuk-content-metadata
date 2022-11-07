@@ -1,9 +1,5 @@
 import yaml
 
-# local
-# with open('src/bulk_inference_pipeline/bulk_inference_config.yml', 'r') as file:
-#    config = yaml.safe_load(file)
-
 # cloud
 with open("bulk_inference_config.yml", "r") as file:
     config = yaml.safe_load(file)
@@ -69,7 +65,6 @@ title_query = f"""SELECT
   title
 FROM `{source_govgraph_project}.{source_govgraph_dataset}.title`
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
-LIMIT 1000
 ;
 """
 
@@ -78,7 +73,6 @@ description_query = f"""SELECT
   description
 FROM `{source_govgraph_project}.{source_govgraph_dataset}.description`
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
-LIMIT 1000
 ;
 """
 
@@ -102,6 +96,5 @@ SELECT
 FROM lines
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
 ORDER BY url, line_number
-LIMIT 1000
 ;
 """
