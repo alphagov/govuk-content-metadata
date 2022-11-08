@@ -101,7 +101,7 @@ def make_inference_from_stream(
 
 
 def extract_entities_pipe(
-    texts: Tuple[str, Dict[str, str]],
+    rows: Tuple[str, Dict[str, str]],
     ner_model: spacy.Language,
     part_of_page: str,
     batch_size: int,
@@ -126,7 +126,7 @@ def extract_entities_pipe(
                             (), ...], "line_number: int} dictionaries.
     """
     for doc, meta in ner_model.pipe(
-        texts, as_tuples=True, batch_size=batch_size, n_process=n_process
+        rows, as_tuples=True, batch_size=batch_size, n_process=n_process
     ):
         if part_of_page == "text":
             yield {

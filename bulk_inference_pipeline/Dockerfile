@@ -25,4 +25,4 @@ RUN chmod +x extract_entities_cloud.sh
 
 ENTRYPOINT []
 
-CMD bash ./extract_entities_cloud.sh -m "/inference/models/model-best" -b 24000 -n 16
+CMD bash ./extract_entities_cloud.sh -m "/inference/models/model-best" -b 8000 -n 16
