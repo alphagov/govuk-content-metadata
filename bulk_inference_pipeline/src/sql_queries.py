@@ -65,7 +65,6 @@ title_query = f"""SELECT
   title
 FROM `{source_govgraph_project}.{source_govgraph_dataset}.title`
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
-LIMIT 60000
 ;
 """
 
@@ -74,7 +73,6 @@ description_query = f"""SELECT
   description
 FROM `{source_govgraph_project}.{source_govgraph_dataset}.description`
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
-LIMIT 60000
 ;
 """
 
@@ -98,6 +96,5 @@ SELECT
 FROM lines
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
 ORDER BY url, line_number
-LIMIT 60000
 ;
 """
