@@ -1,8 +1,7 @@
 import spacy
 import json
 from itertools import islice
-from google.cloud import bigquery, storage
-from google.cloud.storage.fileio import BlobWriter
+from google.cloud import bigquery
 from typing import Optional, Generator, Tuple
 
 # Construct a BigQuery client object.
@@ -20,34 +19,6 @@ def stream_from_bigquery(
     query_job = client.query(query)
     for row in query_job:
         yield row
-
-
-def upload_jsonl_from_stream(
-    storage_client: storage.Client, bucket_name, stream_generator, destination_blob_name
-):
-    """
-    Uploads bytes from a stream or other file-like object to a blob.
-    Ref : https://cloud.google.com/storage/docs/streaming#stream_an_upload
-    and https://stackoverflow.com/questions/44876235/uploading-a-json-to-google-cloud-storage-via-python
-    and https://stackoverflow.com/questions/73687152/how-to-stream-upload-csv-data-to-google-cloud-storage-python
-    """
-
-    # Construct a client-side representation of the blob.
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
-    writer = BlobWriter(blob)
-
-    # Upload data from the stream to your bucket.
-    for line in stream_generator:
-        line_as_byte = json.dumps(line, ensure_ascii=False).encode("utf-8")
-        writer.write(line_as_byte + b"\n")
-    writer.close()
-
-    # Rewind the stream to the beginning. This step can be omitted if the input
-    # stream will always be at a correct position.
-    # file_obj.seek(0)
-
-    print(f"Stream data uploaded to {destination_blob_name} in bucket {bucket_name}.")
 
 
 def write_output_from_stream(outfile: str, content_stream: Generator):

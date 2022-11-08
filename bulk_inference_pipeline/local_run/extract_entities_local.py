@@ -116,7 +116,7 @@ import spacy
 from typing import Generator, Dict, Tuple
 from google.cloud import bigquery, storage
 
-from src.utils import upload_jsonl_from_stream
+from src.extract_entities_cloud import upload_jsonl_from_stream
 
 
 def to_tuples_from_stream(

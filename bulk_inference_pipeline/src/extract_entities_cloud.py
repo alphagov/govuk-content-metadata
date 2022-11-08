@@ -62,11 +62,10 @@ Notes:
 """
 
 import spacy
-
+import json
 from typing import Generator, Dict, Tuple
 from google.cloud import bigquery, storage
-
-from src.utils import upload_jsonl_from_stream
+from google.cloud.storage.fileio import BlobWriter
 
 
 def make_inference_from_stream(
@@ -201,6 +200,34 @@ def to_tuples_from_stream(
                 row.get(part_of_page) if row.get(part_of_page) is not None else "",
                 {"url": row.get("url")},
             )
+
+
+def upload_jsonl_from_stream(
+    storage_client: storage.Client, bucket_name, stream_generator, destination_blob_name
+):
+    """
+    Uploads bytes from a stream or other file-like object to a blob.
+    Ref : https://cloud.google.com/storage/docs/streaming#stream_an_upload
+    and https://stackoverflow.com/questions/44876235/uploading-a-json-to-google-cloud-storage-via-python
+    and https://stackoverflow.com/questions/73687152/how-to-stream-upload-csv-data-to-google-cloud-storage-python
+    """
+
+    # Construct a client-side representation of the blob.
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+    writer = BlobWriter(blob)
+
+    # Upload data from the stream to your bucket.
+    for line in stream_generator:
+        line_as_byte = json.dumps(line, ensure_ascii=False).encode("utf-8")
+        writer.write(line_as_byte + b"\n")
+    writer.close()
+
+    # Rewind the stream to the beginning. This step can be omitted if the input
+    # stream will always be at a correct position.
+    # file_obj.seek(0)
+
+    print(f"Stream data uploaded to {destination_blob_name} in bucket {bucket_name}.")
 
 
 if __name__ == "__main__":  # noqa: C901
