@@ -5,6 +5,8 @@
 # The following options are available:
 #  -m    full path to NER model to use for inference.  (Required)
 #  -p    one of 'title', 'description', 'text' (Required)
+#  -b    batch size; number of texts to be batched processed by the Spacy pipeline (Optional)
+#  -n    number of cores for the parallel processing of texts (Optional)
 
 # Requirements:
 # - Ensure you meet all the `README.md/Inference pipeline [cloud]` requirements.
@@ -25,11 +27,19 @@ case "${unameOut}" in
 esac
 
 
-while getopts ":m:" opt; do
+while getopts ":m:b:n:" opt; do
     case $opt in
         m)
             echo "argument -m called with value $OPTARG" >&2
             NER_MODEL="${OPTARG}"
+            ;;
+        b)
+            BATCH_SIZE="${OPTARG}"
+            echo "argument -b called with value $OPTARG" >&2
+            ;;
+        n)
+            N_PROC="${OPTARG}"
+            echo "argument -n called with value $OPTARG" >&2
             ;;
         *)
             echo "invalid command: no parameter included with argument $OPTARG"
@@ -43,12 +53,15 @@ python -m src.create_input_files
 echo "Input files created."
 
 echo "Running NER bulk inferential pipeline and streaming upload to Google Storage"
+
 echo "Starting NER bulk inferential pipeline for: 'title'"
-python -m src.extract_entities_cloud -p "title" -m ${NER_MODEL} -d ${TODAY}
+python -m src.extract_entities_cloud -p "title" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
 echo "Inference completed and data uploaded for: 'title'"
+
 echo "Starting NER bulk inferential pipeline for: 'description'"
-python -m src.extract_entities_cloud -p "description" -m ${NER_MODEL} -d ${TODAY}
+python -m src.extract_entities_cloud -p "description" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
 echo "Inference completed and data uploaded for: 'description'"
+
 echo "Starting NER bulk inferential pipeline for: 'text'"
 python -m src.extract_entities_cloud -p "text" -m ${NER_MODEL} -d ${TODAY}
 echo "Inference completed and data uploaded for: 'text'"
