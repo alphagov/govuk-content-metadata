@@ -77,3 +77,4 @@ This will be formated by GCP as below:
         ...
     ]}
 ```
+See https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#formatting-instances-as-json for more datails.
