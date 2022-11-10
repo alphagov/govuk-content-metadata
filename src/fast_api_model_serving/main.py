@@ -31,6 +31,8 @@ class Payload(BaseModel):
 class SingleEntity(BaseModel):
     text: str
     entity_type: str
+    entity_startchar: str
+    entity_endchar: str
 
 
 # create a model for for lists of Single Entity key-value pairs
@@ -43,7 +45,7 @@ class Entities(BaseModel):
 # get path for app root
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Hello World!"}
 
 
 # get path for app health check to ensure server is running
@@ -62,7 +64,15 @@ async def get_ner(payload: Payload):
     for doc in tokenize_content:
         # GCP Vertex AI expects custom model payload to be a list of dicts [{'...':'...'}, {'...':'...'}, ...]
         document_enities.append(
-            [{"text": ent.text, "entity_type": ent.label_} for ent in doc.ents]
+            [
+                {
+                    "text": ent.text,
+                    "entity_type": ent.label_,
+                    "entity_startchar": ent.start_char,
+                    "entity_endchar": ent.end_char,
+                }
+                for ent in doc.ents
+            ]
         )
     # GCP Vertex AI expects custom models to return response {"predictions": [... , ...]}
     return {
