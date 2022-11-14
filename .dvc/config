@@ -1,0 +1,4 @@
+[core]
+    remote = cpto-ner-dvc-data
+['remote "cpto-ner-dvc-data"']
+    url = gs://cpto-content-metadata/dvc_data

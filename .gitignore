@@ -874,6 +874,8 @@ data/processed/*
 !data/processed/.gitkeep
 data/processed/entities/*
 !data/processed/entities/.gitkeep
+!data/training_set/**/*.jsonl
+!data/**/*.dvc
 
 # Ignore the contents of the `models` folder, except for the `README.md` file
 models/*
