@@ -46,3 +46,4 @@ wheel
 prodigy>=1.11.0,<2.0.0
 google-cloud-storage==2.5.0
 altair==4.2.0
+'dvc[gs]'
