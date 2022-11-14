@@ -80,7 +80,13 @@ To run:
 
 This should populate your local model and data folders from remote storage on GCP.
 
-To commit/push the most recent data and models following updates. Use ```dvc push``` and ```dvc pull``` in place above.
+To commit/push the most recent data and models following updates. Use
+```bash
+dvc push```
+and
+```bash
+dvc pull```
+in place above.
 
 For more information, visit [Syncing Data to GCP Storage Buckets](https://iterative.ai/blog/using-gcp-remotes-in-dvc)
 
