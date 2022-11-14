@@ -1,5 +1,5 @@
 outs:
-- md5: aac297663e9d3ee2c1bba08e2695d254.dir
-  size: 18687236
-  nfiles: 2
+- md5: c03e1d5ce244b2775e068b952892bd09.dir
+  size: 18687250
+  nfiles: 3
   path: training_set
