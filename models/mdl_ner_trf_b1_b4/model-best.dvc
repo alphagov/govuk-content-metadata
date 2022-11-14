@@ -1,5 +1,5 @@
 outs:
-- md5: 9e1bcaaaa1223b2d2a2971afa833fd7e.dir
-  size: 502778962
-  nfiles: 14
+- md5: afcf502b72219a66b6e3633f71ea7a4b.dir
+  size: 502772814
+  nfiles: 13
   path: model-best
