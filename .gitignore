@@ -908,3 +908,6 @@ src/make_strata/data/*
 corpus/*
 corpus/**/
 !corpus/README.md
+
+#ignore anything with .spacy
+**/**/*.spacy
