@@ -1,0 +1,3 @@
+spacy[cuda113]
+thinc-gpu-ops
+spacy-transformers
