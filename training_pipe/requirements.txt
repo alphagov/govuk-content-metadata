@@ -1,3 +1,2 @@
-spacy[cuda113]
-thinc-gpu-ops
+spacy[cuda112]
 spacy-transformers

@@ -3,6 +3,8 @@ dvc pull -r cpto-ner-dvc-data
 
 # load as prodigy dataset
 prodigy db-in phase_1_annotations /Users/roryhurley/Documents/GitHub/govuk-content-metadata/data/training_set/phase_1_annotations.jsonl
+prodigy db-in phase_1_annotations data/training_set/phase_1_annotations.jsonl
+prodigy db-in phase_1_annotations /Users/alessia.tosi/DataGDS/govuk-content-metadata/data/training_set/phase_1_annotations.jsonl
 
 # creating config files for training with corpus
 # base_...cfg is created using widget
@@ -10,6 +12,7 @@ prodigy db-in phase_1_annotations /Users/roryhurley/Documents/GitHub/govuk-conte
 # the final configuration file is the one without 'base_', phase_1_trf_config.cfg
 # https://spacy.io/usage/training#quickstart
 # https://spacy.io/api/cli#init-config
+cd training_pipe
 spacy init fill-config base_phase_1_trf_config.cfg phase_1_trf_config.cfg
 
 # convert to spacy binary format
@@ -17,3 +20,6 @@ prodigy data-to-spacy ./phase_1_corpus --ner phase_1_annotations --eval-split 0.
 
 # train spacy with gpu
 spacy train phase_1_corpus/config.cfg --output ./phase_1_output --paths.train ./phase_1_corpus/train.spacy --paths.dev ./phase_1_corpus/dev.spacy
+
+# to build and submit docker image
+gcloud builds submit --config cloudbuild.yaml
