@@ -1,14 +1,25 @@
-FROM python:3.9-slim-buster as python-img
-ENV PYTHONUNBUFFERED=1
+FROM nvidia/cuda:11.2.1-runtime-ubuntu20.04
 
 WORKDIR /train
+ENV PYTHONUNBUFFERED=1
+
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/London
+RUN apt update && apt-get install -y apt-transport-https && \
+    apt install --no-install-recommends -y build-essential software-properties-common && \
+    add-apt-repository -y universe && \
+    apt install --no-install-recommends -y python3.8 python3-pip python3-setuptools python3-distutils && \
+    apt clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN python3.8 -m pip install --upgrade pip && \
+    python3.8 -m pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# CMD python -m spacy train phase_1_corpus/config.cfg --output ./phase_1_output --paths.train ./phase_1_corpus/train.spacy --paths.dev ./phase_1_corpus/dev.spacy
+RUN ls --recursive .
+RUN ls --recursive /train/
 
-ENTRYPOINT ["python3", "train.py"]
+ENTRYPOINT [ "python3" ]
+CMD ["/train/train.py"]
