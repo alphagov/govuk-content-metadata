@@ -1,2 +1,4 @@
+--extra-index-url https://***REMOVED***@download.prodi.gy
+prodigy==1.11.8
 spacy[cuda112]
 spacy-transformers
