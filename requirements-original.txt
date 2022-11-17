@@ -20,7 +20,7 @@ notebook
 matplotlib==3.5.2
 mccabe==0.6.1
 multiprocess==0.70.12.2
-numpy==1.22.3
+numpy==1.23.4
 pandas==1.4.2
 plotext==4.2.0
 pycodestyle==2.8.0
