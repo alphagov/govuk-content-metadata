@@ -41,7 +41,7 @@ commands:
       - "assets/${vars.files.train_file}"
 
   - name: data-to-spacy
-    help: "Convert labelled data to spaCy's binary format"
+    help: "Convert annotated data to spaCy's binary format and create a train and a dev set based on the provided split threshold"
     script:
       - "python3 -m prodigy data-to-spacy ./corpus --ner ${vars.prodigy.prodigy-dataset} --eval-split 0.2 --verbose --config configs/${vars.config}"
     outputs:
