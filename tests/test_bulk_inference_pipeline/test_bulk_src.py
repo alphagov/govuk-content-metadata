@@ -6,7 +6,7 @@ from unittest.mock import patch, mock_open, call
 
 from bulk_inference_pipeline.src.utils import chunks, write_output_from_stream
 
-from bulk_inference_pipeline.src.extract_entities_cloud import (
+from bulk_inference_pipeline.extract_entities_cloud import (
     to_tuples_from_stream,
     extract_entities_pipe,
 )
