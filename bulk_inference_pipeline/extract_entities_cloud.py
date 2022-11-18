@@ -268,8 +268,9 @@ if __name__ == "__main__":  # noqa: C901
     SQL_QUERY = f"SELECT * FROM `{config['gcp_metadata']['project_id']}.{config['gcp_metadata']['bq_content_dataset']}.{PART_OF_PAGE}` LIMIT 40000"
 
     print("loading model...")
-    # nlp = load_model(MODEL_PATH)
-    nlp = spacy.load("en_core_web_trf")
+    nlp = load_model(MODEL_PATH)
+    # nlp = spacy.load("en_core_web_trf")
+    # nlp = spacy.load("en-core-web-md")
     print(f"Model loaded successfully! Components: {nlp.pipe_names}")
 
     print("querying BigQuery for input...")
