@@ -1,7 +1,7 @@
 """
 Script to extract Named Entities from GOV.UK pages using a trained Spacy NER pipeline model.
 
-The script saves the extracted entities to a number of .jsonl files, to the Project's Google Storage.
+The script saves the extracted entities to a number of .jsonl files, to the local disk.
 
 The entities are extracted separately from titles, descriptions and texts, based on the user's input.
 
@@ -63,179 +63,135 @@ Notes:
 
 import spacy
 import json
-from typing import Generator, Dict, Tuple
+from typing import Generator
 from google.cloud import bigquery, storage
-from google.cloud.storage.fileio import BlobWriter
+from signal import signal, SIGPIPE, SIG_DFL
+
+signal(SIGPIPE, SIG_DFL)
 
 
-def make_inference_from_stream(
-    rows: Generator[dict[str, str], None, None],
+def make_inference(rows, ner_model, b, n, part_of_page, outfile):
+    """
+    Main function to extract named entities from a sequence of (text, (metadata)).
+
+    Args:
+        rows: a sequence of (text, context) tuples the form ("this is text", ("gov.uk/path", 1)),
+            the output of the stream_rows_from_bigquery() function.
+        ner_model: a Spacy NER model
+        b: number of texts to buffer
+        n: number of processors to use (default, 1)
+        part_of_page: part of page from which to extract entities, one of 'title', 'text', 'description'
+        outfile: filepath of the output JSONL file
+
+    Returns:
+        None
+        Writes the extracted entities to a JSONL file.
+    """
+    results = extract_entities_pipe_from_tuples_to_dict(
+        rows=rows, ner_model=ner_model, b=b, n=n, part_of_page=part_of_page
+    )
+    write_output_from_stream(outfile, results)
+
+
+def stream_rows_from_bigquery(
+    query: str,
+    client: bigquery.client.Client,
     part_of_page: str,
-    ner_model: spacy.Language,
-    storage_client,
-    bucket_name,
-    destination_blob_name,
-    batch_size: int,
-    n_process: int,
 ):
     """
-    Main function to extract named entities from a sequence of {text, context}.
+    Streams rows from a BigQuery table that contain rows of texts and metadata, into a generator.
     """
-
-    tuple_rows = to_tuples_from_stream(rows=rows, part_of_page=part_of_page)
-
-    entities_rows = extract_entities_pipe(
-        rows=tuple_rows,
-        part_of_page=part_of_page,
-        ner_model=ner_model,
-        batch_size=batch_size,
-        n_process=n_process,
-    )
-
-    upload_jsonl_from_stream(
-        storage_client=storage_client,
-        bucket_name=bucket_name,
-        stream_generator=entities_rows,
-        destination_blob_name=destination_blob_name,
-    )
+    query_job = client.query(query)
+    if part_of_page == "text":
+        for row in query_job:
+            yield (row.get("line"), (row.get("url"), row.get("line_number")))
+    elif part_of_page == "title":
+        for row in query_job:
+            yield (row.get("title"), (row.get("url")))
+    elif part_of_page == "description":
+        for row in query_job:
+            yield (row.get("description"), (row.get("url")))
 
 
-def extract_entities_pipe(
-    rows: Tuple[str, Dict[str, str]],
-    ner_model: spacy.Language,
-    part_of_page: str,
-    batch_size: int,
-    n_process: int,
-):
+def extract_entities_pipe_from_tuples_to_dict(rows, ner_model, b, n, part_of_page: str):
+
     """
-
     Applies a trained Spacy NER pipeline model to a batch of texts as a stream,
-    and yields the extracted named entities for each text in order.
+    and yields the extracted named entities for each text in order as a generator.
     It calls the Spacy Language.pipe method (https://spacy.io/api/language#pipe).
 
     Args:
-        texts: a sequence of (text, context) tuples the form ("this is text", {"url": "gov.uk/path", ...}),
-            the output of the to_tuples_from_stream() function.
+        rows: a sequence of (text, context) tuples the form ("this is text", ("gov.uk/path", 1)),
+            the output of the stream_rows_from_bigquery() function.
         ner_model: a Spacy NER model
-        batch_size: number of texts to buffer.
-        n_process: number of processors to use (default, 1).
+        b: number of texts to buffer
+        n: number of processors to use (default, 1)
+        part_of_page: part of page from which to extract entities, one of 'title', 'text', 'description'
 
     Returns:
         A generator yielding {"url": "gov.uk/path",
                             "entities: [(entity text, entity label, entity start, entity end)],
                             (), ...], "line_number: int} dictionaries.
-    """
-    for doc, meta in ner_model.pipe(
-        rows, as_tuples=True, batch_size=batch_size, n_process=n_process
-    ):
-        if part_of_page == "text":
-            yield {
-                "url": meta["url"],
-                "entities": [
-                    {
-                        "name": ent.text,
-                        "type": ent.label_,
-                        "start": ent.start_char,
-                        "end": ent.end_char,
-                    }
-                    for ent in doc.ents
-                ],
-                "line_number": meta["line_number"],
-            }
-        else:  # title / description
-            yield {
-                "url": meta["url"],
-                "entities": [
-                    {
-                        "name": ent.text,
-                        "type": ent.label_,
-                        "start": ent.start_char,
-                        "end": ent.end_char,
-                    }
-                    for ent in doc.ents
-                ],
-            }
 
-
-def to_tuples_from_stream(
-    rows: Generator[bigquery.table.Row, None, None],
-    part_of_page: str,
-):
-    """
-    Formats the elements of a generator, each being a bigquery.table.Row with the following
-    fields: "url" (all), "title" (if part_of_page is title), "description" (if part_of_page
-    is description), "line" and "line_number" (if part_of_page is text),
-    into a generator of tuples of the form (string of text, {"url": <url>, ...}).
-    This is the format required for NER pipe inference by the Spacy framework.
-
-    Example 1 (title):
-        from
-        {"title": "This is a title", "url": "gov.uk/base_path"}
-        to
-        ("This is a title", {"url": "gov.uk/base_path"})
-
-    Example 2 (text):
-        from
-        {"line": "This is a line", "url": "gov.uk/base_path", "line_number": 3}
-        to
-        ("This is a line", {"url": "gov.uk/base_path", "line_number": 3})
-
-    Args:
-        rows: generator yielding dictionaries containing content
-        part_of_page: one of "title", "description", "text"
-
-    Returns:
-        A generator of the reformatted content yiedling tuples (string of text, {"url": url, ...}).
     """
 
     if part_of_page == "text":
-        for row in rows:
-            yield (
-                row.get("line") if row.get("line") is not None else "",
-                {"url": row.get("url"), "line_number": row.get("line_number")},
-            )
+        for doc, meta in ner_model.pipe(
+            rows, as_tuples=True, batch_size=b, n_process=n
+        ):
+            yield {
+                "url": meta[0],
+                "entities": [
+                    {
+                        "name": ent.text,
+                        "type": ent.label_,
+                        "start": ent.start_char,
+                        "end": ent.end_char,
+                    }
+                    for ent in doc.ents
+                ],
+                "line_number": meta[1],
+            }
     else:
-        for row in rows:
-            yield (
-                row.get(part_of_page) if row.get(part_of_page) is not None else "",
-                {"url": row.get("url")},
-            )
+        for doc, meta in ner_model.pipe(
+            rows, as_tuples=True, batch_size=b, n_process=n
+        ):
+            yield {
+                "url": meta,
+                "entities": [
+                    {
+                        "name": ent.text,
+                        "type": ent.label_,
+                        "start": ent.start_char,
+                        "end": ent.end_char,
+                    }
+                    for ent in doc.ents
+                ],
+            }
 
 
-def upload_jsonl_from_stream(
-    storage_client: storage.Client, bucket_name, stream_generator, destination_blob_name
-):
+def write_output_from_stream(outfile: str, content_stream: Generator):
     """
-    Uploads bytes from a stream or other file-like object to a blob.
-    Ref : https://cloud.google.com/storage/docs/streaming#stream_an_upload
-    and https://stackoverflow.com/questions/44876235/uploading-a-json-to-google-cloud-storage-via-python
-    and https://stackoverflow.com/questions/73687152/how-to-stream-upload-csv-data-to-google-cloud-storage-python
+    Writes outputs from a generator to JSONL format.
+
+    NOTE: JSON does not preserve tuples and turn them into lists
+    https://stackoverflow.com/questions/15721363/preserve-python-tuples-with-json
     """
+    with open(outfile, "w") as f:
+        for row in content_stream:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    # Construct a client-side representation of the blob.
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
-    writer = BlobWriter(blob)
 
-    # Upload data from the stream to your bucket.
-    for line in stream_generator:
-        line_as_byte = json.dumps(line, ensure_ascii=False).encode("utf-8")
-        writer.write(line_as_byte + b"\n")
-    writer.close()
-
-    # Rewind the stream to the beginning. This step can be omitted if the input
-    # stream will always be at a correct position.
-    # file_obj.seek(0)
-
-    print(f"Stream data uploaded to {destination_blob_name} in bucket {bucket_name}.")
+def load_model(path_to_model: str):
+    return spacy.load(path_to_model)
 
 
 if __name__ == "__main__":  # noqa: C901
 
     import argparse
     import yaml
+    import time
     from datetime import date
-    from src.utils import load_model, stream_from_bigquery
 
     with open("bulk_inference_config.yml", "r") as file:
         config = yaml.safe_load(file)
@@ -309,25 +265,28 @@ if __name__ == "__main__":  # noqa: C901
     N_PROC = parsed_args.n_proc
 
     # TODO: move to function?
-    SQL_QUERY = f"SELECT * FROM `{config['gcp_metadata']['project_id']}.{config['gcp_metadata']['bq_content_dataset']}.{PART_OF_PAGE}`"
+    SQL_QUERY = f"SELECT * FROM `{config['gcp_metadata']['project_id']}.{config['gcp_metadata']['bq_content_dataset']}.{PART_OF_PAGE}` LIMIT 40000"
 
     print("loading model...")
-    nlp = load_model(MODEL_PATH)
+    # nlp = load_model(MODEL_PATH)
+    nlp = spacy.load("en_core_web_trf")
     print(f"Model loaded successfully! Components: {nlp.pipe_names}")
 
     print("querying BigQuery for input...")
-    content_stream = stream_from_bigquery(query=SQL_QUERY, client=BQ_CLIENT)
+    content_stream = stream_rows_from_bigquery(
+        query=SQL_QUERY, client=BQ_CLIENT, part_of_page=PART_OF_PAGE
+    )
 
     print(f"starting extracting entities from {PART_OF_PAGE}...")
     OUTPUT_FILENAME = f"entities_{TARGET_DATE}_{PART_OF_PAGE}.jsonl"
 
-    make_inference_from_stream(
+    start = time.time()
+    make_inference(
         rows=content_stream,
-        part_of_page=PART_OF_PAGE,
         ner_model=nlp,
-        batch_size=BATCH_SIZE,
-        n_process=N_PROC,
-        storage_client=STORAGE_CLIENT,
-        bucket_name="cpto-content-metadata",
-        destination_blob_name="content_ner/" + OUTPUT_FILENAME,
+        b=BATCH_SIZE,
+        n=N_PROC,
+        part_of_page=PART_OF_PAGE,
+        outfile=OUTPUT_FILENAME,
     )
+    print(time.time() - start)
