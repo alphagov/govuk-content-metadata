@@ -2,7 +2,11 @@
 
 # spaCy Project: GovNER SpaCy Training Pipeline
 
-SpaCy pipeline to train NER model. Runs through multiple stages including data prep and training
+SpaCy pipeline to train NER model. Runs through multiple stages including data prep and training.
+To run the pipeline in full, run:
+```shell
+spacy project run all
+```
 
 ## project.yml
 
