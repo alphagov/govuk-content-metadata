@@ -125,7 +125,7 @@ in the project directory.
 
 The pipeline is currently deployed in a Docker container onto a Virtual Machine (VM) instance on Google Compute Engine (GCE).
 
-The GCE VM instance is called `bulk_inference_pipeline` in the `cpto-content-metadata` Google Project. **To run the pipeline, simply start the VM instance.**
+The GCE VM instance is called `bulk-inference-pipeline` in the `cpto-content-metadata` Google Project. **To run the pipeline, simply start the VM instance.**
 
 If you want to know more about how to deploy pipelines in a Docker container onto a Google Compute Engine VM, refer to the Google official documentation [Deploying containers on VMs](https://cloud.google.com/compute/docs/containers/deploying-containers).
 
@@ -136,6 +136,11 @@ If you want to know more about how to deploy pipelines in a Docker container ont
 ## Code and configuration files
 
 All the code and configuration files are in the [bulk_inference_pipeline](bulk_inference_pipeline) subdirectory in this repository.
+
+In particular:
+- [bulk_inference_config.yml](bulk_inference_pipeline/bulk_inference_config.yml) contains the specification of the Google Cloud Projects and BigQuery datasets used by the pipeline;
+- [entities_bq_schema](bulk_inference_pipeline/entities_bq_schema) contains the BigQuery table schema that is used to export the extracted entities (and their metadata) from the JSONL files in Google Storage to Big Query tables;
+- [bulk_inference_pipeline/cloudbuild.yaml](bulk_inference_pipeline/cloudbuild.yaml) contains the steps to build and submit the Docker image for the bulk inference pipeline to Artifect registry.
 
 ## VM specs
 
@@ -185,7 +190,7 @@ cd bulk_inference_pipeline
 
 Re-build and re-publish the container image:
 ```shell
-gcloud builds submit --region=europe-west2 --tag europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/entity-inference-bulk:latest
+gcloud builds submit --config cloudbuild.yaml
 ```
 
 # Inference pipeline [run on a local machine]
