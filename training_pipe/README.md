@@ -1,16 +1,16 @@
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS START (do not remove) -->
 
-# 🪐 spaCy Project: GovNER SpaCy Training Pipeline
+# spaCy Project: GovNER SpaCy Training Pipeline
 
 SpaCy pipeline to train NER model. Runs through multiple stages including data prep and training
 
-## 📋 project.yml
+## project.yml
 
 The [`project.yml`](project.yml) defines the data assets required by the
 project, as well as the available commands and workflows. For details, see the
 [spaCy projects documentation](https://spacy.io/usage/projects).
 
-### ⏯ Commands
+### Commands
 
 The following commands are defined by the project. They
 can be executed using [`spacy project run [name]`](https://spacy.io/api/cli#project-run).
@@ -24,7 +24,7 @@ Commands are only re-run if their inputs have changed.
 | `push_remote` | Push outputs to remote |
 | `clean` | Remove intermediate files |
 
-### ⏭ Workflows
+### Workflows
 
 The following workflows are defined by the project. They
 can be executed using [`spacy project run [name]`](https://spacy.io/api/cli#project-run)
@@ -35,7 +35,7 @@ inputs have changed.
 | --- | --- |
 | `all` | `db-in` &rarr; `data-to-spacy` &rarr; `train_spacy` &rarr; `push_remote` |
 
-### 🗂 Assets
+### Assets
 
 The following assets are defined by the project. They can
 be fetched by running [`spacy project assets`](https://spacy.io/api/cli#project-assets)
