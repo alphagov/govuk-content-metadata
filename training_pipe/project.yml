@@ -61,7 +61,7 @@ commands:
   - name: push_remote
     help: "Push outputs to remote"
     script:
-      - "python3 -m spacy project push remote"
+      - "python3 -m spacy project push default"
     deps:
       - "training/model-best"
 
