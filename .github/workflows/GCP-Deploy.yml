@@ -2,8 +2,8 @@ name: Docker
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - src/make_visualisations/**
 
 jobs:
 
