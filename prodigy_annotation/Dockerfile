@@ -17,13 +17,20 @@ COPY instructions ./instructions/
 
 ENV PRODIGY_HOME /app
 ENV PRODIGY_LOGGING "verbose"
-ENV PRODIGY_ALLOWED_SESSIONS "user1,user2"
-ENV PRODIGY_BASIC_AUTH_USER "admin"
-ENV PRODIGY_BASIC_AUTH_PASS "password"
+# ENV PRODIGY_ALLOWED_SESSIONS "user1,user2"
+# ENV PRODIGY_BASIC_AUTH_USER "admin"
+# ENV PRODIGY_BASIC_AUTH_PASS "password"
 
 EXPOSE 8080
 
+
 # CMD python -m prodigy ner.manual ner_news en_core_web_md ./data/news_headlines.jsonl --label PERSON,ORG,PRODUCT
-# docker run -it -p 8080:8080 prodigy bash
-# CMD docker run -it -p 9001:8080 -v "$(pwd):work" prodigy bash
+
+# RUN THIS FROM TERMINAL
 # docker run -it -p 8080:8080 -v "$(pwd):$(pwd)" prodigy bash
+
+# host mount
+#~/.prodigy/prodigy.db
+
+#container mount
+#../app/prodigy.db
