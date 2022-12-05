@@ -56,3 +56,13 @@ When in your containerised environment, you can run any prodigy commands as usua
 prodigy ner.manual example_dataset en_core_web_md ./data/example_sentences.jsonl --label LABEL1,LABEL2,LABEL3
 ```
 As the volume has been mounted between your host machine and the container in step 3, all databases will be saved in your local environment as well as the container.
+
+A web server will start at `http://0.0.0.0:8080`
+
+You should add your first initial and surname to the end of the webserver, so the annotation metadata is captured, for example:
+
+`http://0.0.0.0:8080?session=rhurley`
+
+or
+
+`http://0.0.0.0:8080?session=atosi`

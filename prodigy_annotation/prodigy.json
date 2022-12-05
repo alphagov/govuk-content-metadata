@@ -6,6 +6,7 @@
     "instructions": "./instructions/phase2_instructions.html",
     "show_flag":true,
     "hide_meta":false,
+
     "custom_theme": {
         "labels": {
           "FORM": "#79dd6f",

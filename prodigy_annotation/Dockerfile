@@ -16,6 +16,7 @@ COPY data ./data/
 COPY instructions ./instructions/
 
 ENV PRODIGY_HOME /app/.prodigy
+ENV PRODIGY_ALLOWED_SESSIONS "atosi,rhurley"
 
 EXPOSE 8080
 
