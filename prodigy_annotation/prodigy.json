@@ -3,7 +3,7 @@
     "host": "0.0.0.0",
     "feed_overlap": false,
     "show_stats": true,
-    "instructions": "./instructions/instructions.html",
+    "instructions": "./instructions/phase2_instructions.html",
     "show_flag":true,
     "hide_meta":false,
     "custom_theme": {
