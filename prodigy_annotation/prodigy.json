@@ -25,12 +25,5 @@
           "LIFE EVENT": "#ffdd00",
           "TRANSACTION": "#fcf6d3"
         }
-      },
-    "db": "sqlite",
-    "db_settings": {
-      "sqlite": {
-      "name": "prodigy.db",
-      "path": "."
-    }
-  }
+      }
 }

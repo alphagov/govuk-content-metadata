@@ -15,22 +15,12 @@ COPY prodigy.json .
 COPY data ./data/
 COPY instructions ./instructions/
 
-ENV PRODIGY_HOME /app
-ENV PRODIGY_LOGGING "verbose"
-# ENV PRODIGY_ALLOWED_SESSIONS "user1,user2"
-# ENV PRODIGY_BASIC_AUTH_USER "admin"
-# ENV PRODIGY_BASIC_AUTH_PASS "password"
+ENV PRODIGY_HOME /app/.prodigy
 
 EXPOSE 8080
 
+CMD bash
 
-# CMD python -m prodigy ner.manual ner_news en_core_web_md ./data/news_headlines.jsonl --label PERSON,ORG,PRODUCT
+# docker run -itd --name prodann_con -p 8080:8080 -v /Users/roryhurley/.prodigy:/app/.prodigy prodann
 
-# RUN THIS FROM TERMINAL
-# docker run -it -p 8080:8080 -v "$(pwd):$(pwd)" prodigy bash
-
-# host mount
-#~/.prodigy/prodigy.db
-
-#container mount
-#../app/prodigy.db
+# docker exec -it prodann_con bash
