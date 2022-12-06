@@ -62,6 +62,7 @@ Notes:
 """
 
 import spacy
+import torch
 import json
 from typing import Generator
 from google.cloud import bigquery, storage
@@ -149,41 +150,48 @@ def extract_entities_pipe_from_tuples_to_dict(rows, ner_model, b, n, part_of_pag
                             "entities: [(entity text, entity label, entity start, entity end)],
                             (), ...], "line_number: int} dictionaries.
 
+    Notes: torch.no_grad() used for addressing GPU memery allocation at inference
+    ref: https://github.com/explosion/spaCy/issues/9432
+    https://stackoverflow.com/questions/69301276/spacy-inference-goes-oom-when-processing-several-documents
+    https://pytorch.org/docs/stable/generated/torch.no_grad.html
+
     """
 
     if part_of_page == "text":
-        for doc, meta in tqdm.tqdm(
-            ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
-        ):
-            yield {
-                "url": meta[0],
-                "entities": [
-                    {
-                        "name": ent.text,
-                        "type": ent.label_,
-                        "start": ent.start_char,
-                        "end": ent.end_char,
-                    }
-                    for ent in doc.ents
-                ],
-                "line_number": meta[1],
-            }
+        with torch.no_grad():
+            for doc, meta in tqdm.tqdm(
+                ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
+            ):
+                yield {
+                    "url": meta[0],
+                    "entities": [
+                        {
+                            "name": ent.text,
+                            "type": ent.label_,
+                            "start": ent.start_char,
+                            "end": ent.end_char,
+                        }
+                        for ent in doc.ents
+                    ],
+                    "line_number": meta[1],
+                }
     else:
-        for doc, meta in tqdm.tqdm(
-            ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
-        ):
-            yield {
-                "url": meta,
-                "entities": [
-                    {
-                        "name": ent.text,
-                        "type": ent.label_,
-                        "start": ent.start_char,
-                        "end": ent.end_char,
-                    }
-                    for ent in doc.ents
-                ],
-            }
+        with torch.no_grad():
+            for doc, meta in tqdm.tqdm(
+                ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
+            ):
+                yield {
+                    "url": meta,
+                    "entities": [
+                        {
+                            "name": ent.text,
+                            "type": ent.label_,
+                            "start": ent.start_char,
+                            "end": ent.end_char,
+                        }
+                        for ent in doc.ents
+                    ],
+                }
 
 
 def write_output_from_stream(outfile: str, content_stream: Generator):

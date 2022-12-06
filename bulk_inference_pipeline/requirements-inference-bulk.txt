@@ -11,6 +11,7 @@ spacy-transformers
 google-auth==2.14.1
 google.cloud-bigquery==3.3.6
 google.cloud-storage==2.5.0
-spacy-transformers
 thinc_gpu_ops
 GPUtil
+--extra-index-url https://download.pytorch.org/whl/cu112
+torch
