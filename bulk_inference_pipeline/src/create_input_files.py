@@ -38,7 +38,7 @@ if __name__ == "__main__":  # noqa: C901
     ]
 
     # Construct a BigQuery client object.
-    client = bigquery.Client()
+    client = bigquery.Client(project=metadata_project)
 
     # intermediate table
     # TODO: uncomment when ready to run whole pipeline ($$$)
