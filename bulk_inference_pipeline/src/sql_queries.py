@@ -76,24 +76,11 @@ INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}`
 ;
 """
 
-text_query = f"""WITh lines AS (
-  SELECT * FROM `{source_govgraph_project}.{source_govgraph_dataset}.body_lines`
-  UNION ALL
-  SELECT * FROM `{source_govgraph_project}.{source_govgraph_dataset}.body_content_lines`
-  UNION ALL
-  SELECT url, line_number, line FROM `{source_govgraph_project}.{source_govgraph_dataset}.parts_lines`
-  UNION ALL
-  SELECT * FROM `{source_govgraph_project}.{source_govgraph_dataset}.place_lines`
-  UNION ALL
-  SELECT * FROM `{source_govgraph_project}.{source_govgraph_dataset}.step_by_step_lines`
-  UNION ALL
-  SELECT * FROM `{source_govgraph_project}.{source_govgraph_dataset}.transaction_lines`
-)
-SELECT
+text_query = f"""SELECT
   url,
   line_number,
   line
-FROM lines
+FROM `{source_govgraph_project}.{source_govgraph_dataset}.lines
 INNER JOIN `{metadata_project}.{metadata_dataset}.{metadata_intermediate_table}` USING (url)
 ORDER BY url, line_number
 ;
