@@ -41,7 +41,6 @@ if __name__ == "__main__":  # noqa: C901
     client = bigquery.Client(project=metadata_project)
 
     # intermediate table
-    # TODO: uncomment when ready to run whole pipeline ($$$)
     write_query(
         client=client,
         sql_query=sql_queries.intermediate_query,
