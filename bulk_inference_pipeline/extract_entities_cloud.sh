@@ -49,13 +49,13 @@ done
 
 
 echo "Creating input files in Google Big Query"
-python -m src.create_input_files
+python3.9 -m src.create_input_files
 echo "Input files created."
 
 echo "Starting NER bulk inferential pipeline and upload to Google Storage"
 
 echo "Extracting entities from: TITLE"
-python -m extract_entities_cloud -p "title" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
+python3.9 -m src.extract_entities_cloud -p "title" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
 echo "Extraction completed."
 echo "Uploading file to Google Storage"
 gcloud storage cp entities_${TODAY}_title.jsonl gs://cpto-content-metadata/content_ner
@@ -67,7 +67,7 @@ echo "Inference completed for: TITLE"
 rm -f entities_${TODAY}_title.jsonl
 
 echo "Extracting entities from: DESCRIPTION"
-python -m extract_entities_cloud -p "description" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
+python3.9 -m src.extract_entities_cloud -p "description" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
 echo "Extraction completed."
 echo "Uploading file to Google Storage"
 gcloud storage cp entities_${TODAY}_description.jsonl gs://cpto-content-metadata/content_ner
@@ -79,7 +79,7 @@ echo "Inference completed for: DESCRIPTION"
 rm -f entities_${TODAY}_description.jsonl
 
 echo "Extracting entities from: TEXT"
-python -m extract_entities_cloud -p "text" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
+python3.9 -m src.extract_entities_cloud -p "text" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
 echo "Extraction completed."
 echo "Uploading file to Google Storage"
 gcloud storage cp entities_${TODAY}_text.jsonl gs://cpto-content-metadata/content_ner
