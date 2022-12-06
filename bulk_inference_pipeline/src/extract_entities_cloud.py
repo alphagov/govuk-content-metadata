@@ -65,9 +65,25 @@ import spacy
 import json
 from typing import Generator
 from google.cloud import bigquery, storage
-from signal import signal, SIGPIPE, SIG_DFL
+import tqdm
+import GPUtil
+from thinc.api import get_current_ops, set_gpu_allocator
 
-signal(SIGPIPE, SIG_DFL)
+# For GPU memory allocation management
+# https://github.com/explosion/spaCy/issues/9432
+set_gpu_allocator("pytorch")
+
+# Check if Spacy can see/use GPU
+is_using_gpu = spacy.prefer_gpu()
+if is_using_gpu:
+    print("Using GPU!")
+    spacy.require_gpu()
+    print("GPU Usage")
+    GPUtil.showUtilization()
+else:
+    print("GPU not found.")
+
+print(f"get_current_ops: {get_current_ops()}")
 
 
 def make_inference(rows, ner_model, b, n, part_of_page, outfile):
@@ -136,8 +152,8 @@ def extract_entities_pipe_from_tuples_to_dict(rows, ner_model, b, n, part_of_pag
     """
 
     if part_of_page == "text":
-        for doc, meta in ner_model.pipe(
-            rows, as_tuples=True, batch_size=b, n_process=n
+        for doc, meta in tqdm.tqdm(
+            ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
         ):
             yield {
                 "url": meta[0],
@@ -153,8 +169,8 @@ def extract_entities_pipe_from_tuples_to_dict(rows, ner_model, b, n, part_of_pag
                 "line_number": meta[1],
             }
     else:
-        for doc, meta in ner_model.pipe(
-            rows, as_tuples=True, batch_size=b, n_process=n
+        for doc, meta in tqdm.tqdm(
+            ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
         ):
             yield {
                 "url": meta,
@@ -183,7 +199,13 @@ def write_output_from_stream(outfile: str, content_stream: Generator):
 
 
 def load_model(path_to_model: str):
-    return spacy.load(path_to_model)
+    # For GPU memory management during spacy.pipe inference
+    # See https://spacy.io/api/pipeline-functions#doc_cleaner
+    config = {"attrs": {"tensor": None}}
+    nlp_model = spacy.load(path_to_model)
+    nlp_model.add_pipe("doc_cleaner", config=config)
+    print(f"Loaded model components:  {nlp_model.pipeline}")
+    return nlp_model
 
 
 if __name__ == "__main__":  # noqa: C901
@@ -249,7 +271,7 @@ if __name__ == "__main__":  # noqa: C901
     parsed_args = parser.parse_args()
 
     # Construct a BigQuery and a Gogle Stoarge client object.
-    BQ_CLIENT = bigquery.Client()
+    BQ_CLIENT = bigquery.Client(project=config["gcp_metadata"]["project_id"])
     STORAGE_CLIENT = storage.Client()
 
     # Set date
@@ -269,8 +291,6 @@ if __name__ == "__main__":  # noqa: C901
 
     print("loading model...")
     nlp = load_model(MODEL_PATH)
-    # nlp = spacy.load("en_core_web_trf")
-    # nlp = spacy.load("en-core-web-md")
     print(f"Model loaded successfully! Components: {nlp.pipe_names}")
 
     print("querying BigQuery for input...")
