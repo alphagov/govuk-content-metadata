@@ -44,7 +44,7 @@ The set-up script will:
 - Authenticate Docker via the pre-installed gcloud cli and the attached service account.
 
 
-3. Stop the instance, add the start-up script and a schedule to the VM instance.
+# 3. Stop the instance, add the start-up script and a schedule to the VM instance.
 
 The start-up script launches the docker image every time the VM is started.
 
@@ -55,7 +55,7 @@ bash config_vm/create_schedule_policy_vm.sh
 The inference pipeline is now scheduled to run according to the schedule specified in config_vm/create_schedule_policy_vm.sh. No manual actions needed.
 
 
-4. (Optional) Monitor the start-up script and execution of the docker image
+# 4. (Optional) Monitor the start-up script and execution of the docker image
 
 Connect to the VM and monitor the start-up script
 ```shell
