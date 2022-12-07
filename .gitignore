@@ -908,3 +908,7 @@ src/make_strata/data/*
 corpus/*
 corpus/**/
 !corpus/README.md
+
+#ignore any prodigy annotation or wheel files
+prodigy_annotation/data/*
+prodigy_annotation/wheel/*
