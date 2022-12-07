@@ -909,6 +909,8 @@ corpus/*
 corpus/**/
 !corpus/README.md
 
-#ignore any prodigy annotation or wheel files
+#ignore anything with .spacy
+**/**/*.spacy
+
 prodigy_annotation/data/*
 prodigy_annotation/wheel/*
