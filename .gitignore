@@ -911,3 +911,7 @@ corpus/**/
 
 #ignore anything with .spacy
 **/**/*.spacy
+
+prodigy_annotation/data/*
+prodigy_annotation/wheel/*
+
