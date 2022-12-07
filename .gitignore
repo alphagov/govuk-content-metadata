@@ -904,3 +904,8 @@ src/make_strata/data/*
 corpus/*
 corpus/**/
 !corpus/README.md
+
+# VM configuration files
+bulk_inference_pipeline/config_vm/*
+bulk_inference_pipeline/config_vm/**/
+!bulk_inference_pipeline/config_vm/.gitkeep
