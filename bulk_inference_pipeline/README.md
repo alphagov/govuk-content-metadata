@@ -2,21 +2,21 @@
 
 Here we detail how the VM was created and set. There is no need to repeat these steps as they are one off.
 
-All the commans were run from the `bulk_inference_pipeline` subdirectory:
+All the commands were run from the `bulk_inference_pipeline` subdirectory:
 
 ```shell
 cd bulk_inference_pipeline
 ```
 
 All the scripts are available in the `cpto-content-metadata` Google Storage bucket.
-This only works if you have the permissions
+The following only works if you have the right permissions.
 
 ```shell
 gsutil -m cp -r gs://cpto-content-metadata/gce_vm_bulk_inference_phase1_configs/* config_vm
 ```
 
 NOTE - Set variables:
-VM_NAME=<name-of-virtual-machine>
+VM_NAME=`<name-of-virtual-machine>`
 
 # 1. Create the general Ubuntu VM on GCE
 
