@@ -222,6 +222,7 @@ if __name__ == "__main__":  # noqa: C901
     import yaml
     import time
     from datetime import date
+    import gc
 
     with open("bulk_inference_config.yml", "r") as file:
         config = yaml.safe_load(file)
@@ -295,7 +296,7 @@ if __name__ == "__main__":  # noqa: C901
     N_PROC = parsed_args.n_proc
 
     # TODO: move to function?
-    SQL_QUERY = f"SELECT * FROM `{config['gcp_metadata']['project_id']}.{config['gcp_metadata']['bq_content_dataset']}.{PART_OF_PAGE}` LIMIT 40000"
+    SQL_QUERY = f"SELECT * FROM `{config['gcp_metadata']['project_id']}.{config['gcp_metadata']['bq_content_dataset']}.{PART_OF_PAGE}`"
 
     print("loading model...")
     nlp = load_model(MODEL_PATH)
@@ -319,3 +320,8 @@ if __name__ == "__main__":  # noqa: C901
         outfile=OUTPUT_FILENAME,
     )
     print(time.time() - start)
+
+    del nlp
+    time.sleep(3)
+    gc.collect()
+    torch.cuda.empty_cache()
