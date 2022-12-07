@@ -19,7 +19,6 @@ RUN python3.8 -m pip install --upgrade pip && \
 COPY . .
 
 RUN ls --recursive .
-RUN ls --recursive /train/
 
 ENTRYPOINT [ "python3" ]
-CMD ["/train/train.py"]
+CMD ["-m", "spacy", "project", "run", "all"]
