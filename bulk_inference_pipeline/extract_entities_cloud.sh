@@ -18,6 +18,10 @@
 # - Transfer the extracted entities files into corresponding BigQuery tables
 
 
+# CUDA memory management
+# ref: https://medium.com/@snk.nitin/how-to-solve-cuda-out-of-memory-error-850bb247cfb2
+export PYTORCH_CUDA_ALLOC_CONF=garbage_collection_threshold:0.6,max_split_size_mb:128
+
 # Set default value for `date` to today in the format `DDMMYY`
 unameOut="$(uname -s)"
 case "${unameOut}" in
