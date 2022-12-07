@@ -19,15 +19,25 @@ It follows a three-stage process:
 
 ### 2. Build the Environment
 
-1. Build the docker image, by running
+1. Ensure you are in the `prodigy_annotation/` subdirectory.
+
+2. Build the docker image, by running
     ```bash
     docker build -t prodann --no-cache .
     ```
+    Or, if you are using and M1 machine
+    ```bash
+    docker build  --platform linux/amd64 -t prodann --no-cache .
+    ```
     This builds a Docker image called `prodann` (prodigy annotation) locallly.
 
-2. Run the docker image with
+3. Run the docker image with
     ```bash
     docker run -itd --name prodann_con -p 8080:8080 -v $HOME/.prodigy:/app/.prodigy prodann
+    ```
+    or, if using and M1 machine
+    ```bash
+    docker run --platform linux/amd64 -itd --name prodann_con -p 8080:8080 -v $HOME/.prodigy:/app/.prodigy prodann
     ```
 
     This creates a container based on the docker image which will be the Prodigy annotation environment.
@@ -41,7 +51,7 @@ It follows a three-stage process:
 
     The container will start runnning in the backgrond.
 
-3. Run commands within the container by running
+4. Run commands within the container by running
 
     ```bash
     docker exec -it prodann_con bash
