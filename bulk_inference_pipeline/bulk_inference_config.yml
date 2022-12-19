@@ -6,6 +6,8 @@ gcp_metadata:
     text: text
     title: title
     description: description
+  gs_bucket: cpto-content-metadata
+  gs_folder: content_ner
 gcp_govgraph:
   project_id: govuk-knowledge-graph
   bq_content_dataset: content
