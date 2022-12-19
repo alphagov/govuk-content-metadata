@@ -51,7 +51,7 @@ echo "Input files created."
 echo "Starting NER bulk inferential pipeline and upload to Google Storage"
 
 echo "Extracting entities from: TITLE"
-python3.9 -m src.extract_entities_cloud -p "title" -h ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 2000 -n 1
+python3.9 -m src.extract_entities_cloud -p "title" --phase ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 2000 -n 1
 echo "Extraction completed."
 echo "Uploading file to Google Storage"
 gcloud storage cp entities_phase${PHASE_N}_${TODAY}_title.jsonl gs://cpto-content-metadata/content_ner
@@ -63,7 +63,7 @@ echo "Inference completed for: TITLE"
 rm -f entities_phase${PHASE_N}_${TODAY}_title.jsonl
 
 echo "Extracting entities from: DESCRIPTION"
-python3.9 -m src.extract_entities_cloud -p "description" -h ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 2000 -n 1
+python3.9 -m src.extract_entities_cloud -p "description" --phase ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 2000 -n 1
 echo "Extraction completed."
 echo "Uploading file to Google Storage"
 gcloud storage cp entities_phase${PHASE_N}_${TODAY}_description.jsonl gs://cpto-content-metadata/content_ner
@@ -75,7 +75,7 @@ echo "Inference completed for: DESCRIPTION"
 rm -f entities_phase${PHASE_N}_${TODAY}_description.jsonl
 
 echo "Extracting entities from: TEXT"
-python3.9 -m src.extract_entities_cloud -p "text" -h ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 64 -n 1
+python3.9 -m src.extract_entities_cloud -p "text" --phase ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 64 -n 1
 echo "Extraction and upload to Google Storage completed."
 echo "Exporting entities to Big Query"
 bq load --replace --project_id=cpto-content-metadata --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.text_${PHASE_N} gs://cpto-content-metadata/content_ner/entities_phase${PHASE_N}_${TODAY}_text_*.jsonl entities_bq_schema

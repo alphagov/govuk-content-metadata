@@ -36,7 +36,7 @@ The script takes the following arguments:
         thus the choice of value may require to carefully consider both
         the chosen `batch_size` value and the overall number of texts to be processed.
 
-- "--phase", "-h":
+- "--phase":
         Number of the entity phase, either 1, 2, 3.
 
 
@@ -50,7 +50,7 @@ python bulk_inference_pipeline/extract_entities_cloud.py \
         -m "models/mdl_ner_trf_b1_b4/model-best" \
             --batch_size 1000 \
                 --n_proc 1 \
-                    -h 1
+                    --phase 1
 ```
 
 Notes:
@@ -290,7 +290,6 @@ if __name__ == "__main__":  # noqa: C901
     )
 
     parser.add_argument(
-        "-h",
         "--phase",
         type=int,
         action="store",
@@ -331,7 +330,7 @@ if __name__ == "__main__":  # noqa: C901
     )
 
     # Inference pipeline for 'title' and 'description'
-    if {PART_OF_PAGE} in set(["title", "description"]):
+    if PART_OF_PAGE in set(["title", "description"]):
         print(f"starting extracting entities from {PART_OF_PAGE}...")
         OUTPUT_FILENAME = f"entities_phase{PHASE_N}_{TARGET_DATE}_{PART_OF_PAGE}.jsonl"
 
@@ -351,7 +350,7 @@ if __name__ == "__main__":  # noqa: C901
     # and running the pipeline iteratively
     # we also upload the output file with extracted entities at the end of each iteration
     # then delete the file
-    if {PART_OF_PAGE} == "text":
+    if PART_OF_PAGE == "text":
 
         CHUNK_SIZE = 100000
 
