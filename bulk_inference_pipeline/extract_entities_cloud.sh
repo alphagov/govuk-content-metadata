@@ -27,7 +27,7 @@ case "${unameOut}" in
 esac
 
 
-while getopts ":m:h:b:n:" opt; do
+while getopts ":m:h:" opt; do
     case $opt in
         m)
             echo "argument -m called with value $OPTARG" >&2
