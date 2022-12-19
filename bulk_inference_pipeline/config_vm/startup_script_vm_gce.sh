@@ -2,12 +2,10 @@
 
 # General info
 # This start-up script does:
-# 1. ssh into the VM
-# 2. launch the Docker image
+# 1. pull and launch the latest Docker image every time the VM is booted/started.
 
-# Requires following env variable to be defines:
-# VM_NAME
-# DOCKER_IMAGE_NAME
+# Requires following env variable to be defined:
+DOCKER_IMAGE_NAME=ner-bulk-inference-phase1
 
 # Ensure CUDA is on the PATH
 echo "Add CUDA to the PATH"
