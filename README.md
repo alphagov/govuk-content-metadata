@@ -121,13 +121,15 @@ in the project directory.
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS END (do not remove) -->
 
 
-# Inference pipeline [run in the cloud]
+# Inference pipeline [run on a VM with GPU on Google Compute Engine]
 
-The pipeline is currently deployed in a Docker container onto a Virtual Machine (VM) instance on Google Compute Engine (GCE).
+The pipeline is currently deployed in a Docker container onto a Virtual Machine (VM) instance on Google Compute Engine (GCE) within the `cpto-content-metadata` Google Project.
 
-The GCE VM instance is called `bulk-inference-pipeline` in the `cpto-content-metadata` Google Project. **To run the pipeline, simply start the VM instance.**
+A schedule is associated to the VM which runs the pipeline twice a month, on the 1st and 15th of each month. To run the pipeline on an ad-hoc basis outside of this schedule, simply start the VM instance (please remember to turn it off!).
 
-If you want to know more about how to deploy pipelines in a Docker container onto a Google Compute Engine VM, refer to the Google official documentation [Deploying containers on VMs](https://cloud.google.com/compute/docs/containers/deploying-containers).
+The GCE VM instance for the Phase-1 entities is called `bulk-inference-phase1-ubuntu-gpu`.
+
+To know more about how to the VM was set up, please see [bulk_inference_pipeline/README.md][bulk_inference_pipeline/README.md].
 
 ## Pipeline Flow and Components
 
@@ -140,14 +142,16 @@ All the code and configuration files are in the [bulk_inference_pipeline](bulk_i
 In particular:
 - [bulk_inference_config.yml](bulk_inference_pipeline/bulk_inference_config.yml) contains the specification of the Google Cloud Projects and BigQuery datasets used by the pipeline;
 - [entities_bq_schema](bulk_inference_pipeline/entities_bq_schema) contains the BigQuery table schema that is used to export the extracted entities (and their metadata) from the JSONL files in Google Storage to Big Query tables;
-- [bulk_inference_pipeline/cloudbuild.yaml](bulk_inference_pipeline/cloudbuild.yaml) contains the steps to build and submit the Docker image for the bulk inference pipeline to Artifect registry.
+- [bulk_inference_pipeline/cloudbuild_phase*.yaml](bulk_inference_pipeline/cloudbuild_phase1.yaml) contains the steps to build and submit the Docker image for the bulk inference pipeline to Artifect registry. There is one such file for each entity phase.
 
-## VM specs
+## GCE VM specs
 
-- Container-Optimized OS (COS)
-- Boot Disk 100GB
-- Architectire x86/64
-- Machine Type: e2-standard-8
+Full info can be found in the [bulk_inference_pipeline/README.md][bulk_inference_pipeline/README.md] file, and associated bash scripts in [bulk_inference_pipeline/config_vm][bulk_inference_pipeline/config_vm].
+
+- machine-type: n1-standard-16
+- image-family: ubuntu-2004-lts
+- GPU: nvidia-tesla-t4
+- boot-disk-size: 100GB
 
 ## Other System Requirements
 
@@ -159,12 +163,12 @@ In particular:
 If you are contributing to / editing the pipeline:
 - Docker
 
-The pipeline is currently bundled into the following Docker image, hosted on Artifact Registry: `europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/entity-inference-bulk:latest`
+## Editing an existing pipeline
 
-The pipeline relies on the availability of a spacy NER model which is downloaded when the pipeline's Docker image is built. At the moment, the latest model, which the pipeline is using, is:
-- `gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4`
+The pipeline relies on the availability of a spacy NER model which is downloaded when the pipeline's Docker image is built.
+For each Entity Phase {N}, the model is defined in the `bulk_inference_pipeline/cloudbuild_phase{N}.yaml` file. For instance, for Phase-1 entities, this is the [bulk_inference_pipeline/cloudbuild_phase1.yaml][bulk_inference_pipeline/cloudbuild_phase1.yaml] file.
 
-Please update the Dockerfile and rebuild the image if the model changes.
+Please update the relevant `cloudbuild_phase{N}.yaml` and rebuild the image if the model (or anything in the pipeline code) changes.
 
 ## Required Permissions
 
@@ -190,10 +194,23 @@ cd bulk_inference_pipeline
 
 Re-build and re-publish the container image:
 ```shell
-gcloud builds submit --config cloudbuild.yaml
+gcloud builds submit --config cloudbuild_phase{N}.yaml
 ```
+where `{N}` is the Entity Phase number, e.g. 1.
+
+
+## Creating the pipeline for a new Entity phase
+
+If you need to build the pipeline for a new Entity Phase:
+
+- simply create a new `bulk_inference_pipeline/cloudbuild_phase{N}.yaml`, seeting `{N}` appropriately, and update the relevant values with that phase's information (i.e., model filepath, Docker image phase, phase number);
+
+- then set up a new VM in GCE and attached schedule, following the instructions in [bulk_inference_pipeline/README.md][bulk_inference_pipeline/README.md].
+
 
 # Inference pipeline [run on a local machine]
+
+We do not recommend to run the pipeline locally, unless you have a GPU available.
 
 ## Required Permissions
 
@@ -202,6 +219,7 @@ In order to run the pipeline's computations on a local machine (rather than a GC
 - Storage Object Creator (roles/storage.objects.create) - required to enable writing of pipeline outputs to Google Storage for the `cpto-content-metadata` project;
 - BigQuery Data Editor (roles/bigquery.tables.create) - required to read / create / write to output tables for the `cpto-content-metadata` project;
 - BigQuery Data Reader (roles/bigquery.dataViewer) for the `govuk-knolwedge-graph.content dataset` dataset in BigQuery.
+- Artifact Registry Reader (roles/artifactregistry.reader) for the `europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo` Artefact Registry repository.
 
 ## Google Cloud authentication
 
@@ -212,41 +230,17 @@ The following command can be used to authenticate with GCP:
 ```shell
 gcloud auth login
 ```
-
-Then ensure your Project is set to `cpto-content-metedata`.
-
-## Other Requirements
-
-- Download the spacy NER model from `gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best` to the `models/` local folder. Note, you may need to create the local folder first.
-
-    ```shell
-    cd bulk_inference_pipeline
-    mkdir models/
-    gsutil -m cp -r gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best models/
-    ```
+then ensure your Project is set to `cpto-content-metedata`.
 
 ## Run the pipeline
 
-1. Create the input files
-
-    Go to the `bulk_inference_pipeline` and create the required input files in BigQuery:
-    ```shell
-    cd bulk_inference_pipeline
-    python -m src.create_input_files
-    ```
-
-2. Extract the entities for a part of page (title, description, text).
-You will need to re-run the computationally and memory expensive pipeline for each part of page separately, by re-running the bash script with the appropriate `-p` argument.
-
-From the project root directory run:
-
 ```shell
-cd bulk_inference_pipeline
-bash local_run/extract_entities_local.sh \
-    -p "title" \
-    -m "models/model-best"
+docker run -v "$HOME/.config/gcloud:/gcp/config:ro" \
+    -v /gcp/config/logs \
+    --env GCLOUD_PROJECT=cpto-content-metadata \
+    --env CLOUDSDK_CONFIG=/gcp/config \
+    --env GOOGLE_APPLICATION_CREDENTIALS=/gcp/config/application_default_credentials.json \
+    europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/<DOCKER_IMAGE_NAME>
 ```
 
-this will extract entities from all the `"titles"` of yesterday's GOV.UK pages using a pre-trained model saved in `models/model-best`, upload the .jsonl files to Google Storage and then transfer the data to BigQuery.
-
-Follow the instructions in [extract_entities_local.sh](bulk_inference_pipeline/local_run/extract_entities_local.sh) to know how to specify optional arguments.
+where <DOCKER_IMAGE_NAME> is the name of the pipeline's docker image.
