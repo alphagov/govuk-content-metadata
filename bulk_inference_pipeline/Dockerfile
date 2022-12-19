@@ -23,6 +23,10 @@ COPY . .
 
 RUN ls --recursive .
 
+# Note, the value is set at build-time in cloudbuild.yaml file
+ARG phaseN
+ENV envPhaseN=$phaseN
+
 ENTRYPOINT []
 RUN chmod +x extract_entities_cloud.sh
-CMD bash ./extract_entities_cloud.sh -m "models/model-best" -b 2000 -n 1
+CMD bash ./extract_entities_cloud.sh -m "models/model-best" -h ${envPhaseN}
