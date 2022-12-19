@@ -6,8 +6,10 @@ steps:
 - name: 'gcr.io/cloud-builders/gsutil'
   args: ['-m', 'cp', '-r', 'gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best', '/workspace/models/']
 # Build the container image
+# and set the build-time variables phaseN
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-bulk-inference-phase1', '.']
+  args: ['build', '-t', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-bulk-inference-phase1', '.',
+  '--build-arg', 'phaseN=1']
 # Push the container image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-bulk-inference-phase1']
