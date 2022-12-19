@@ -387,7 +387,7 @@ if __name__ == "__main__":  # noqa: C901
             upload_to_bucket(
                 storage_client=STORAGE_CLIENT,
                 bucket_name=config["gcp_metadata"]["project_id"],
-                blob_name=config["gs_folder"] + "/" + OUTPUT_FILENAME,
+                blob_name=config["gcp_metadata"]["gs_folder"] + "/" + OUTPUT_FILENAME,
                 path_to_local_file=OUTPUT_FILENAME,
             )
             print("Uploaded.")
