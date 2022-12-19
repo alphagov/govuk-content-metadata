@@ -30,23 +30,27 @@ The script takes the following arguments:
         https://prrao87.github.io/blog/spacy/nlp/performance/2020/05/02/\
             spacy-multiprocess.html#Option-1:-Sequentially-process-DataFrame-column
 
-
 - "--n_proc", "-n" [OPTIONAL, default is 1]:
         Number of cores for the parallel processing of texts.
         Note that multiprocessing has a lot of overhead when starting child processes,
         thus the choice of value may require to carefully consider both
         the chosen `batch_size` value and the overall number of texts to be processed.
 
-Example, to extract entities from the titles of all the pages in the
-2022-07-20 copy of the preprocessed content store using a trained NER model saved in the "models/"
-folder, from the root directory you can run:
+- "--phase", "-h":
+        Number of the entity phase, either 1, 2, 3.
+
+
+Example, to extract phase-1 entities from the titles of all the pages on GOV.UK on
+2022-07-20 using a trained NER model saved in the "models/" folder,
+from the root directory you can run:
 
 ```
-python src/bulk_inference_pipeline/extract_entities_cloud.py \
+python bulk_inference_pipeline/extract_entities_cloud.py \
     -p "title" \
         -m "models/mdl_ner_trf_b1_b4/model-best" \
-            --batch_size 6000 \
-                        --n_proc 5
+            --batch_size 1000 \
+                --n_proc 1 \
+                    -h 1
 ```
 
 Notes:
@@ -62,7 +66,6 @@ Notes:
 """
 
 import spacy
-import torch
 import json
 from typing import Generator
 from google.cloud import bigquery, storage
@@ -158,40 +161,38 @@ def extract_entities_pipe_from_tuples_to_dict(rows, ner_model, b, n, part_of_pag
     """
 
     if part_of_page == "text":
-        with torch.no_grad():
-            for doc, meta in tqdm.tqdm(
-                ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
-            ):
-                yield {
-                    "url": meta[0],
-                    "entities": [
-                        {
-                            "name": ent.text,
-                            "type": ent.label_,
-                            "start": ent.start_char,
-                            "end": ent.end_char,
-                        }
-                        for ent in doc.ents
-                    ],
-                    "line_number": meta[1],
-                }
+        for doc, meta in tqdm.tqdm(
+            ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
+        ):
+            yield {
+                "url": meta[0],
+                "entities": [
+                    {
+                        "name": ent.text,
+                        "type": ent.label_,
+                        "start": ent.start_char,
+                        "end": ent.end_char,
+                    }
+                    for ent in doc.ents
+                ],
+                "line_number": meta[1],
+            }
     else:
-        with torch.no_grad():
-            for doc, meta in tqdm.tqdm(
-                ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
-            ):
-                yield {
-                    "url": meta,
-                    "entities": [
-                        {
-                            "name": ent.text,
-                            "type": ent.label_,
-                            "start": ent.start_char,
-                            "end": ent.end_char,
-                        }
-                        for ent in doc.ents
-                    ],
-                }
+        for doc, meta in tqdm.tqdm(
+            ner_model.pipe(rows, as_tuples=True, batch_size=b, n_process=n)
+        ):
+            yield {
+                "url": meta,
+                "entities": [
+                    {
+                        "name": ent.text,
+                        "type": ent.label_,
+                        "start": ent.start_char,
+                        "end": ent.end_char,
+                    }
+                    for ent in doc.ents
+                ],
+            }
 
 
 def write_output_from_stream(outfile: str, content_stream: Generator):
@@ -207,8 +208,18 @@ def write_output_from_stream(outfile: str, content_stream: Generator):
 
 
 def load_model(path_to_model: str):
-    # For GPU memory management during spacy.pipe inference
-    # See https://spacy.io/api/pipeline-functions#doc_cleaner
+    """
+    Loads a spacy model and adds doc_cleaner component,
+    for GPU memory management during spacy.pipe inference.
+
+    See https://spacy.io/api/pipeline-functions#doc_cleaner
+
+    Args:
+        path_to_model: full filepath to the model to be lodaded
+    Returns:
+        the model.
+    """
+
     config = {"attrs": {"tensor": None}}
     nlp_model = spacy.load(path_to_model)
     nlp_model.add_pipe("doc_cleaner", config=config)
@@ -223,6 +234,7 @@ if __name__ == "__main__":  # noqa: C901
     import time
     from datetime import date
     import gc
+    from src.utils import upload_to_bucket, chunks
 
     with open("bulk_inference_config.yml", "r") as file:
         config = yaml.safe_load(file)
@@ -277,11 +289,21 @@ if __name__ == "__main__":  # noqa: C901
         help="Specify the number of processes for parallel processing; default is 1.",
     )
 
+    parser.add_argument(
+        "-h",
+        "--phase",
+        type=int,
+        action="store",
+        required=True,
+        choices=[1, 2, 3],
+        help="Specify the entities phase number: 1, 2, 3",
+    )
+
     parsed_args = parser.parse_args()
 
     # Construct a BigQuery and a Gogle Stoarge client object.
     BQ_CLIENT = bigquery.Client(project=config["gcp_metadata"]["project_id"])
-    STORAGE_CLIENT = storage.Client()
+    STORAGE_CLIENT = storage.Client(project=config["gcp_metadata"]["project_id"])
 
     # Set date
     if parsed_args.date:
@@ -294,8 +316,9 @@ if __name__ == "__main__":  # noqa: C901
     PART_OF_PAGE = parsed_args.part_of_page
     BATCH_SIZE = parsed_args.batch_size
     N_PROC = parsed_args.n_proc
+    PHASE_N = parsed_args.phase
 
-    # TODO: move to function?
+    # Get content data
     SQL_QUERY = f"SELECT * FROM `{config['gcp_metadata']['project_id']}.{config['gcp_metadata']['bq_content_dataset']}.{PART_OF_PAGE}`"
 
     print("loading model...")
@@ -307,21 +330,70 @@ if __name__ == "__main__":  # noqa: C901
         query=SQL_QUERY, client=BQ_CLIENT, part_of_page=PART_OF_PAGE
     )
 
-    print(f"starting extracting entities from {PART_OF_PAGE}...")
-    OUTPUT_FILENAME = f"entities_{TARGET_DATE}_{PART_OF_PAGE}.jsonl"
+    # Inference pipeline for 'title' and 'description'
+    if {PART_OF_PAGE} in set(["title", "description"]):
+        print(f"starting extracting entities from {PART_OF_PAGE}...")
+        OUTPUT_FILENAME = f"entities_phase{PHASE_N}_{TARGET_DATE}_{PART_OF_PAGE}.jsonl"
 
-    start = time.time()
-    make_inference(
-        rows=content_stream,
-        ner_model=nlp,
-        b=BATCH_SIZE,
-        n=N_PROC,
-        part_of_page=PART_OF_PAGE,
-        outfile=OUTPUT_FILENAME,
-    )
-    print(time.time() - start)
+        start = time.time()
+        make_inference(
+            rows=content_stream,
+            ner_model=nlp,
+            b=BATCH_SIZE,
+            n=N_PROC,
+            part_of_page=PART_OF_PAGE,
+            outfile=OUTPUT_FILENAME,
+        )
+        print(time.time() - start)
 
-    del nlp
-    time.sleep(3)
-    gc.collect()
-    torch.cuda.empty_cache()
+    # Inference pipeline for lines of 'text'
+    # we need to manage the GPU VRAM better by chunkiing up the stream of lines
+    # and running the pipeline iteratively
+    # we also upload the output file with extracted entities at the end of each iteration
+    # then delete the file
+    if {PART_OF_PAGE} == "text":
+
+        CHUNK_SIZE = 100000
+
+        for i, chunk_stream in enumerate(chunks(content_stream, CHUNK_SIZE)):
+
+            print(f"chunk N: {i}")
+
+            print(f"GPU Usage - start of iteration {i}:")
+            GPUtil.showUtilization()
+
+            sub_start = time.time()
+            try:
+                OUTPUT_FILENAME = (
+                    f"entities_phase{PHASE_N}_{TARGET_DATE}_{PART_OF_PAGE}_{i}.jsonl"
+                )
+                make_inference(
+                    rows=chunk_stream,
+                    ner_model=nlp,
+                    b=BATCH_SIZE,
+                    n=N_PROC,
+                    part_of_page=PART_OF_PAGE,
+                    outfile=OUTPUT_FILENAME,
+                )
+            except AttributeError as e:
+                print(e)
+                pass
+            print(time.time() - sub_start)
+
+            print(f"GPU Usage - end of iteration {i}:")
+            GPUtil.showUtilization()
+
+            # upload to Google Storage
+            print(f"Uploading file {i} to Google Storage...")
+            upload_to_bucket(
+                storage_client=STORAGE_CLIENT,
+                bucket_name=config["gcp_metadata"]["project_id"],
+                blob_name=config["gs_folder"] + "/" + OUTPUT_FILENAME,
+                path_to_local_file=OUTPUT_FILENAME,
+            )
+            print("Uploaded.")
+
+            # delete local output file no longer needed
+            del OUTPUT_FILENAME
+            time.sleep(3)
+            gc.collect
