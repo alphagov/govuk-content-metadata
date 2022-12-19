@@ -18,10 +18,6 @@
 # - Transfer the extracted entities files into corresponding BigQuery tables
 
 
-# CUDA memory management
-# ref: https://medium.com/@snk.nitin/how-to-solve-cuda-out-of-memory-error-850bb247cfb2
-export PYTORCH_CUDA_ALLOC_CONF=garbage_collection_threshold:0.6,max_split_size_mb:128
-
 # Set default value for `date` to today in the format `DDMMYY`
 unameOut="$(uname -s)"
 case "${unameOut}" in
@@ -31,19 +27,15 @@ case "${unameOut}" in
 esac
 
 
-while getopts ":m:b:n:" opt; do
+while getopts ":m:h:b:n:" opt; do
     case $opt in
         m)
             echo "argument -m called with value $OPTARG" >&2
             NER_MODEL="${OPTARG}"
             ;;
-        b)
-            BATCH_SIZE="${OPTARG}"
-            echo "argument -b called with value $OPTARG" >&2
-            ;;
-        n)
-            N_PROC="${OPTARG}"
-            echo "argument -n called with value $OPTARG" >&2
+        h)
+            echo "argument -h called with value $OPTARG" >&2
+            PHASE_N="${OPTARG}"
             ;;
         *)
             echo "invalid command: no parameter included with argument $OPTARG"
@@ -59,37 +51,33 @@ echo "Input files created."
 echo "Starting NER bulk inferential pipeline and upload to Google Storage"
 
 echo "Extracting entities from: TITLE"
-python3.9 -m src.extract_entities_cloud -p "title" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
+python3.9 -m src.extract_entities_cloud -p "title" -h ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 2000 -n 1
 echo "Extraction completed."
 echo "Uploading file to Google Storage"
-gcloud storage cp entities_${TODAY}_title.jsonl gs://cpto-content-metadata/content_ner
+gcloud storage cp entities_phase${PHASE_N}_${TODAY}_title.jsonl gs://cpto-content-metadata/content_ner
 echo "Upload completed."
 echo "Exporting entities to Big Query"
-bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.title gs://cpto-content-metadata/content_ner/entities_${TODAY}_title.jsonl entities_bq_schema
+bq load --replace --project_id=cpto-content-metadata --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.title_${PHASE_N} gs://cpto-content-metadata/content_ner/entities_phase${PHASE_N}_${TODAY}_title.jsonl entities_bq_schema
 echo "Entities exported."
 echo "Inference completed for: TITLE"
-rm -f entities_${TODAY}_title.jsonl
+rm -f entities_phase${PHASE_N}_${TODAY}_title.jsonl
 
 echo "Extracting entities from: DESCRIPTION"
-python3.9 -m src.extract_entities_cloud -p "description" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
+python3.9 -m src.extract_entities_cloud -p "description" -h ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 2000 -n 1
 echo "Extraction completed."
 echo "Uploading file to Google Storage"
-gcloud storage cp entities_${TODAY}_description.jsonl gs://cpto-content-metadata/content_ner
+gcloud storage cp entities_phase${PHASE_N}_${TODAY}_description.jsonl gs://cpto-content-metadata/content_ner
 echo "Upload completed."
 echo "Exporting entities to Big Query"
-bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.description gs://cpto-content-metadata/content_ner/entities_${TODAY}_description.jsonl entities_bq_schema
+bq load --replace --project_id=cpto-content-metadata --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.description_${PHASE_N} gs://cpto-content-metadata/content_ner/entities_phase${PHASE_N}_${TODAY}_description.jsonl entities_bq_schema
 echo "Entities exported."
 echo "Inference completed for: DESCRIPTION"
-rm -f entities_${TODAY}_description.jsonl
+rm -f entities_phase${PHASE_N}_${TODAY}_description.jsonl
 
 echo "Extracting entities from: TEXT"
-python3.9 -m src.extract_entities_cloud -p "text" -m ${NER_MODEL} -d ${TODAY} -b ${BATCH_SIZE} -n ${N_PROC}
-echo "Extraction completed."
-echo "Uploading file to Google Storage"
-gcloud storage cp entities_${TODAY}_text.jsonl gs://cpto-content-metadata/content_ner
-echo "Upload completed."
+python3.9 -m src.extract_entities_cloud -p "text" -h ${PHASE_N} -m ${NER_MODEL} -d ${TODAY} -b 64 -n 1
+echo "Extraction and upload to Google Storage completed."
 echo "Exporting entities to Big Query"
-bq load --replace --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.text gs://cpto-content-metadata/content_ner/entities_${TODAY}_text.jsonl entities_bq_schema
+bq load --replace --project_id=cpto-content-metadata --source_format=NEWLINE_DELIMITED_JSON named_entities_raw.text_${PHASE_N} gs://cpto-content-metadata/content_ner/entities_phase${PHASE_N}_${TODAY}_text_*.jsonl entities_bq_schema
 echo "Entities exported."
 echo "Inference completed for: TEXT"
-rm -f entities_${TODAY}_text.jsonl
