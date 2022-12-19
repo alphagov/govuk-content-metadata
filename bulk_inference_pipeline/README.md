@@ -1,6 +1,6 @@
 # Create and set up the Virtual Machine (WM) on Google Compute Engine (GCE) - One off
 
-Here we detail how the VM was created and set. There is no need to repeat these steps as they are one off.
+Here we detail how the VM was created and set. There is no need to repeat these steps as they are one off: PLEASE DO NOR RUN THEM AGAIN if the VM has already been set up correctly.
 
 All the commands were run from the `bulk_inference_pipeline` subdirectory:
 
@@ -15,8 +15,14 @@ The following only works if you have the right permissions.
 gsutil -m cp -r gs://cpto-content-metadata/gce_vm_bulk_inference_phase1_configs/* config_vm
 ```
 
-NOTE - Set variables:
-VM_NAME=`<name-of-virtual-machine>`
+# 0. Set and upload the required environment variables
+
+Open the `config_vm/env_vars.sh` and update the value of the environment variables as necessary.
+
+The load the variables by running:
+```shell
+source config_vm/env_vars.sh
+```
 
 # 1. Create the general Ubuntu VM on GCE
 
@@ -57,7 +63,7 @@ The inference pipeline is now scheduled to run according to the schedule specifi
 
 # 4. (Optional) Monitor the start-up script and execution of the docker image
 
-Connect to the VM and monitor the start-up script
+Wait ~15sec, then you can connect to the VM and monitor the execution of the start-up script
 ```shell
 gcloud compute ssh --project=cpto-content-metadata --zone=europe-west2-a ${VM_NAME}
 sudo journalctl -u google-startup-scripts.service -n 200 -f
