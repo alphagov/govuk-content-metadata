@@ -4,10 +4,6 @@ from google.cloud import bigquery, storage
 from google.cloud.storage.fileio import BlobWriter
 from typing import Optional, Generator, Tuple
 
-# Construct a BigQuery client object.
-# BQ_CLIENT = bigquery.Client()
-# STORAGE_CLIENT = storage.Client()
-
 
 def stream_from_bigquery(
     query: str, client: bigquery.client.Client
@@ -79,3 +75,26 @@ def parse_sql_script(filepath: str) -> str:
     # Open `filename` in the `folder` folder, and read it
     with open(filepath, "r") as f:
         return f.read()
+
+
+def upload_to_bucket(storage_client, bucket_name, blob_name, path_to_local_file):
+    """
+    Uploads a file to a Google Storage bucket
+
+    Args:
+        storage_client: A google storage client.
+        bucket_name: name of the google storage bucket
+        blob_name: full path of the destination object on google storage bucket
+                    e.g., 'subfolder/name_of_dest_file.jsonl'
+        path_to_local_file: file path of teh local file to be uploaded.
+    Returns:
+        The public url of the uploaded file.
+    """
+
+    storage_client = storage_client
+
+    bucket = storage_client.get_bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+    blob.upload_from_filename(path_to_local_file)
+
+    return blob.public_url
