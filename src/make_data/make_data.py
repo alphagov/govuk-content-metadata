@@ -90,7 +90,7 @@ def sentences_to_jsonl(dataframe, sentence_col, meta_cols, outfile):
     Specify metacols and file path to save .jsonl to.
     """
     dict_lines = []
-    for i, row in tqdm(dataframe.iterrows()):
+    for i, row in dataframe.iterrows():
         for sentence in row[sentence_col]:
             # dict_line = {"text": sentence, "meta": {"base_path": base_path, "content_id": c_id}}
             dict_line = {"text": sentence, "meta": {i: row[i] for i in meta_cols}}
@@ -109,15 +109,15 @@ if __name__ == "__main__":
     DIR_OUTPUT = os.getenv("DIR_DATA_PROCESSED")
 
     ramdom_schemas_filepath = os.path.join(
-        DIR_STRATA, "data", "schemas_stratified_random_sample.csv"
+        DIR_STRATA, "data", "20221220_schemas_stratified_random_sample.csv"
     )
     ramdom_taxons_filepath = os.path.join(
-        DIR_STRATA, "data", "taxons_stratified_random_sample.csv"
+        DIR_STRATA, "data", "20221220_taxons_stratified_random_sample.csv"
     )
     output_filepath = os.path.join(DIR_OUTPUT, "sampled_sentences.jsonl")
 
     df = load_preprocessed_content_store(
-        path_to_gz="/tmp/govukmirror/preprocessed_content_store_250522.csv.gz"
+        path_to_gz="/tmp/govukmirror/preprocessed_content_store_181122.csv.gz"
     )
     base_path_schema_list = get_base_path_sample_list(
         ramdom_schemas_filepath, col="base_path"
