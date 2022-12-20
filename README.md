@@ -148,3 +148,20 @@ aws s3 ls --profile govuk-datascience
 [infer-entities-sh]: ./src/make_data/infer_entities.sh
 [ds-role]: https://us-east-1.console.aws.amazon.com/iamv2/home?region=eu-west-1#/roles/details/govuk-datascienceusers?section=permissions
 [awscli-install]: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+
+
+## Named entities: Post-extraction processing and aggregation
+
+After the named entities are extracted by the model and uploaded to tables in the BigQuery `cpto-content-metadata.named_entities.named_entities_raw` dataset, the outputs undergoes further processing and aggregation.
+
+This post-extraction processing are executed by the [src/make_data/sql_queries/post_entity_extraction_processing.sql][src/make_data/sql_queries/post_entity_extraction_processing.sql] query, which is scheduled to run twice a month 1h after the bulk inference pipeline is expected to be finished.
+
+The query schedule is available at [cpto-content-metadata Big Query - scheduled queries] (https://console.cloud.google.com/bigquery/scheduled-queries?project=cpto-content-metadata).
+
+The query produces two BigQuey tables:
+
+1. `cpto-content-metadata.named_entities.named_entities_all`:  one line per individual entity instance with as much noise as possible removed;
+
+2. `cpto-content-metadata.named_entities.named_entities_counts`: aggregated table of counts of entity-type per url;
+
+Table (2.) is in the format for govGraph ingestion.
