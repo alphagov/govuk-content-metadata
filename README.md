@@ -129,7 +129,7 @@ A schedule is associated to the VM which runs the pipeline twice a month, on the
 
 The GCE VM instance for the Phase-1 entities is called `bulk-inference-phase1-ubuntu-gpu`.
 
-To know more about how to the VM was set up, please see [bulk_inference_pipeline/README.md(bulk_inference_pipeline/README.md).
+To know more about how to the VM was set up, please see [bulk_inference_pipeline/README.md](bulk_inference_pipeline/README.md).
 
 ## Pipeline Flow and Components
 
