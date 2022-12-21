@@ -129,7 +129,7 @@ A schedule is associated to the VM which runs the pipeline twice a month, on the
 
 The GCE VM instance for the Phase-1 entities is called `bulk-inference-phase1-ubuntu-gpu`.
 
-To know more about how to the VM was set up, please see [bulk_inference_pipeline/README.md][bulk_inference_pipeline/README.md].
+To know more about how to the VM was set up, please see [bulk_inference_pipeline/README.md(bulk_inference_pipeline/README.md).
 
 ## Pipeline Flow and Components
 
@@ -146,7 +146,7 @@ In particular:
 
 ## GCE VM specs
 
-Full info can be found in the [bulk_inference_pipeline/README.md][bulk_inference_pipeline/README.md] file, and associated bash scripts in [bulk_inference_pipeline/config_vm][bulk_inference_pipeline/config_vm].
+Full info can be found in the [bulk_inference_pipeline/README.md](bulk_inference_pipeline/README.md) file, and associated bash scripts in [bulk_inference_pipeline/config_vm](bulk_inference_pipeline/config_vm).
 
 - machine-type: n1-standard-16
 - image-family: ubuntu-2004-lts
@@ -166,7 +166,7 @@ If you are contributing to / editing the pipeline:
 ## Editing an existing pipeline
 
 The pipeline relies on the availability of a spacy NER model which is downloaded when the pipeline's Docker image is built.
-For each Entity Phase {N}, the model is defined in the `bulk_inference_pipeline/cloudbuild_phase{N}.yaml` file. For instance, for Phase-1 entities, this is the [bulk_inference_pipeline/cloudbuild_phase1.yaml][bulk_inference_pipeline/cloudbuild_phase1.yaml] file.
+For each Entity Phase {N}, the model is defined in the `bulk_inference_pipeline/cloudbuild_phase{N}.yaml` file. For instance, for Phase-1 entities, this is the [bulk_inference_pipeline/cloudbuild_phase1.yaml](bulk_inference_pipeline/cloudbuild_phase1.yaml) file.
 
 Please update the relevant `cloudbuild_phase{N}.yaml` and rebuild the image if the model (or anything in the pipeline code) changes.
 
@@ -194,7 +194,7 @@ cd bulk_inference_pipeline
 
 Re-build and re-publish the container image:
 ```shell
-gcloud builds submit --config cloudbuild_phase{N}.yaml
+gcloud builds submit --config cloudbuild_phase{N}.yaml .
 ```
 where `{N}` is the Entity Phase number, e.g. 1.
 
@@ -203,9 +203,9 @@ where `{N}` is the Entity Phase number, e.g. 1.
 
 If you need to build the pipeline for a new Entity Phase:
 
-- simply create a new `bulk_inference_pipeline/cloudbuild_phase{N}.yaml`, seeting `{N}` appropriately, and update the relevant values with that phase's information (i.e., model filepath, Docker image phase, phase number);
+- simply create a new `bulk_inference_pipeline/cloudbuild_phase{N}.yaml`, seeting `{N}` appropriately, and update the relevant values with that phase's information (i.e., model filepath, Docker image name, phase number);
 
-- then set up a new VM in GCE and attached schedule, following the instructions in [bulk_inference_pipeline/README.md][bulk_inference_pipeline/README.md].
+- then set up a new VM in GCE and attached schedule, following the instructions in [bulk_inference_pipeline/README.md](bulk_inference_pipeline/README.md).
 
 
 # Inference pipeline [run on a local machine]

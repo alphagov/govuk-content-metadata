@@ -19,7 +19,7 @@ gsutil -m cp -r gs://cpto-content-metadata/gce_vm_bulk_inference_phase1_configs/
 
 Open the `config_vm/env_vars.sh` and update the value of the environment variables as necessary.
 
-The load the variables by running:
+Then load the variables by running:
 ```shell
 source config_vm/env_vars.sh
 ```
@@ -61,7 +61,7 @@ bash config_vm/create_schedule_policy_vm.sh
 The start-up script defines which docker image to be launched every time the VM is started.
 Please modify the script (`config_vm/startup_script_vm_gce.sh`) if you need a different docker image to be launched.
 
-The inference pipeline is now scheduled to run according to the schedule specified in `config_vm/create_schedule_policy_vm.sh`. No manual actions needed.
+The inference pipeline is now scheduled to run according to the schedule specified in `config_vm/create_schedule_policy_vm.sh`; modify the schedule if needed. No manual actions needed.
 
 
 # 4. (Optional) Monitor the start-up script and execution of the docker image
