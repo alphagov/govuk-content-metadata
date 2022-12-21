@@ -19,13 +19,11 @@
           "EMAIL": "#4a0bcc",
           "PHONE": "#aaff00",
 
-          "PER-TITLE": "#79dd6f",
-          "PER-ROLE": "#00ffcc",
-          "PER-OCCUPATION": "#e4f60b",
-          "LOC-COMMON": "#ff00ee",
-          "LIFE-EVENT": "#ffdd00",
-          "TRANSACTION": "#fcf6d3",
-          "SECTOR": "#f9b750"
+          "Title": "#79dd6f",
+          "Role": "#00ffcc",
+          "Occupation": "#e4f60b",
+          "Location(CN)": "#ff00ee",
+          "Sector": "#ffdd00"
         }
       }
 }
