@@ -19,10 +19,10 @@ gcloud compute instances add-metadata ${VM_NAME} \
 
 # Create schedule
 gcloud compute resource-policies create instance-schedule ${SCHEDULE_NAME} \
-  --description='Twice on the 1st and 15th of each month, start VMs at 0:10 AM and stop VMs at 6 PM' \
+  --description='Twice on the 1st and 15th of each month, start VMs at 0:10 AM and stop VMs at 9 PM' \
   --region=europe-west2 \
   --vm-start-schedule='10 0 1,15 * *' \
-  --vm-stop-schedule='0 18 1,15 * *'
+  --vm-stop-schedule='0 21 1,15 * *'
 
 # Add the schedule
 gcloud compute instances add-resource-policies ${VM_NAME} \
