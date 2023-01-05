@@ -6,10 +6,6 @@ from io import BytesIO
 
 from bulk_inference_pipeline.src.utils import chunks
 
-# from bulk_inference_pipeline.src.extract_entities_cloud import (
-#    write_output_from_stream,
-#    extract_entities_pipe_from_tuples_to_dict,
-# )
 
 
 def test_chunks_output_type_1():
