@@ -8,21 +8,20 @@ All the commands were run from the `bulk_inference_pipeline` subdirectory:
 cd bulk_inference_pipeline
 ```
 
-All the scripts are available in the `cpto-content-metadata` Google Storage bucket.
-The following only works if you have the right permissions.
+All the scripts are available in the [bulk_inference_pipeline/config_vm](bulk_inference_pipeline/config_vm) folder.
 
-```shell
-gsutil -m cp -r gs://cpto-content-metadata/gce_vm_bulk_inference_phase1_configs/* config_vm
-```
 
 # 0. Set and upload the required environment variables
 
-Open the `config_vm/env_vars.sh` and update the value of the environment variables as necessary.
+Open the `config_vm/env_vars.sh` file and update the value of the environment variables as necessary.
 
 Then load the variables by running:
 ```shell
 source config_vm/env_vars.sh
 ```
+
+Open the `config_vm/startup_script_vm_gce.sh` file and set or update the value of the `DOCKER_IMAGE_NAME` variable (if needed).
+
 
 # 1. Create the general Ubuntu VM on GCE
 
@@ -52,7 +51,7 @@ The set-up script will:
 
 # 3. Stop the instance, add the start-up script and a schedule to the VM instance.
 
-The start-up script launches the docker image every time the VM is started.
+The start-up script launches the specified docker image every time the VM is started.
 
 ```shell
 bash config_vm/create_schedule_policy_vm.sh
@@ -62,6 +61,8 @@ The start-up script defines which docker image to be launched every time the VM 
 Please modify the script (`config_vm/startup_script_vm_gce.sh`) if you need a different docker image to be launched.
 
 The inference pipeline is now scheduled to run according to the schedule specified in `config_vm/create_schedule_policy_vm.sh`; modify the schedule if needed. No manual actions needed.
+
+Every time you modify anything in the start-up script, you'll need to re-add it to the VM instance using step (3).
 
 
 # 4. (Optional) Monitor the start-up script and execution of the docker image
