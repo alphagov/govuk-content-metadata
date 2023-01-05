@@ -3,7 +3,6 @@ import types
 import gzip
 from io import BytesIO
 
-# from unittest.mock import patch, mock_open, call
 
 from bulk_inference_pipeline.src.utils import chunks
 
