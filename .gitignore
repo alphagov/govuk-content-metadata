@@ -874,11 +874,15 @@ data/processed/*
 !data/processed/.gitkeep
 data/processed/entities/*
 !data/processed/entities/.gitkeep
+!data/training_set/**/*.jsonl
+!data/**/*.dvc
 
 # Ignore the contents of the `models` folder, except for the `README.md` file
 models/*
-models/**/
-!models/README.md
+!models/**/
+models/README.md
+models/mdl_ner_trf_b1_b4/*
+!models/**/*.dvc
 
 # Ignore the `docs/reference/api` folder
 docs/reference/api/*
@@ -904,3 +908,9 @@ src/make_strata/data/*
 corpus/*
 corpus/**/
 !corpus/README.md
+
+#ignore anything with .spacy
+**/**/*.spacy
+
+prodigy_annotation/data/*
+prodigy_annotation/wheel/*

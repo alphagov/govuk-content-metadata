@@ -1,0 +1,4 @@
+['remote "cpto-ner-dvc-data"']
+    url = gs://cpto-content-metadata/dvc_data
+['remote "cpto-ner-dvc-models"']
+    url = gs://cpto-content-metadata/dvc_models

@@ -56,69 +56,39 @@ Unless stated otherwise, the codebase is released under the MIT License. This co
 both the codebase and any sample code in the documentation. The documentation is ©
 Crown copyright and available under the terms of the Open Government 3.0 licence.
 
-## Contributing
+# Data Version Control (DVC)
 
-[If you want to help us build, and improve `govuk-content-metadata`, view our
-contributing guidelines][contributing].
+[DVC](dvc.org) is used in this project for version control of data and models.
 
-## Acknowledgements
+Requirements:
+- You must have read and write access to the [project GCP repository](gs://cpto-content-metadata)
+- DVC installed with `pip install 'dvc[gs]'`
+- Authenticated to used GCloud `gcloud auth application-default login`
 
-[This project structure is based on the `govcookiecutter` template
-project][govcookiecutter].
+The project uses two DVC remotes; for data and models, respectively.
 
-[contributing]: CONTRIBUTING.md
-[govcookiecutter]: https://github.com/best-practice-and-impact/govcookiecutter
-[docs-loading-environment-variables]: ./docs/user_guide/loading_environment_variables.md
-[docs-loading-environment-variables-secrets]: ./docs/user_guide/loading_environment_variables.md#storing-secrets-and-credentials
+To run:
 
+1. Pull the latest models DVC
+  ```shell
+  dvc pull -r cpto-ner-dvc-models
+  ```
+2. Pull the latest training data DVC
+  ```shell
+  dvc pull -r cpto-ner-dvc-data
+  ```
 
-<!-- SPACY PROJECT: AUTO-GENERATED DOCS START (do not remove) -->
+This should populate your local model and data folders from remote storage on GCP.
 
-# 🪐 spaCy Project: Content Metadata NER
+To commit/push the most recent data and models following updates. Use
+```bash
+dvc push```
+and
+```bash
+dvc pull```
+in place above.
 
-A project for building a language model for HM Government
-
-## 📋 project.yml
-
-The [`project.yml`](project.yml) defines the data assets required by the
-project, as well as the available commands and workflows. For details, see the
-[spaCy projects documentation](https://spacy.io/usage/projects).
-
-### ⏯ Commands
-
-The following commands are defined by the project. They
-can be executed using [`spacy project run [name]`](https://spacy.io/api/cli#project-run).
-Commands are only re-run if their inputs have changed.
-
-| Command | Description |
-| --- | --- |
-| `download` | Download a spaCy model with pretrained vectors |
-| `db-in` | Load labelled .jsonl file data into prodigy |
-| `train_prodigy` | Train a named entity recognition model with Prodigy |
-| `train_curve` | Train the model with Prodigy by using different portions of training examples to evaluate if more annotations can potentially improve the performance |
-
-### ⏭ Workflows
-
-The following workflows are defined by the project. They
-can be executed using [`spacy project run [name]`](https://spacy.io/api/cli#project-run)
-and will run the specified commands in order. Commands are only re-run if their
-inputs have changed.
-
-| Workflow | Steps |
-| --- | --- |
-| `all` | `db-in` &rarr; `train_prodigy` &rarr; `train_curve` |
-
-### 🗂 Assets
-
-The following assets are defined by the project. They can
-be fetched by running [`spacy project assets`](https://spacy.io/api/cli#project-assets)
-in the project directory.
-
-| File | Source | Description |
-| --- | --- | --- |
-| `data/gold/mark_goppepdm.jsonl` | Local | JSONL-formatted training data exported from Prodigy (2970 examples) |
-
-<!-- SPACY PROJECT: AUTO-GENERATED DOCS END (do not remove) -->
+For more information, visit [Syncing Data to GCP Storage Buckets](https://iterative.ai/blog/using-gcp-remotes-in-dvc)
 
 
 # Inference pipeline [run on a VM with GPU on Google Compute Engine]
@@ -244,3 +214,21 @@ docker run -v "$HOME/.config/gcloud:/gcp/config:ro" \
 ```
 
 where <DOCKER_IMAGE_NAME> is the name of the pipeline's docker image.
+
+
+## Named entities: Post-extraction processing and aggregation
+
+After the named entities are extracted by the model and uploaded to tables in the BigQuery `cpto-content-metadata.named_entities.named_entities_raw` dataset, the outputs undergoes further processing and aggregation.
+
+This post-extraction processing are executed by the [src/make_data/sql_queries/post_entity_extraction_processing.sql][src/make_data/sql_queries/post_entity_extraction_processing.sql] query, which is scheduled to run twice a month 1h after the bulk inference pipeline is expected to be finished.
+
+The query's schedule is available at [cpto-content-metadata Big Query - scheduled queries] (https://console.cloud.google.com/bigquery/scheduled-queries?project=cpto-content-metadata).
+
+The query produces two BigQuey tables:
+
+1. `cpto-content-metadata.named_entities.named_entities_all`:  one line per individual entity instance with as much noise as possible removed;
+
+2. `cpto-content-metadata.named_entities.named_entities_counts`: aggregated table of counts of entity-type per url;
+
+Table (2.) is in the format for govGraph ingestion.
+

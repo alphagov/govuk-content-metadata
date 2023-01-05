@@ -1,0 +1,23 @@
+db-in:
+  cmd: python -m spacy run db-in
+  script:
+    - python3 -m prodigy db-in phase_1_annotations assets/phase_1_annotations.jsonl
+  deps:
+    - path: assets/phase_1_annotations.jsonl
+      md5: 6e1fa78c092389b2f488717342543182
+  outs: []
+  spacy_version: 3.2.4
+  spacy_git_version: b50fe5ec6
+data-to-spacy:
+  cmd: python -m spacy run data-to-spacy
+  script:
+    - python3 -m prodigy data-to-spacy ./corpus --ner phase_1_annotations --eval-split
+      0.2 --verbose --config configs/config.cfg
+  deps: []
+  outs:
+    - path: corpus/train.spacy
+      md5: d9015bc51afbaafe722c042a978b1fc2
+    - path: corpus/dev.spacy
+      md5: 0c272f260a7345bbd8054423f1b12ef8
+  spacy_version: 3.2.4
+  spacy_git_version: b50fe5ec6

@@ -1,0 +1,31 @@
+{
+    "port": 8080,
+    "host": "0.0.0.0",
+    "feed_overlap": false,
+    "show_stats": true,
+    "instructions": "./instructions/phase2_instructions.html",
+    "show_flag":true,
+    "hide_meta":false,
+
+    "custom_theme": {
+        "labels": {
+          "FORM": "#79dd6f",
+          "GPE": "#00ffcc",
+          "MONEY": "#e4f60b",
+          "ORG": "#ff00ee",
+          "PERSON": "#ffdd00",
+          "DATE": "#fcf6d3",
+          "POSTCODE": "#f9b750",
+          "EMAIL": "#4a0bcc",
+          "PHONE": "#aaff00",
+
+          "PER-TITLE": "#79dd6f",
+          "PER-ROLE": "#00ffcc",
+          "PER-OCCUPATION": "#e4f60b",
+          "LOC-COMMON": "#ff00ee",
+          "LIFE-EVENT": "#ffdd00",
+          "TRANSACTION": "#fcf6d3",
+          "SECTOR": "#f9b750"
+        }
+      }
+}
