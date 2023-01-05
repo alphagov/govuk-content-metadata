@@ -7,7 +7,6 @@ from io import BytesIO
 from bulk_inference_pipeline.src.utils import chunks
 
 
-
 def test_chunks_output_type_1():
     """Assert output of chunks() is a generator"""
     input_generator = (x for x in range(0, 20))
@@ -46,5 +45,3 @@ def in_memory_gzipped_csv():
     # Seek back to the beginning of the file
     stream.seek(0)
     return stream
-
-
