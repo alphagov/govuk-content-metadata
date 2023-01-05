@@ -82,10 +82,12 @@ This should populate your local model and data folders from remote storage on GC
 
 To commit/push the most recent data and models following updates. Use
 ```bash
-dvc push```
+dvc push
+```
 and
 ```bash
-dvc pull```
+dvc pull
+```
 in place above.
 
 For more information, visit [Syncing Data to GCP Storage Buckets](https://iterative.ai/blog/using-gcp-remotes-in-dvc)
@@ -231,4 +233,3 @@ The query produces two BigQuey tables:
 2. `cpto-content-metadata.named_entities.named_entities_counts`: aggregated table of counts of entity-type per url;
 
 Table (2.) is in the format for govGraph ingestion.
-
