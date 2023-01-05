@@ -185,7 +185,7 @@ And, in addition:
 
 ## Editing and re-deplying the pipeline to GCE
 
-After you have done with your editing to the pipeline, you need to re-build the container image and publish it to the Artefact repository so that this will be pulled from the repository and launched when the VM is started.
+After you have done with your editing to the pipeline, you need to re-build the container image and publish it to Artifact Registry so that this will be pulled from the repository and launched when the VM is started.
 
 Ensure you are in the sub-directory that contains the `Dockerfile`:
 ```shell
