@@ -3,8 +3,8 @@
 -- (2) cpto-content-metadata.named_entities.named_entities_counts
 
 -- At the moment, this query is attached to the following schedule
--- found at: https://console.cloud.google.com/bigquery/scheduled-queries/locations/ \
---     us/configs/63d1df30-0000-2629-90c0-001a114d40b2/runs?project=cpto-content-metadata
+-- name: "RUN SCHEDULED Post-extraction processing and count of named entities"
+-- found at: https://console.cloud.google.com/bigquery/scheduled-queries?project=cpto-content-metadata
 
 
 -- (1) post-extraction cleaning:
@@ -14,6 +14,18 @@
 -- REMOVE NOISE 3: exclude entity instances that contain no ascii character at all
 -- create url for each unique combination of entity's name and type
 -- only keep lines with entities extracted
+
+CREATE TEMPORARY FUNCTION ENCODE_URI_COMPONENT(strings STRING)
+RETURNS STRING
+LANGUAGE js AS """
+if (strings == null) return null;
+try {
+  return encodeURIComponent(strings);
+} catch (e) {
+  return strings;
+}"""
+;
+
 CREATE OR REPLACE TABLE `cpto-content-metadata.named_entities.named_entities_all` AS
 
 WITH ents_all AS (
@@ -50,7 +62,7 @@ WHERE entities[SAFE_OFFSET(0)].name IS NOT null
 -- create url for each unique combination of entity's name and type
 SELECT
   *,
-  CONCAT('https://www.gov.uk/named-entity/', REPLACE(name_lower, ' ', '_'), type) AS url_entity_nametype,
+  CONCAT('https://www.gov.uk/named-entity/', type, '/', ENCODE_URI_COMPONENT(name_lower)) AS url_entity_nametype
 FROM ents_all
 WHERE (NOT (REGEXP_CONTAINS(name_lower, r"^[^\p{ASCII}]") AND type="ORG")) AND (NOT (REGEXP_CONTAINS(name_lower, r'^[�#£"]') AND type='ORG')) AND (CHAR_LENGTH(name_lower) > 1) AND (ARRAY_LENGTH(REGEXP_EXTRACT_ALL(REPLACE(name_lower, ' ', ''), r"[\p{ASCII}]")) > 0)
 ORDER BY url
