@@ -1,0 +1,39 @@
+[
+    {
+        "name": "url",
+        "type": "STRING",
+        "mode": "NULLABLE"
+    },
+    {
+        "name": "entities",
+        "type": "RECORD",
+        "mode": "REPEATED",
+        "fields": [
+            {
+                "name": "name",
+                "type": "STRING",
+                "mode": "NULLABLE"
+            },
+            {
+                "name": "type",
+                "type": "STRING",
+                "mode": "NULLABLE"
+            },
+            {
+                "name": "start",
+                "type": "INTEGER",
+                "mode": "NULLABLE"
+            },
+            {
+                "name": "end",
+                "type": "INTEGER",
+                "mode": "NULLABLE"
+            }
+        ]
+    },
+    {
+        "name": "line_number",
+        "type": "INTEGER",
+        "mode": "NULLABLE"
+    }
+]

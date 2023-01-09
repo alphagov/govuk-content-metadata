@@ -1,0 +1,13 @@
+gcp_metadata:
+  project_id: cpto-content-metadata
+  bq_content_dataset: content_ner
+  bq_content_tables:
+    intermediate_table: filtered_url
+    text: text
+    title: title
+    description: description
+  gs_bucket: cpto-content-metadata
+  gs_folder: content_ner
+gcp_govgraph:
+  project_id: govuk-knowledge-graph
+  bq_content_dataset: content

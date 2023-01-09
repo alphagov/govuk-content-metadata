@@ -14,6 +14,7 @@
 requirements:
 	python -m pip install -U pip setuptools
 	python -m pip install -r requirements.txt
+	python -m pip install -r bulk_inference_pipeline/requirements-inference-bulk.txt
 	python -m spacy download en_core_web_md
 	python -m spacy download en_core_web_lg
 	pre-commit install
