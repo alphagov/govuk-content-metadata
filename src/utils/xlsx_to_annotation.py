@@ -11,7 +11,7 @@ import argparse
 import json
 
 
-def excel_to_df(excel_file, sheet_names) -> pd.DataFrame:
+def excel_to_df(excel_file) -> pd.DataFrame:
     """Converts an excel sheet with one or more tabs into a single DataFrame.
 
     Args:
@@ -20,13 +20,12 @@ def excel_to_df(excel_file, sheet_names) -> pd.DataFrame:
     Returns:
         pd.DataFrame: Concatenated DataFrame of the tab(s).
     """
-    dfs = pd.read_excel(excel_file, sheet_name=[i for i in sheet_names])
-    concat = pd.concat([dfs[i] for i in sheet_names])
-    return concat
+    df = pd.read_excel(excel_file)
+    return df
 
 
-def df_to_match_patterns(dataframe, outfile) -> json:
-    """Converts rows of a DataFrame into Spacy match pattern format.
+def df_to_annotation_set(dataframe, outfile) -> json:
+    """Converts rows of a DataFrame into Prodiogy annotataion format.
 
     Args:
         dataframe (_type_): DataFrame
@@ -37,13 +36,10 @@ def df_to_match_patterns(dataframe, outfile) -> json:
     """
     with open(outfile, 'w') as file:
         for i, val in dataframe.iterrows():
-            pattern_list = [{"LOWER": j.lower()} for j in val['SeedTerm'].split(" ")]
-            pattern = {"label": val['EntityType'], "pattern":pattern_list}
-            # pattern = {"label": val['EntityType'], "pattern":[{"lower": val['SeedTerm']}]}
+            pattern = {"text": str(val['line']), "meta": {"url": val['url'], "line_number": val['line_number'], "regex_or_rand": val['regex_or_rand'], "cat": val['cat']}}
             print(pattern)
             file.write(json.dumps(pattern))
             file.write("\n")
-            # file.write(pattern)
 
 
 if __name__ == "__main__":
@@ -52,12 +48,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Add an argument
     parser.add_argument('--excel_file', type=str, required=True)
-    parser.add_argument('--sheet_names', type=str, required=True)
     parser.add_argument('--out_file', type=str, required=True)
     
     # Parse the argument
     args = parser.parse_args()
-    sheet_names_list = args.sheet_names.split(',')
-    print(sheet_names_list)
-    df = excel_to_df(args.excel_file, sheet_names_list)
-    df_to_match_patterns(df, args.out_file)
+    df = excel_to_df(args.excel_file)
+    df_to_annotation_set(df, args.out_file)
