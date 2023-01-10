@@ -63,7 +63,7 @@ It follows a three-stage process:
 
 When in your containerised environment, you can run any prodigy commands as usual. For example:
 ```bash
-prodigy ner.manual example_dataset en_core_web_md ./data/example_sentences.jsonl --label LABEL1,LABEL2,LABEL3
+prodigy ner.manual phase_2_test_subset400_rh blank:en data/phase_2_test_subset400.jsonl --label PER-TITLE,LOC-COMMON,SECTOR,PER-ROLE,PER-OCCUPATION --patterns data/phase_2_patterns_no_occ.jsonl 
 ```
 As the volume has been mounted between your host machine and the container in step 3, all databases will be saved in your local environment as well as the container.
 

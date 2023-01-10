@@ -1,7 +1,6 @@
 {
     "port": 8080,
     "host": "0.0.0.0",
-    "feed_overlap": false,
     "show_stats": true,
     "instructions": "./instructions/phase2_instructions.html",
     "show_flag":true,
@@ -19,11 +18,11 @@
           "EMAIL": "#4a0bcc",
           "PHONE": "#aaff00",
 
-          "Title": "#79dd6f",
-          "Role": "#00ffcc",
-          "Occupation": "#e4f60b",
-          "Location(CN)": "#ff00ee",
-          "Sector": "#ffdd00"
+          "PER-TITLE": "#79dd6f",
+          "PER-ROLE": "#00ffcc",
+          "PER-OCCUPATION": "#e4f60b",
+          "LOC-COMMON": "#ff00ee",
+          "SECTOR": "#ffdd00"
         }
       }
 }
