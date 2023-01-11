@@ -19,7 +19,7 @@ DECLARE sector_regex STRING DEFAULT r"(?i)\s(AGRICULTURE, FORESTRY AND FISHING|A
 -- CREATE OR REPLACE TABLE `cpto-content-metadata.phase2_categories.primarytable_titles` AS
 
 -- WITH title_categories AS (
---   SELECT 
+--   SELECT
 --   *,
 --   0 AS line_number,
 --   REGEXP_CONTAINS( title, title_regex) AS contains_title,
@@ -35,24 +35,24 @@ DECLARE sector_regex STRING DEFAULT r"(?i)\s(AGRICULTURE, FORESTRY AND FISHING|A
 -- FROM `cpto-content-metadata.content_ner.title`
 -- )
 
--- SELECT url, 
---       title, 
+-- SELECT url,
+--       title,
 --       line_number,
---       title_categories.contains_title, 
---       title_categories.contains_loc, 
+--       title_categories.contains_title,
+--       title_categories.contains_loc,
 --       title_categories.contains_role,
---       title_categories.contains_occupation, 
---       title_categories.contains_sector, 
---       title_categories.which_title, 
---       title_categories.which_loc, 
+--       title_categories.contains_occupation,
+--       title_categories.contains_sector,
+--       title_categories.which_title,
+--       title_categories.which_loc,
 --       title_categories.which_role,
---       title_categories.which_occupation, 
+--       title_categories.which_occupation,
 --       title_categories.which_sector
 -- FROM title_categories
--- WHERE (contains_title IS true) 
--- OR (contains_loc IS true) 
+-- WHERE (contains_title IS true)
+-- OR (contains_loc IS true)
 -- OR (contains_role IS true)
--- OR (contains_occupation IS true) 
+-- OR (contains_occupation IS true)
 -- OR (contains_sector IS true)
 -- ORDER BY url, line_number;
 
@@ -61,7 +61,7 @@ DECLARE sector_regex STRING DEFAULT r"(?i)\s(AGRICULTURE, FORESTRY AND FISHING|A
 -- CREATE OR REPLACE TABLE `cpto-content-metadata.phase2_categories.primarytable_descriptions` AS
 
 -- WITH description_categories AS (
---   SELECT 
+--   SELECT
 --   *,
 --   0.5 AS line_number,
 --   REGEXP_CONTAINS( description, title_regex) AS contains_title,
@@ -77,32 +77,32 @@ DECLARE sector_regex STRING DEFAULT r"(?i)\s(AGRICULTURE, FORESTRY AND FISHING|A
 -- FROM `cpto-content-metadata.content_ner.description`
 -- )
 
--- SELECT url, 
---       description, 
+-- SELECT url,
+--       description,
 --       line_number,
---       description_categories.contains_title, 
---       description_categories.contains_loc, 
+--       description_categories.contains_title,
+--       description_categories.contains_loc,
 --       description_categories.contains_role,
---       description_categories.contains_occupation, 
---       description_categories.contains_sector, 
---       description_categories.which_title, 
---       description_categories.which_loc, 
+--       description_categories.contains_occupation,
+--       description_categories.contains_sector,
+--       description_categories.which_title,
+--       description_categories.which_loc,
 --       description_categories.which_role,
---       description_categories.which_occupation, 
+--       description_categories.which_occupation,
 --       description_categories.which_sector
 -- FROM description_categories
--- WHERE (contains_title IS true) 
--- OR (contains_loc IS true) 
+-- WHERE (contains_title IS true)
+-- OR (contains_loc IS true)
 -- OR (contains_role IS true)
--- OR (contains_occupation IS true) 
+-- OR (contains_occupation IS true)
 -- OR (contains_sector IS true)
 -- ORDER BY url, line_number;
 
 -- lines
-CREATE OR REPLACE TABLE `cpto-content-metadata.phase2_categories.primarytable_lines` AS 
+CREATE OR REPLACE TABLE `cpto-content-metadata.phase2_categories.primarytable_lines` AS
 
 WITH line_categories AS (
-  SELECT 
+  SELECT
   *,
   REGEXP_CONTAINS( line, title_regex) AS contains_title,
   REGEXP_EXTRACT_ALL(line, title_regex) AS which_title,
@@ -117,23 +117,23 @@ WITH line_categories AS (
 FROM `cpto-content-metadata.content_ner.text_clean`
 )
 
-SELECT url, 
-    line, 
+SELECT url,
+    line,
     line_number,
-    line_categories.contains_title, 
-    line_categories.contains_loc, 
+    line_categories.contains_title,
+    line_categories.contains_loc,
     line_categories.contains_role,
-    line_categories.contains_occupation, 
-    line_categories.contains_sector, 
-    line_categories.which_title, 
-    line_categories.which_loc, 
+    line_categories.contains_occupation,
+    line_categories.contains_sector,
+    line_categories.which_title,
+    line_categories.which_loc,
     line_categories.which_role,
-    line_categories.which_occupation, 
+    line_categories.which_occupation,
     line_categories.which_sector
 FROM line_categories
-WHERE (contains_title IS true) 
-OR (contains_loc IS true) 
+WHERE (contains_title IS true)
+OR (contains_loc IS true)
 OR (contains_role IS true)
-OR (contains_occupation IS true) 
+OR (contains_occupation IS true)
 OR (contains_sector IS true)
 ORDER BY url, line_number;

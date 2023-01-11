@@ -1,6 +1,6 @@
 # `src/make_data` folder overview
 
-This folder contains various scripts and functions that are used at various points throughout the project. The purpose of the scripts in these section are always to contribute to the creation of datasets, be it for generating data for annotation, or creating a dataset for another reason. 
+This folder contains various scripts and functions that are used at various points throughout the project. The purpose of the scripts in these section are always to contribute to the creation of datasets, be it for generating data for annotation, or creating a dataset for another reason.
 
 There are 4 .sql files that are used for creating an annotation set. These are all prefixed with `Ann-0x...`:
 

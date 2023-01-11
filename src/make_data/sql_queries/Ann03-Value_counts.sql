@@ -17,7 +17,7 @@ SELECT unnest_which_loc_l, COUNT(unnest_which_loc_l) as loc_count
 FROM categories, UNNEST(categories.which_loc_l) as unnest_which_loc_l
 WHERE (contains_loc IS true)
 GROUP BY unnest_which_loc_l
-ORDER BY loc_count DESC; 
+ORDER BY loc_count DESC;
 
 -- role value counts
 CREATE OR REPLACE TABLE `cpto-content-metadata.phase2_categories.phase2_role_counts_lower` AS
@@ -26,7 +26,7 @@ SELECT unnest_which_role_l, COUNT(unnest_which_role_l) as role_count
 FROM categories, UNNEST(categories.which_role_l) as unnest_which_role_l
 WHERE (contains_role IS true)
 GROUP BY unnest_which_role_l
-ORDER BY role_count DESC; 
+ORDER BY role_count DESC;
 
 -- occupation value counts
 CREATE OR REPLACE TABLE `cpto-content-metadata.phase2_categories.phase2_occupation_counts_lower` AS
@@ -35,7 +35,7 @@ SELECT unnest_which_occupation_l, COUNT(unnest_which_occupation_l) as occupation
 FROM categories, UNNEST(categories.which_occupation_l) as unnest_which_occupation_l
 WHERE (contains_occupation IS true)
 GROUP BY unnest_which_occupation_l
-ORDER BY occupation_count DESC; 
+ORDER BY occupation_count DESC;
 
 -- sector value counts
 CREATE OR REPLACE TABLE `cpto-content-metadata.phase2_categories.phase2_sector_counts_lower` AS
@@ -44,4 +44,4 @@ SELECT unnest_which_sector_l, COUNT(unnest_which_sector_l) as sector_count
 FROM categories, UNNEST(categories.which_sector_l) as unnest_which_sector_l
 WHERE (contains_sector IS true)
 GROUP BY unnest_which_sector_l
-ORDER BY sector_count DESC; 
+ORDER BY sector_count DESC;

@@ -23,7 +23,7 @@ sector_true AS(
 ),
 joined AS(
   SELECT * FROM title_true
-  UNION ALL 
+  UNION ALL
   SELECT * FROM role_true
   UNION ALL
   SELECT * FROM loc_true
@@ -39,10 +39,10 @@ rand_samp AS(
   SELECT url, line_number, line, "rand" as regex_or_rand, "rand" as cat FROM `cpto-content-metadata.content_ner.text`
   ORDER BY RAND() LIMIT 1000
 )
-SELECT 
+SELECT
 * FROM joined_regexp
 UNION ALL
-SELECT 
+SELECT
 * FROM rand_samp
 ORDER BY cat
 );

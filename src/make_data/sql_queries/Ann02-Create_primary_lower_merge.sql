@@ -4,7 +4,7 @@ CREATE OR REPLACE TABLE `cpto-content-metadata.phase2_categories.primarytable_lo
 
 WITH merged_table AS (
   SELECT *, title as line FROM `cpto-content-metadata.phase2_categories.primarytable_titles`
-  UNION ALL 
+  UNION ALL
   SELECT *, description as line FROM `cpto-content-metadata.phase2_categories.primarytable_descriptions`
   UNION ALL
   SELECT *, line as line FROM `cpto-content-metadata.phase2_categories.primarytable_lines`
@@ -18,15 +18,15 @@ SELECT url,
       contains_role,
       contains_occupation,
       contains_sector,
-  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string)) 
+  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string))
     FROM UNNEST(which_title) AS item) AS which_title_l,
-  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string)) 
+  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string))
     FROM UNNEST(which_loc) AS item) AS which_loc_l,
-  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string)) 
+  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string))
     FROM UNNEST(which_role) AS item) AS which_role_l,
-  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string)) 
+  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string))
     FROM UNNEST(which_occupation) AS item) AS which_occupation_l,
-  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string)) 
+  (SELECT ARRAY_AGG(CAST(LOWER(item) AS string))
     FROM UNNEST(which_sector) AS item) AS which_sector_l
 FROM merged_table
 ORDER BY url, line_number;
