@@ -1,0 +1,174 @@
+# Google Workflow
+#
+# (1) BigQuery sql query 1
+# post-extraction cleaning:
+# -- create a new column containing the lower-case name of the entity instance
+# -- REMOVE NOISE 1: exclude entity instances that start with non-ascii symbol (e.g., '- hello') and are tagged as ORG
+# -- REMOVE NOISE 2: exclude entities that consist of a single character
+# -- REMOVE NOISE 3: exclude entity instances that contain no ascii character at all
+# -- create url for each unique combination of entity's name and type
+# -- only keep lines with entities extracted
+#
+# (2) Big Query sql query 2
+# aggregate and count by gov.uk url
+#
+# (3) export counts from big query to google storage bucket
+
+- init:
+    assign:
+      - project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+      - bq_dataset_id: "named_entities"
+      - table_id_1_processed: "named_entities_all"
+      - table_id_2_counts: "named_entities_counts"
+      - query1_processed: "CREATE TEMPORARY FUNCTION ENCODE_URI_COMPONENT(strings STRING)
+              RETURNS STRING
+              LANGUAGE js AS '''
+              if (strings == null) return null;
+              try {
+                return encodeURIComponent(strings);
+              } catch (e) {
+                return strings;
+              }'''
+              ;
+          WITH ents_all AS (
+            SELECT
+              url,
+              entities[SAFE_OFFSET(0)].name,
+              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
+              entities[SAFE_OFFSET(0)].type,
+              'title' AS part_of_page
+            FROM `cpto-content-metadata.named_entities_raw.title_1`
+            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
+            UNION ALL
+            SELECT
+              url,
+              entities[SAFE_OFFSET(0)].name,
+              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
+              entities[SAFE_OFFSET(0)].type,
+              'description' AS part_of_page
+            FROM `cpto-content-metadata.named_entities_raw.description_1`
+            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
+            UNION ALL
+            SELECT
+              url,
+              entities[SAFE_OFFSET(0)].name AS name,
+              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
+              entities[SAFE_OFFSET(0)].type,
+              'text' AS part_of_page
+            FROM `cpto-content-metadata.named_entities_raw.text_1`
+            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
+            )
+            SELECT
+              *,
+              CONCAT('https://www.gov.uk/named-entity/', type, '/', ENCODE_URI_COMPONENT(name_lower)) AS url_entity_nametype,
+            FROM ents_all
+            WHERE (NOT (REGEXP_CONTAINS(name_lower, r'^[^[:ascii:]+]') AND type='ORG')) AND (NOT (REGEXP_CONTAINS(name_lower, r'^[�#£\"*-]') AND type='ORG')) AND (CHAR_LENGTH(name_lower) > 1) AND (ARRAY_LENGTH(REGEXP_EXTRACT_ALL(REPLACE(name_lower, ' ', ''), r'[[:ascii:]]')) > 0)
+            ORDER BY url
+            ;"
+      - query2_get_counts: "WITH title_counts AS (
+              SELECT
+                url, name_lower, type, url_entity_nametype,
+                COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS title_count
+              FROM `cpto-content-metadata.named_entities.named_entities_all`
+              WHERE part_of_page = 'title'
+              ),
+              description_counts AS (
+              SELECT
+                url, name_lower, type, url_entity_nametype,
+                COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS description_count
+              FROM `cpto-content-metadata.named_entities.named_entities_all`
+              WHERE part_of_page = 'description'
+              ),
+              text_counts AS (
+              SELECT
+                url, name_lower, type, url_entity_nametype,
+                COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS text_count
+              FROM `cpto-content-metadata.named_entities.named_entities_all`
+              WHERE part_of_page = 'text'
+              ),
+              total_counts AS (
+                SELECT
+                url, name_lower, type, url_entity_nametype,
+                COUNT(*) AS total_count
+              FROM `cpto-content-metadata.named_entities.named_entities_all`
+              GROUP BY url, name_lower, type, url_entity_nametype
+              ),
+              combined_counts AS (
+              SELECT
+                *
+                FROM title_counts
+                FULL JOIN description_counts USING(url, name_lower, type, url_entity_nametype)
+                FULL JOIN text_counts USING(url, name_lower, type, url_entity_nametype)
+                FULL JOIN total_counts USING(url, name_lower, type, url_entity_nametype)
+              )
+              SELECT DISTINCT
+              url,
+              name_lower,
+              type,
+              url_entity_nametype,
+              IFNULL(title_count, 0) AS title_count,
+              IFNULL(description_count, 0) AS description_count,
+              IFNULL(text_count, 0) AS text_count,
+              IFNULL(total_count, 0) AS total_count,
+              FROM combined_counts
+              ORDER BY url
+              ;"
+      - create_disposition: "CREATE_IF_NEEDED"  # create a new one if table doesn't exist
+      - write_disposition: "WRITE_TRUNCATE"  # truncate it if the table already exists
+      - gs_bucket: "cpto-content-metadata"
+      - gs_folder: "named_entities_counts"
+      - gs_filename: "named_entities_counts.csv.gz"
+
+- bq_clean_and_process_raw_entities:
+    call: googleapis.bigquery.v2.jobs.insert
+    args:
+      projectId: ${project_id}
+      body:
+        configuration:
+          query:
+            query: ${query1_processed}
+            destinationTable:
+              projectId: ${project_id}
+              datasetId: ${bq_dataset_id}
+              tableId: ${table_id_1_processed}
+            create_disposition: ${create_disposition}
+            write_disposition: ${write_disposition}
+            allowLargeResults: true
+            useLegacySql: false
+
+- bq_aggregate_and_count_entities:
+    call: googleapis.bigquery.v2.jobs.insert
+    args:
+      projectId: ${project_id}
+      body:
+        configuration:
+          query:
+            query: ${query2_get_counts}
+            destinationTable:
+              projectId: ${project_id}
+              datasetId: ${bq_dataset_id}
+              tableId: ${table_id_2_counts}
+            create_disposition: ${create_disposition}
+            write_disposition: ${write_disposition}
+            allowLargeResults: true
+            useLegacySql: false
+
+- bq_table_to_gcs:
+    call: googleapis.bigquery.v2.jobs.insert
+    args:
+        projectId: ${project_id}
+        body:
+            configuration:
+                extract:
+                    compression: GZIP
+                    destinationFormat: "CSV"
+                    destinationUris: ['${"gs://" + gs_bucket + "/" + gs_folder + "/" + gs_filename}']
+                    fieldDelimiter: ","
+                    printHeader: true
+                    sourceTable:
+                        projectId: ${project_id}
+                        datasetId: ${bq_dataset_id}
+                        tableId: ${table_id_2_counts}
+
+- the_end:
+    return: "SUCCESS"

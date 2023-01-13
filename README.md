@@ -222,14 +222,14 @@ where <DOCKER_IMAGE_NAME> is the name of the pipeline's docker image.
 
 After the named entities are extracted by the model and uploaded to tables in the BigQuery `cpto-content-metadata.named_entities.named_entities_raw` dataset, the outputs undergoes further processing and aggregation.
 
-This post-extraction processing are executed by the [src/make_data/sql_queries/post_entity_extraction_processing.sql][src/make_data/sql_queries/post_entity_extraction_processing.sql] query, which is scheduled to run twice a month 1h after the bulk inference pipeline is expected to be finished.
+This post-extraction processing are executed by a google Workflow which is scheduled to run twice a month 1h after the bulk inference pipeline is expected to be finished.
 
-The query's schedule is available at [cpto-content-metadata Big Query - scheduled queries] (https://console.cloud.google.com/bigquery/scheduled-queries?project=cpto-content-metadata).
+All information about the post-extraction Workflow can be found in the [src/post_extraction_process](src/post_extraction_process) sub-directory.
 
-The query produces two BigQuey tables:
+The Workflow produces two BigQuey tables:
 
 1. `cpto-content-metadata.named_entities.named_entities_all`:  one line per individual entity instance with as much noise as possible removed;
 
 2. `cpto-content-metadata.named_entities.named_entities_counts`: aggregated table of counts of entity-type per url;
 
-Table (2.) is in the format for govGraph ingestion.
+Table (2.) is then exported to a CSV.GZ file to a Google Storage bucket [gs://cpto-content-metadata/named_entities_counts/named_entities_counts.csv.gz](gs://cpto-content-metadata/named_entities_counts/named_entities_counts.csv.gz) that it is ready for govGraph ingestion.
