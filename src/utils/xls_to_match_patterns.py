@@ -15,7 +15,7 @@ def excel_to_df(excel_file, sheet_names) -> pd.DataFrame:
     """Converts an excel sheet with one or more tabs into a single DataFrame.
 
     Args:
-        excel_file (_type_): A .xlsx file. 
+        excel_file (_type_): A .xlsx file.
 
     Returns:
         pd.DataFrame: Concatenated DataFrame of the tab(s).
@@ -35,10 +35,10 @@ def df_to_match_patterns(dataframe, outfile) -> json:
     Returns:
         json: .JSONL file
     """
-    with open(outfile, 'w') as file:
+    with open(outfile, "w") as file:
         for i, val in dataframe.iterrows():
-            pattern_list = [{"LOWER": j.lower()} for j in val['SeedTerm'].split(" ")]
-            pattern = {"label": val['EntityType'], "pattern":pattern_list}
+            pattern_list = [{"LOWER": j.lower()} for j in val["SeedTerm"].split(" ")]
+            pattern = {"label": val["EntityType"], "pattern": pattern_list}
             # pattern = {"label": val['EntityType'], "pattern":[{"lower": val['SeedTerm']}]}
             print(pattern)
             file.write(json.dumps(pattern))
@@ -51,13 +51,13 @@ if __name__ == "__main__":
     # Create the parser
     parser = argparse.ArgumentParser()
     # Add an argument
-    parser.add_argument('--excel_file', type=str, required=True)
-    parser.add_argument('--sheet_names', type=str, required=True)
-    parser.add_argument('--out_file', type=str, required=True)
-    
+    parser.add_argument("--excel_file", type=str, required=True)
+    parser.add_argument("--sheet_names", type=str, required=True)
+    parser.add_argument("--out_file", type=str, required=True)
+
     # Parse the argument
     args = parser.parse_args()
-    sheet_names_list = args.sheet_names.split(',')
+    sheet_names_list = args.sheet_names.split(",")
     print(sheet_names_list)
     df = excel_to_df(args.excel_file, sheet_names_list)
     df_to_match_patterns(df, args.out_file)

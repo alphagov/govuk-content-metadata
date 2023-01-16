@@ -15,7 +15,7 @@ def excel_to_df(excel_file) -> pd.DataFrame:
     """Converts an excel sheet with one or more tabs into a single DataFrame.
 
     Args:
-        excel_file (_type_): A .xlsx file. 
+        excel_file (_type_): A .xlsx file.
 
     Returns:
         pd.DataFrame: Concatenated DataFrame of the tab(s).
@@ -34,9 +34,17 @@ def df_to_annotation_set(dataframe, outfile) -> json:
     Returns:
         json: .JSONL file
     """
-    with open(outfile, 'w') as file:
+    with open(outfile, "w") as file:
         for i, val in dataframe.iterrows():
-            pattern = {"text": str(val['line']), "meta": {"url": val['url'], "line_number": val['line_number'], "regex_or_rand": val['regex_or_rand'], "cat": val['cat']}}
+            pattern = {
+                "text": str(val["line"]),
+                "meta": {
+                    "url": val["url"],
+                    "line_number": val["line_number"],
+                    "regex_or_rand": val["regex_or_rand"],
+                    "cat": val["cat"],
+                },
+            }
             print(pattern)
             file.write(json.dumps(pattern))
             file.write("\n")
@@ -47,9 +55,9 @@ if __name__ == "__main__":
     # Create the parser
     parser = argparse.ArgumentParser()
     # Add an argument
-    parser.add_argument('--excel_file', type=str, required=True)
-    parser.add_argument('--out_file', type=str, required=True)
-    
+    parser.add_argument("--excel_file", type=str, required=True)
+    parser.add_argument("--out_file", type=str, required=True)
+
     # Parse the argument
     args = parser.parse_args()
     df = excel_to_df(args.excel_file)

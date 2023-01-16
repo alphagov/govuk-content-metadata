@@ -13,7 +13,7 @@ It follows a three-stage process:
 
 ### 1. Setup Instructions
 
-1. Download the Prodigy wheel file from https://$PRODIGY_LICENSE@download.prodi.gy where $PRODIGY_LICENSE is predefined in the repo .secrets file. Download the `prodigy-1.11.0-cp39-cp39-linux_x86_64.whl` wheel file and move it into the `wheel/` folder in the working directory.
+1. Download the Prodigy wheel file from https://$PRODIGY_LICENSE@download.prodi.gy where $PRODIGY_LICENSE is predefined in the repo .secrets file. Download the `prodigy-1.11.8-cp39-cp39-linux_x86_64.whl` wheel file and move it into the `wheel/` folder in the working directory.
 2. Move the data you want to label into the `data/` folder in the working directory.
 
 
@@ -63,7 +63,7 @@ It follows a three-stage process:
 
 When in your containerised environment, you can run any prodigy commands as usual. For example:
 ```bash
-prodigy ner.manual phase_2_test_subset400_rh blank:en data/phase_2_test_subset400.jsonl --label PER-TITLE,LOC-COMMON,SECTOR,PER-ROLE,PER-OCCUPATION --patterns data/phase_2_patterns_no_occ.jsonl 
+prodigy ner.manual phase_2_test_subset400_rh blank:en data/phase_2_test_subset400.jsonl --label PER-TITLE,LOC-COMMON,SECTOR,PER-ROLE,PER-OCCUPATION --patterns data/phase_2_patterns_no_occ.jsonl
 ```
 As the volume has been mounted between your host machine and the container in step 3, all databases will be saved in your local environment as well as the container.
 
@@ -76,3 +76,10 @@ You should add your first initial and surname to the end of the webserver, so th
 or
 
 `http://0.0.0.0:8080?session=atosi`
+
+
+### 4. For review
+
+```bash
+prodigy review phase_2_test_subset400_review phase_2_test_subset400_rh,phase_2_test_subset400_at --label PER-TITLE,LOC-COMMON,SECTOR,PER-ROLE,PER-OCCUPATION,ORG-COMMON --view-id ner_manual
+```
