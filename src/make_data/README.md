@@ -5,7 +5,7 @@ This folder contains various scripts and functions that are used at various poin
 There are 4 .sql files that are used for creating an annotation set. These are all prefixed with `Ann-0x...`:
 
 1. `sql_queries/Ann01-Flag_phase2_titles_desc_lines_merged`
-This script uses regex strings to identify which seed terms and categories are identified in individual lines across gov.uk content. The 'CREATE' commands should be run sequentially, as they can time out. 'Seed terms' are a collection of words of phrases that are predetermined and manually curated by the project team, and 
+This script uses regex strings to identify which seed terms and categories are identified in individual lines across gov.uk content. The 'CREATE' commands should be run sequentially, as they can time out. 'Seed terms' are a collection of words of phrases that are predetermined and manually curated by the project team, and
 
 2. `sql_queries/Ann02-Create_primary_lower_merge`
 Primary tables contain lines across GOV.UK with flags to indicate if a line in question contains a certain type of entity, and and what enitity it is that is contained. This SQL script merges primary tables for each of title, description and lines, and casts the term detected in the line to lower case. This is done in order to count the occurences of terms in a later script.
