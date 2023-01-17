@@ -22,7 +22,8 @@
           "PER-ROLE": "#00ffcc",
           "PER-OCCUPATION": "#e4f60b",
           "LOC-COMMON": "#ff00ee",
-          "SECTOR": "#ffdd00"
+          "SECTOR": "#ffdd00",
+          "ORG-COMMON": "#4a0bcc"
         }
       }
 }
