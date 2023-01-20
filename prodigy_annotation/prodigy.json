@@ -9,21 +9,22 @@
     "custom_theme": {
         "labels": {
           "FORM": "#79dd6f",
-          "GPE": "#00ffcc",
           "MONEY": "#e4f60b",
-          "ORG": "#ff00ee",
           "PERSON": "#ffdd00",
           "DATE": "#fcf6d3",
           "POSTCODE": "#f9b750",
           "EMAIL": "#4a0bcc",
           "PHONE": "#aaff00",
 
-          "PER-TITLE": "#79dd6f",
-          "PER-ROLE": "#00ffcc",
-          "PER-OCCUPATION": "#e4f60b",
-          "LOC-COMMON": "#ff00ee",
+          "TITLE": "#79dd6f",
+          "ROLE": "#00ffcc",
+          "OCCUPATION": "#e4f60b",
           "SECTOR": "#ffdd00",
-          "ORG-COMMON": "#4a0bcc"
+          "LOCATION": "#a89532",
+          "GPE": "#ffb5fa",
+          "FAC": "#ffb24d",
+          "ORG": "#cff5bf",
+          "EVENT": "#f0eec0" 
         }
       }
 }
