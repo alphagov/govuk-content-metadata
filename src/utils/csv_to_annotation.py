@@ -23,6 +23,18 @@ def excel_to_df(excel_file) -> pd.DataFrame:
     df = pd.read_excel(excel_file)
     return df
 
+def csv_to_df(csv_file) -> pd.DataFrame:
+    """Converts an excel sheet with one or more tabs into a single DataFrame.
+
+    Args:
+        excel_file (_type_): A .xlsx file.
+
+    Returns:
+        pd.DataFrame: Concatenated DataFrame of the tab(s).
+    """
+    df = pd.read_csv(csv_file)
+    return df
+
 
 def df_to_annotation_set(dataframe, outfile) -> json:
     """Converts rows of a DataFrame into Prodiogy annotataion format.
@@ -55,10 +67,10 @@ if __name__ == "__main__":
     # Create the parser
     parser = argparse.ArgumentParser()
     # Add an argument
-    parser.add_argument("--excel_file", type=str, required=True)
+    parser.add_argument("--csv_file", type=str, required=True)
     parser.add_argument("--out_file", type=str, required=True)
 
     # Parse the argument
     args = parser.parse_args()
-    df = excel_to_df(args.excel_file)
+    df = csv_to_df(args.csv_file)
     df_to_annotation_set(df, args.out_file)
