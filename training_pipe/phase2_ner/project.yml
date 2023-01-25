@@ -1,0 +1,84 @@
+title: "GovNER Phase2 SpaCy Training Pipeline"
+description: "SpaCy pipeline to train NER model for phase-2 entities. Runs through multiple stages including data prep and training"
+
+# Variables can be referenced across the project.yml using ${vars.var_name}
+vars:
+  config: "config.cfg"
+  gpu_id: 0
+  files:
+    train_file: "phase_2_annotations.jsonl"
+  prodigy:
+    prodigy-dataset: "phase_2_annotations"
+  gcp_storage_remote: "gs://cpto-content-metadata/spacy-project-remote/ner_phase2"
+
+remotes:
+  default: '${vars.gcp_storage_remote}'
+
+# These are the directories that the project needs. The project CLI will make
+# sure that they always exist.
+directories: ["assets", "training", "configs", "metrics", "corpus"]
+
+# Assets that should be downloaded or available in the directory. We"re shipping
+# them with the project, so they won't have to be downloaded. But the
+# "project assets" command still lets you verify that the checksums match.
+assets:
+  - dest: "assets/${vars.files.train_file}"
+    url: '${vars.gcp_storage_remote}/${vars.files.train_file}'
+    description: "JSONL-formatted training data exported from Prodigy"
+
+workflows:
+  all:
+    - create-config
+    - db-in
+    - data-to-spacy
+    - train_spacy
+    - push_remote
+
+commands:
+
+  - name: create-config
+    help: "Initialise and save a config.cfg file using the recommended settings for your use case"
+    script:
+      - "python3 -m spacy init config configs/${vars.config} --lang en --pipeline transformer,ner --optimize accuracy --gpu --force"
+    outputs:
+      - "configs/${vars.config}"
+
+  - name: db-in
+    help: "Load the annotated .jsonl file in as a prodigy database."
+    script:
+      - "python3 -m prodigy db-in ${vars.prodigy.prodigy-dataset} assets/${vars.files.train_file}"
+    deps:
+      - "assets/${vars.files.train_file}"
+
+  - name: data-to-spacy
+    help: "Convert annotated data to spaCy's binary format and create a train and a dev set based on the provided split threshold"
+    script:
+      - "python3 -m prodigy data-to-spacy ./corpus --ner ${vars.prodigy.prodigy-dataset} --eval-split 0.2 --verbose --config configs/${vars.config}"
+    outputs:
+      - "corpus/train.spacy"
+      - "corpus/dev.spacy"
+
+  - name: train_spacy
+    help: "Train a named entity recognition model with spaCy"
+    script:
+      - "python3 -m spacy train configs/${vars.config} --output training/ --paths.train corpus/train.spacy --paths.dev corpus/dev.spacy --gpu-id ${vars.gpu_id}"
+    deps:
+      - "corpus/train.spacy"
+      - "corpus/dev.spacy"
+    outputs:
+      - "training/model-best"
+
+  - name: push_remote
+    help: "Push outputs to remote"
+    script:
+      - "python3 -m spacy project push default"
+    deps:
+      - "training/model-best"
+
+  # clean up files (not in workflow by default)
+  - name: clean
+    help: "Remove intermediate files"
+    script:
+      - "rm -rf training/*"
+      - "rm -rf metrics/*"
+      - "rm -rf corpus/*"
