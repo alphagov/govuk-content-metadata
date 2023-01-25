@@ -33,17 +33,17 @@ requests==2.27.1
 setuptools
 six==1.16.0
 soupsieve==2.3.2.post1
+spacy>=3.2.4
 spacy-streamlit==1.0.4
-spacy-transformers
 streamlit==1.10.0
-spacy==3.2.4
 # thinc-apple-ops==0.0.7;sys_platform=="darwin"
 tqdm==4.64.0
-transformers
+transformers==4.9.2
 urllib3==1.26.9
 wheel
 --extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
 prodigy>=1.11.0,<2.0.0
+spacy-transformers==1.2.0
 google-cloud-storage==2.5.0
 altair==4.2.0
 dvc[gs]
