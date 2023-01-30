@@ -34,8 +34,6 @@ setuptools
 six==1.16.0
 soupsieve==2.3.2.post1
 spacy>=3.2.4
-spacy-streamlit==1.0.4
-streamlit==1.10.0
 # thinc-apple-ops==0.0.7;sys_platform=="darwin"
 tqdm==4.64.0
 transformers==4.9.2
@@ -47,3 +45,5 @@ spacy-transformers==1.2.0
 google-cloud-storage==2.5.0
 altair==4.2.0
 dvc[gs]
+spacy-streamlit==1.0.4
+streamlit==1.17.0
