@@ -37,7 +37,7 @@ transformers==4.9.2
 urllib3==1.26.9
 wheel==0.38.4
 --extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
-prodigy==1.11.9
+prodigy==1.11.8
 spacy-transformers==1.2.0
 google-cloud-storage==2.5.0
 altair==4.2.0
@@ -58,6 +58,7 @@ appnope==0.1.3
 argon2-cffi==21.3.0
 argon2-cffi-bindings==21.2.0
 arrow==1.2.3
+asgiref==3.6.0
 asttokens==2.2.1
 async-timeout==4.0.2
 asyncssh==2.13.0
@@ -69,8 +70,6 @@ billiard==3.6.4.0
 bleach==6.0.0
 blinker==1.5
 blis==0.7.9
-boto3==1.24.29
-botocore==1.27.29
 cachetools==5.3.0
 catalogue==2.0.8
 celery==5.2.7
@@ -80,7 +79,6 @@ click==8.1.3
 click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.2.0
-cloudpickle==2.2.1
 colorama==0.4.6
 comm==0.1.2
 confection==0.0.4
@@ -88,7 +86,6 @@ configobj==5.0.8
 cryptography==39.0.0
 cycler==0.11.0
 cymem==2.0.7
-dask==2022.6.1
 debugpy==1.6.6
 decorator==5.1.1
 defusedxml==0.7.1
@@ -107,10 +104,9 @@ dvc-render==0.0.17
 dvc-studio-client==0.3.0
 dvc-task==0.1.11
 dvclive==1.3.3
-en-core-web-trf @ https://github.com/explosion/spacy-models/releases/download/en_core_web_trf-3.5.0/en_core_web_trf-3.5.0-py3-none-any.whl
 entrypoints==0.4
 executing==1.2.0
-fastapi==0.78.0
+fastapi==0.74.1
 fastjsonschema==2.16.2
 filelock==3.9.0
 flatten-dict==0.4.2
@@ -145,7 +141,6 @@ isoduration==20.11.0
 iterative-telemetry==0.0.6
 jedi==0.18.2
 Jinja2==3.1.2
-jmespath==1.0.1
 jsonpointer==2.3
 jsonschema==4.17.3
 jupyter-events==0.6.3
@@ -157,7 +152,6 @@ jupyterlab-pygments==0.2.2
 kiwisolver==1.4.4
 kombu==5.2.4
 langcodes==3.3.0
-locket==1.0.0
 markdown-it-py==2.1.0
 MarkupSafe==2.1.2
 matplotlib-inline==0.1.6
@@ -181,7 +175,6 @@ orjson==3.8.5
 packaging==23.0
 pandocfilters==1.5.0
 parso==0.8.3
-partd==1.3.0
 pathspec==0.11.0
 pathy==0.10.1
 peewee==3.15.4
@@ -224,7 +217,6 @@ rich==13.3.1
 rsa==4.9
 ruamel.yaml==0.17.21
 ruamel.yaml.clib==0.2.7
-s3transfer==0.6.0
 sacremoses==0.0.53
 scmrepo==0.1.6
 semver==2.13.0
@@ -238,7 +230,6 @@ snowballstemmer==2.2.0
 spacy-alignments==0.9.0
 spacy-legacy==3.0.12
 spacy-loggers==1.0.4
-spacy-lookups-data==1.0.3
 sphinxcontrib-applehelp==1.0.4
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==2.0.0
@@ -248,11 +239,10 @@ sphinxcontrib-serializinghtml==1.1.5
 sqltrie==0.0.26
 srsly==2.4.5
 stack-data==0.6.2
-starlette==0.19.1
+starlette==0.17.1
 tabulate==0.9.0
 terminado==0.17.1
 thinc==8.1.7
-thinc-apple-ops==0.1.3
 tinycss2==1.2.1
 tokenizers==0.10.3
 tomli==2.0.1
@@ -266,7 +256,7 @@ typing_extensions==4.4.0
 tzdata==2022.7
 tzlocal==4.2
 uri-template==1.2.0
-uvicorn==0.18.3
+uvicorn==0.17.6
 validators==0.20.0
 vine==5.0.0
 virtualenv==20.17.1
