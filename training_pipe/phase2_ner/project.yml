@@ -6,8 +6,8 @@ vars:
   config: "config.cfg"
   gpu_id: 0
   files:
-    train_file: "phase_2_annotations.jsonl"
-    train_file_checksum: 59807a858f7e91abd730832bd80d076c
+    train_file: "phase_2_annotations_a1.jsonl"
+    # train_file_checksum: 59807a858f7e91abd730832bd80d076c
   prodigy:
     prodigy-dataset: "phase_2_annotations"
   gcp_storage_remote: "gs://cpto-content-metadata/spacy-project-remote/ner_phase2"
@@ -23,7 +23,7 @@ directories: ["assets", "training", "configs", "metrics", "corpus"]
 # them with the project, so they won't have to be downloaded. But the
 # "project assets" command still lets you verify that the checksums match.
 assets:
-  - dest: "assets/phase_2_annotations.jsonl"
+  - dest: "assets/${vars.files.train_file}"
     description: "JSONL-formatted training data exported from Prodigy"
 
 workflows:
@@ -46,9 +46,9 @@ commands:
   - name: db-in
     help: "Load the annotated .jsonl file in as a prodigy database."
     script:
-      - "python3 -m prodigy db-in ${vars.prodigy.prodigy-dataset} assets/phase_2_annotations.jsonl"
+      - "python3 -m prodigy db-in ${vars.prodigy.prodigy-dataset} assets/${vars.files.train_file}"
     deps:
-      - "assets/phase_2_annotations.jsonl"
+      - "assets/${vars.files.train_file}"
 
   - name: create-config
     help: "Initialise and save a config.cfg file using the recommended settings for your use case"
@@ -78,12 +78,12 @@ commands:
   - name: "evaluate"
     help: "Evaluate the model and export metrics"
     script:
-      - "python -m spacy evaluate training/model-best corpus/dev.spacy --output training/metrics.json"
+      - "python -m spacy evaluate training/model-best corpus/dev.spacy --output metrics/metrics.json"
     deps:
       - "corpus/dev.spacy"
       - "training/model-best"
     outputs:
-      - "training/metrics.json"
+      - "metrics/metrics.json"
 
   - name: push_remote
     help: "Push outputs to remote"
@@ -91,7 +91,7 @@ commands:
       - "python3 -m spacy project push default"
     deps:
       - "training/model-best"
-      - "training/metrics.json"
+      - "metrics/metrics.json"
 
   # clean up files (not in workflow by default)
   - name: clean
