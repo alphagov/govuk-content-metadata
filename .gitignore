@@ -918,3 +918,13 @@ prodigy_annotation/wheel/*
 **/assets
 **/**/assets/*
 !**/**/assets/.gitkeep
+
+**/project.lock
+**/configs
+**/configs/**
+**/corpus/
+**/corpus/**
+**/metrics/
+**/metrics/**
+**/training/
+**/training/**
