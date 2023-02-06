@@ -6,7 +6,7 @@ vars:
   config: "config.cfg"
   gpu_id: 0
   files:
-    train_file: "phase_2_annotations_a1.jsonl"
+    train_file: "phase2_cycle_a_merged_and_events_a.jsonl"
     # train_file_checksum: 59807a858f7e91abd730832bd80d076c
   prodigy:
     prodigy-dataset: "phase_2_annotations"
