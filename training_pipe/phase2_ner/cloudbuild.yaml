@@ -1,7 +1,4 @@
 steps:
-# Download the prodigy wheel from gcp into image
-- name: 'gcr.io/cloud-builders/gsutil'
-  args: ['-m', 'cp', '-r', 'gs://cpto-content-metadata/prodigy_wheels/prodigy-1.11.8-cp38-cp38-linux_x86_64.whl', '.']
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/spacy-projects-training-pipe/phase2_ner', '.']

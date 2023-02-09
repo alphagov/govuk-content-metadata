@@ -16,9 +16,7 @@ COPY . .
 RUN ls --recursive .
 
 RUN python3.8 -m pip install --upgrade pip \
-    && python3.8 -m pip install prodigy-1.11.8-cp38-cp38-linux_x86_64.whl \
-    && python3.8 -m pip install --no-cache-dir -r requirements.txt \
-    && rm -rf prodigy-1.11.8-cp38-cp38-linux_x86_64.whl
+    && python3.8 -m pip install --no-cache-dir -r requirements.txt
 
 ENTRYPOINT [ "python3" ]
 CMD ["-m", "spacy", "project", "run", "all"]
