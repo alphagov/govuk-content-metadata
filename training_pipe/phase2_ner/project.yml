@@ -5,9 +5,8 @@ description: "SpaCy pipeline to train NER model for phase-2 entities. Runs throu
 vars:
   config: "config.cfg"
   gpu_id: 0
-  files:
-    train_file: "phase2_cycle_a_merged_and_events_a.jsonl"
-    # train_file_checksum: 59807a858f7e91abd730832bd80d076c
+  train: "data_training"
+  dev: "data_eval"
   prodigy:
     prodigy-dataset: "phase_2_annotations"
   gcp_storage_remote: "gs://cpto-content-metadata/spacy-project-remote/ner_phase2"
@@ -23,15 +22,16 @@ directories: ["assets", "training", "configs", "metrics", "corpus"]
 # them with the project, so they won't have to be downloaded. But the
 # "project assets" command still lets you verify that the checksums match.
 assets:
-  - dest: "assets/${vars.files.train_file}"
+  - dest: "assets/${vars.train}.jsonl"
     description: "JSONL-formatted training data exported from Prodigy"
+  - dest: "assets/${vars.dev}.jsonl"
+    description: "JSONL-formatted development data exported from Prodigy"
 
 workflows:
   all:
     - get-assets
-    - db-in
+    - preprocess
     - create-config
-    - data-to-spacy
     - train_spacy
     - evaluate
     - push_remote
@@ -43,12 +43,18 @@ commands:
       - "python3 -m spacy project assets"
     help: "Fetch project assets"
 
-  - name: db-in
-    help: "Load the annotated .jsonl file in as a prodigy database."
+  - name: "preprocess"
+    help: "Convert the data to spaCy's binary format"
     script:
-      - "python3 -m prodigy db-in ${vars.prodigy.prodigy-dataset} assets/${vars.files.train_file}"
+      - "python scripts/preprocess.py assets/${vars.train}.jsonl corpus/${vars.train}.spacy"
+      - "python scripts/preprocess.py assets/${vars.dev}.jsonl corpus/${vars.dev}.spacy"
     deps:
-      - "assets/${vars.files.train_file}"
+      - "assets/${vars.train}.jsonl"
+      - "assets/${vars.dev}.jsonl"
+      - "scripts/preprocess.py"
+    outputs:
+      - "corpus/${vars.train}.spacy"
+      - "corpus/${vars.dev}.spacy"
 
   - name: create-config
     help: "Initialise and save a config.cfg file using the recommended settings for your use case"
@@ -57,33 +63,23 @@ commands:
     outputs:
       - "configs/${vars.config}"
 
-  - name: data-to-spacy
-    help: "Convert annotated data to spaCy's binary format and create a train and a dev set based on the provided split threshold"
-    script:
-      - "python3 -m prodigy data-to-spacy ./corpus --ner ${vars.prodigy.prodigy-dataset} --eval-split 0.2 --verbose --config configs/${vars.config}"
-    outputs:
-      - "corpus/train.spacy"
-      - "corpus/dev.spacy"
-
   - name: train_spacy
     help: "Train a named entity recognition model with spaCy"
     script:
-      - "python3 -m spacy train configs/${vars.config} --output training/ --paths.train corpus/train.spacy --paths.dev corpus/dev.spacy --gpu-id ${vars.gpu_id}"
+      - "python3 -m spacy train configs/${vars.config} --output training/ --paths.train corpus/${vars.train}.spacy --paths.dev corpus/${vars.dev}.spacy --gpu-id ${vars.gpu_id}"
     deps:
-      - "corpus/train.spacy"
-      - "corpus/dev.spacy"
+      - "corpus/${vars.train}.spacy"
+      - "corpus/${vars.dev}.spacy"
     outputs:
       - "training/model-best"
 
   - name: "evaluate"
     help: "Evaluate the model and export metrics"
     script:
-      - "python -m spacy evaluate training/model-best corpus/dev.spacy --output metrics/metrics.json"
+      - "python -m spacy evaluate training/model-best corpus/${vars.dev}.spacy --output metrics/metrics.json"
     deps:
-      - "corpus/dev.spacy"
+      - "corpus/${vars.dev}.spacy"
       - "training/model-best"
-    outputs:
-      - "metrics/metrics.json"
 
   - name: push_remote
     help: "Push outputs to remote"
