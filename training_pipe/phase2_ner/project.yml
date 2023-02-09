@@ -5,11 +5,9 @@ description: "SpaCy pipeline to train NER model for phase-2 entities. Runs throu
 vars:
   config: "config.cfg"
   gpu_id: 0
-  train: "data_training"
-  dev: "data_eval"
-  prodigy:
-    prodigy-dataset: "phase_2_annotations"
-  gcp_storage_remote: "gs://cpto-content-metadata/spacy-project-remote/ner_phase2"
+  train: "data_train"
+  dev: "data_test"
+  gcp_storage_remote: "gs://cpto-content-metadata/spacy-project-remote/phase2_ner"
 
 remotes:
   default: '${vars.gcp_storage_remote}'
@@ -46,8 +44,8 @@ commands:
   - name: "preprocess"
     help: "Convert the data to spaCy's binary format"
     script:
-      - "python src/preprocess.py assets/${vars.train}.jsonl corpus/${vars.train}.spacy"
-      - "python src/preprocess.py assets/${vars.dev}.jsonl corpus/${vars.dev}.spacy"
+      - "python3 src/preprocess.py assets/${vars.train}.jsonl corpus/${vars.train}.spacy"
+      - "python3 src/preprocess.py assets/${vars.dev}.jsonl corpus/${vars.dev}.spacy"
     deps:
       - "assets/${vars.train}.jsonl"
       - "assets/${vars.dev}.jsonl"
@@ -76,7 +74,7 @@ commands:
   - name: "evaluate"
     help: "Evaluate the model and export metrics"
     script:
-      - "python -m spacy evaluate training/model-best corpus/${vars.dev}.spacy --output metrics/metrics.json"
+      - "python3 -m spacy evaluate training/model-best corpus/${vars.dev}.spacy --output metrics/metrics.json"
     deps:
       - "corpus/${vars.dev}.spacy"
       - "training/model-best"
