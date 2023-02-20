@@ -867,6 +867,8 @@ data/external/*
 data/raw/*
 data/interim/*
 data/processed/*
+data/annotations/*
+!data/annotations/.gitkeep
 !data/external/.gitkeep
 !data/raw/.gitkeep
 !data/interim/.gitkeep
@@ -914,3 +916,16 @@ corpus/**/
 
 prodigy_annotation/data/*
 prodigy_annotation/wheel/*
+
+**/assets/**
+!**/assets/.gitkeep
+
+**/project.lock
+**/configs
+**/configs/**
+**/corpus/
+**/corpus/**
+**/metrics/
+**/metrics/**
+**/training/
+**/training/**

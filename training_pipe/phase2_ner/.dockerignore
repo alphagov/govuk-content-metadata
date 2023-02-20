@@ -1,0 +1,9 @@
+configs/
+corpus/
+metrics/
+training/
+configs/*
+corpus/*
+metrics/*
+training/*
+project.lock

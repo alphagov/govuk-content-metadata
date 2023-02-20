@@ -1,0 +1,3 @@
+spacy[cuda112]
+spacy-transformers
+pathy[gcs]
