@@ -22,7 +22,6 @@ pandas==1.4.2
 plotext==4.2.0
 pycodestyle==2.8.0
 pyflakes==2.4.0
-pymongo==4.1.1
 python-dateutil==2.8.2
 pytz==2022.1
 PyYAML==6.0
@@ -30,15 +29,16 @@ requests==2.27.1
 setuptools
 six==1.16.0
 soupsieve==2.3.2.post1
-spacy>=3.2.4
+spacy>=3.5.0
+pymongo
 # thinc-apple-ops==0.0.7;sys_platform=="darwin"
 tqdm==4.64.0
 transformers==4.9.2
 urllib3==1.26.9
 wheel
 --extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
-prodigy==1.11.8
-spacy-transformers==1.2.0
+prodigy>=1.11.10
+spacy-transformers==1.2.2
 google-cloud-storage==2.5.0
 altair==4.2.0
 dvc[gs]
