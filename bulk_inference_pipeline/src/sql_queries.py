@@ -12,26 +12,17 @@ metadata_intermediate_table = config["gcp_metadata"]["bq_content_tables"][
     "intermediate_table"
 ]
 
-intermediate_query = f"""WITH en_locales AS (
-  SELECT
-    url,
-    locale
-  FROM `{source_govgraph_project}.{source_govgraph_dataset}.locale`
-  WHERE locale='en'
-  ),
-  live_phases AS (
+intermediate_query = f"""WITH filtered_urls AS (
     SELECT
         url,
-        phase
-    FROM `{source_govgraph_project}.{source_govgraph_dataset}.phase`
-    WHERE phase IN ('live', 'beta')
-    ),
-    document_types AS (
-        SELECT
-            url,
-            document_type
-        FROM `{source_govgraph_project}.{source_govgraph_dataset}.document_type`
-        WHERE document_type IS NOT NULL AND document_type NOT IN (
+        document_type,
+        phase,
+        locale,
+        public_updated_at
+    FROM `{source_govgraph_project}.graph.page`
+    WHERE locale='en'
+    AND phase IN ('live', 'beta')
+    AND document_type IS NOT NULL AND document_type NOT IN (
             'business_support_finder',
             'finder',
             'finder_email_signup',
@@ -47,18 +38,12 @@ intermediate_query = f"""WITH en_locales AS (
             'world_location_news',
             'redirect',
             'special_route')
-        )
-        SELECT
-            u.url,
-            dt.document_type,
-            pua.public_updated_at
-        FROM `{source_govgraph_project}.{source_govgraph_dataset}.url` u
-        INNER JOIN en_locales USING (url)
-        INNER JOIN live_phases USING (url)
-        INNER JOIN document_types dt USING (url)
-        LEFT JOIN `{source_govgraph_project}.{source_govgraph_dataset}.public_updated_at` pua USING (url)
-        ;
-        """
+    )
+    SELECT
+        *
+    FROM filtered_urls
+    ;
+    """
 
 title_query = f"""SELECT
   url,
