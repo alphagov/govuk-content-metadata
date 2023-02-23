@@ -41,8 +41,7 @@ intermediate_query = f"""WITH filtered_urls AS (
     )
     SELECT
         *
-    FROM filtered_urls urls
-    ORDER BY url
+    FROM filtered_urls
     ;
     """
 
