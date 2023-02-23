@@ -33,30 +33,30 @@
           WITH ents_all AS (
             SELECT
               url,
-              entities[SAFE_OFFSET(0)].name,
-              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
-              entities[SAFE_OFFSET(0)].type,
+              name,
+              LOWER(name) AS name_lower,
+              type,
               'title' AS part_of_page
-            FROM `cpto-content-metadata.named_entities_raw.title_1`
-            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
+            FROM `cpto-content-metadata.named_entities_raw.title_1`, UNNEST(entities)
+            WHERE name IS NOT null
             UNION ALL
             SELECT
               url,
-              entities[SAFE_OFFSET(0)].name,
-              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
-              entities[SAFE_OFFSET(0)].type,
+              name,
+              LOWER(name) AS name_lower,
+              type,
               'description' AS part_of_page
-            FROM `cpto-content-metadata.named_entities_raw.description_1`
-            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
+            FROM `cpto-content-metadata.named_entities_raw.description_1`, UNNEST(entities)
+            WHERE name IS NOT null
             UNION ALL
             SELECT
               url,
-              entities[SAFE_OFFSET(0)].name AS name,
-              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
-              entities[SAFE_OFFSET(0)].type,
+              name,
+              LOWER(name) AS name_lower,
+              type,
               'text' AS part_of_page
-            FROM `cpto-content-metadata.named_entities_raw.text_1`
-            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
+            FROM `cpto-content-metadata.named_entities_raw.text_1`, UNNEST(entities)
+            WHERE name IS NOT null
             )
             SELECT
               *,
