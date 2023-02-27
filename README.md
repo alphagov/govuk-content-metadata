@@ -218,7 +218,7 @@ docker run -v "$HOME/.config/gcloud:/gcp/config:ro" \
 where <DOCKER_IMAGE_NAME> is the name of the pipeline's docker image.
 
 
-## Named entities: Post-extraction processing and aggregation
+# Named entities: Post-extraction processing and aggregation
 
 After the named entities are extracted by the model and uploaded to tables in the BigQuery `cpto-content-metadata.named_entities.named_entities_raw` dataset, the outputs undergoes further processing and aggregation.
 

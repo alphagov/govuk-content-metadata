@@ -14,161 +14,324 @@
 #
 # (3) export counts from big query to google storage bucket
 
-- init:
-    assign:
-      - project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
-      - bq_dataset_id: "named_entities"
-      - table_id_1_processed: "named_entities_all"
-      - table_id_2_counts: "named_entities_counts"
-      - query1_processed: "CREATE TEMPORARY FUNCTION ENCODE_URI_COMPONENT(strings STRING)
-              RETURNS STRING
-              LANGUAGE js AS '''
-              if (strings == null) return null;
-              try {
-                return encodeURIComponent(strings);
-              } catch (e) {
-                return strings;
-              }'''
-              ;
-          WITH ents_all AS (
-            SELECT
-              url,
-              entities[SAFE_OFFSET(0)].name,
-              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
-              entities[SAFE_OFFSET(0)].type,
-              'title' AS part_of_page
-            FROM `cpto-content-metadata.named_entities_raw.title_1`
-            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
-            UNION ALL
-            SELECT
-              url,
-              entities[SAFE_OFFSET(0)].name,
-              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
-              entities[SAFE_OFFSET(0)].type,
-              'description' AS part_of_page
-            FROM `cpto-content-metadata.named_entities_raw.description_1`
-            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
-            UNION ALL
-            SELECT
-              url,
-              entities[SAFE_OFFSET(0)].name AS name,
-              LOWER(entities[SAFE_OFFSET(0)].name) AS name_lower,
-              entities[SAFE_OFFSET(0)].type,
-              'text' AS part_of_page
-            FROM `cpto-content-metadata.named_entities_raw.text_1`
-            WHERE entities[SAFE_OFFSET(0)].name IS NOT null
-            )
-            SELECT
-              *,
-              CONCAT('https://www.gov.uk/named-entity/', type, '/', ENCODE_URI_COMPONENT(name_lower)) AS url_entity_nametype,
-            FROM ents_all
-            WHERE (NOT (REGEXP_CONTAINS(name_lower, r'^[^[:ascii:]+]') AND type='ORG')) AND (NOT (REGEXP_CONTAINS(name_lower, r'^[�#£\"*-]') AND type='ORG')) AND (CHAR_LENGTH(name_lower) > 1) AND (ARRAY_LENGTH(REGEXP_EXTRACT_ALL(REPLACE(name_lower, ' ', ''), r'[[:ascii:]]')) > 0)
-            ORDER BY url
-            ;"
-      - query2_get_counts: "WITH title_counts AS (
-              SELECT
-                url, name_lower, type, url_entity_nametype,
-                COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS title_count
-              FROM `cpto-content-metadata.named_entities.named_entities_all`
-              WHERE part_of_page = 'title'
-              ),
-              description_counts AS (
-              SELECT
-                url, name_lower, type, url_entity_nametype,
-                COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS description_count
-              FROM `cpto-content-metadata.named_entities.named_entities_all`
-              WHERE part_of_page = 'description'
-              ),
-              text_counts AS (
-              SELECT
-                url, name_lower, type, url_entity_nametype,
-                COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS text_count
-              FROM `cpto-content-metadata.named_entities.named_entities_all`
-              WHERE part_of_page = 'text'
-              ),
-              total_counts AS (
+main:
+  steps:
+    - init:
+        assign:
+          - projectid: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+          - bucket: "cpto-content-metadata"
+          - finalFileName: "named_entities_counts/named_entities_counts.csv"
+          - prefix: "named_entities_counts/temp_csvs"
+          - listResultDelete:
+              nextPageToken: ""
+          - listResult:
+              nextPageToken: ""
+          - query_headers: "SELECT * FROM `cpto-content-metadata.named_entities.named_entities_counts` LIMIT 0"
+          - bq_dataset_id: "named_entities"
+          - table_id_1_processed: "named_entities_all"
+          - table_id_2_counts: "named_entities_counts"
+          - query1_processed: "CREATE TEMPORARY FUNCTION ENCODE_URI_COMPONENT(strings STRING)
+                  RETURNS STRING
+                  LANGUAGE js AS '''
+                  if (strings == null) return null;
+                  try {
+                    return encodeURIComponent(strings);
+                  } catch (e) {
+                    return strings;
+                  }'''
+                  ;
+              WITH ents_all AS (
                 SELECT
-                url, name_lower, type, url_entity_nametype,
-                COUNT(*) AS total_count
-              FROM `cpto-content-metadata.named_entities.named_entities_all`
-              GROUP BY url, name_lower, type, url_entity_nametype
-              ),
-              combined_counts AS (
-              SELECT
-                *
-                FROM title_counts
-                FULL JOIN description_counts USING(url, name_lower, type, url_entity_nametype)
-                FULL JOIN text_counts USING(url, name_lower, type, url_entity_nametype)
-                FULL JOIN total_counts USING(url, name_lower, type, url_entity_nametype)
-              )
-              SELECT DISTINCT
-              url,
-              name_lower,
-              type,
-              url_entity_nametype,
-              IFNULL(title_count, 0) AS title_count,
-              IFNULL(description_count, 0) AS description_count,
-              IFNULL(text_count, 0) AS text_count,
-              IFNULL(total_count, 0) AS total_count,
-              FROM combined_counts
-              ORDER BY url
-              ;"
-      - create_disposition: "CREATE_IF_NEEDED"  # create a new one if table doesn't exist
-      - write_disposition: "WRITE_TRUNCATE"  # truncate it if the table already exists
-      - gs_bucket: "cpto-content-metadata"
-      - gs_folder: "named_entities_counts"
-      - gs_filename: "named_entities_counts.csv.gz"
+                  url,
+                  name,
+                  LOWER(name) AS name_lower,
+                  type,
+                  'title' AS part_of_page
+                FROM `cpto-content-metadata.named_entities_raw.title_1`, UNNEST(entities)
+                WHERE name IS NOT null
+                UNION ALL
+                SELECT
+                  url,
+                  name,
+                  LOWER(name) AS name_lower,
+                  type,
+                  'description' AS part_of_page
+                FROM `cpto-content-metadata.named_entities_raw.description_1`, UNNEST(entities)
+                WHERE name IS NOT null
+                UNION ALL
+                SELECT
+                  url,
+                  name,
+                  LOWER(name) AS name_lower,
+                  type,
+                  'text' AS part_of_page
+                FROM `cpto-content-metadata.named_entities_raw.text_1`, UNNEST(entities)
+                WHERE name IS NOT null
+                )
+                SELECT
+                  *,
+                  CONCAT('https://www.gov.uk/named-entity/', type, '/', ENCODE_URI_COMPONENT(name_lower)) AS url_entity_nametype,
+                FROM ents_all
+                WHERE (NOT (REGEXP_CONTAINS(name_lower, r'^[^[:ascii:]+]') AND type='ORG')) AND (NOT (REGEXP_CONTAINS(name_lower, r'^[�#£\"*-]') AND type='ORG')) AND (CHAR_LENGTH(name_lower) > 1) AND (ARRAY_LENGTH(REGEXP_EXTRACT_ALL(REPLACE(name_lower, ' ', ''), r'[[:ascii:]]')) > 0)
+                ORDER BY url
+                ;"
+          - query2_get_counts: "WITH title_counts AS (
+                  SELECT
+                    url, name_lower, type, url_entity_nametype,
+                    COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS title_count
+                  FROM `cpto-content-metadata.named_entities.named_entities_all`
+                  WHERE part_of_page = 'title'
+                  ),
+                  description_counts AS (
+                  SELECT
+                    url, name_lower, type, url_entity_nametype,
+                    COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS description_count
+                  FROM `cpto-content-metadata.named_entities.named_entities_all`
+                  WHERE part_of_page = 'description'
+                  ),
+                  text_counts AS (
+                  SELECT
+                    url, name_lower, type, url_entity_nametype,
+                    COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS text_count
+                  FROM `cpto-content-metadata.named_entities.named_entities_all`
+                  WHERE part_of_page = 'text'
+                  ),
+                  total_counts AS (
+                    SELECT
+                    url, name_lower, type, url_entity_nametype,
+                    COUNT(*) AS total_count
+                  FROM `cpto-content-metadata.named_entities.named_entities_all`
+                  GROUP BY url, name_lower, type, url_entity_nametype
+                  ),
+                  combined_counts AS (
+                  SELECT
+                    *
+                    FROM title_counts
+                    FULL JOIN description_counts USING(url, name_lower, type, url_entity_nametype)
+                    FULL JOIN text_counts USING(url, name_lower, type, url_entity_nametype)
+                    FULL JOIN total_counts USING(url, name_lower, type, url_entity_nametype)
+                  )
+                  SELECT DISTINCT
+                  url,
+                  name_lower,
+                  type,
+                  url_entity_nametype,
+                  IFNULL(title_count, 0) AS title_count,
+                  IFNULL(description_count, 0) AS description_count,
+                  IFNULL(text_count, 0) AS text_count,
+                  IFNULL(total_count, 0) AS total_count,
+                  FROM combined_counts
+                  ORDER BY url
+                  ;"
+          - create_disposition: "CREATE_IF_NEEDED"  # create a new one if table doesn't exist
+          - write_disposition: "WRITE_TRUNCATE"  # truncate it if the table already exists
 
-- bq_clean_and_process_raw_entities:
-    call: googleapis.bigquery.v2.jobs.insert
-    args:
-      projectId: ${project_id}
-      body:
-        configuration:
-          query:
-            query: ${query1_processed}
-            destinationTable:
-              projectId: ${project_id}
-              datasetId: ${bq_dataset_id}
-              tableId: ${table_id_1_processed}
-            create_disposition: ${create_disposition}
-            write_disposition: ${write_disposition}
-            allowLargeResults: true
-            useLegacySql: false
-
-- bq_aggregate_and_count_entities:
-    call: googleapis.bigquery.v2.jobs.insert
-    args:
-      projectId: ${project_id}
-      body:
-        configuration:
-          query:
-            query: ${query2_get_counts}
-            destinationTable:
-              projectId: ${project_id}
-              datasetId: ${bq_dataset_id}
-              tableId: ${table_id_2_counts}
-            create_disposition: ${create_disposition}
-            write_disposition: ${write_disposition}
-            allowLargeResults: true
-            useLegacySql: false
-
-- bq_table_to_gcs:
-    call: googleapis.bigquery.v2.jobs.insert
-    args:
-        projectId: ${project_id}
-        body:
+    - bq_clean_and_process_raw_entities:
+        call: googleapis.bigquery.v2.jobs.insert
+        args:
+          projectId: ${projectid}
+          body:
             configuration:
-                extract:
-                    compression: GZIP
-                    destinationFormat: "CSV"
-                    destinationUris: ['${"gs://" + gs_bucket + "/" + gs_folder + "/" + gs_filename}']
-                    fieldDelimiter: ","
-                    printHeader: true
-                    sourceTable:
-                        projectId: ${project_id}
-                        datasetId: ${bq_dataset_id}
-                        tableId: ${table_id_2_counts}
+              query:
+                query: ${query1_processed}
+                destinationTable:
+                  projectId: ${projectid}
+                  datasetId: ${bq_dataset_id}
+                  tableId: ${table_id_1_processed}
+                create_disposition: ${create_disposition}
+                write_disposition: ${write_disposition}
+                allowLargeResults: true
+                useLegacySql: false
 
-- the_end:
-    return: "SUCCESS"
+    - bq_aggregate_and_count_entities:
+        call: googleapis.bigquery.v2.jobs.insert
+        args:
+          projectId: ${projectid}
+          body:
+            configuration:
+              query:
+                query: ${query2_get_counts}
+                destinationTable:
+                  projectId: ${projectid}
+                  datasetId: ${bq_dataset_id}
+                  tableId: ${table_id_2_counts}
+                create_disposition: ${create_disposition}
+                write_disposition: ${write_disposition}
+                allowLargeResults: true
+                useLegacySql: false
+
+    - deleteExisitngTempCsv:
+            call: list_and_delete_files
+            args:
+              pagetoken: ${listResultDelete.nextPageToken}
+              bucket: ${bucket}
+              prefix: ${prefix}
+              projectid: ${projectid}
+
+    - waitForGCS1: # fix latency issue with Cloud Storage
+            call: sys.sleep
+            args:
+              seconds: 1
+
+    - create-file:
+            call: http.post
+            args:
+                url: ${"https://storage.googleapis.com/upload/storage/v1/b/" + bucket + "/o?name=" + finalFileName + "&uploadType=media"}
+                auth:
+                    type: OAuth2
+
+    - get-headers-bq:
+            call: googleapis.bigquery.v2.jobs.query
+            args:
+              projectId: ${projectid}
+              body:
+                query: ${"EXPORT DATA OPTIONS( uri='gs://" + bucket + "/" + prefix + "/" + "*.csv', format='CSV', overwrite=true,header=true) AS " + query_headers}
+                useLegacySql: false
+
+    - export-bq_table_to_gcs:
+        call: googleapis.bigquery.v2.jobs.insert
+        args:
+            projectId: ${projectid}
+            body:
+                configuration:
+                    extract:
+                        destinationFormat: "CSV"
+                        destinationUris: ['${"gs://" + bucket + "/" + prefix + "/" + "/z*.csv"}']
+                        fieldDelimiter: ","
+                        printHeader: false
+                        sourceTable:
+                            projectId: ${projectid}
+                            datasetId: ${bq_dataset_id}
+                            tableId: ${table_id_2_counts}
+
+    - composefiles:
+                call: list_and_compose_file
+                args:
+                  pagetoken: ${listResult.nextPageToken}
+                  bucket: ${bucket}
+                  prefix: ${prefix}
+                  projectid: ${projectid}
+                  finalFileName: ${finalFileName}
+                result: listResult
+
+    - missing-files: # Non recursive loop, to prevent depth errors
+            switch:
+              - condition: ${"nextPageToken" in listResult}
+                next: composefiles
+
+    - the_end:
+        return: "SUCCESS"
+
+list_and_delete_files:
+    params:
+      - pagetoken
+      - bucket
+      - prefix
+      - projectid
+    steps:
+      - list-files:
+          call: googleapis.storage.v1.objects.list
+          args:
+            bucket: ${bucket}
+            pageToken: ${pagetoken}
+            prefix: ${prefix}
+            maxResults: 1000
+          result: listResultDelete
+      - delete-files:
+          try:
+              for:
+                value: file
+                in: ${listResultDelete.items}
+                steps:
+                    - delete-file:
+                          call: googleapis.storage.v1.objects.delete
+                          args:
+                            bucket: ${bucket}
+                            object: ${text.replace_all(file.name,"/","%2F")}
+                            userProject: ${projectid}
+                          result: deleteResult
+          except:
+            as: e
+            steps:
+              - known_errors:
+                  switch:
+                    - condition: ${not("KeyError" in e)}
+                      return: "files do not exists"
+
+# source: https://medium.com/google-cloud/get-a-single-one-csv-file-with-bigquery-export-956d2a147886
+list_and_compose_file:
+    params:
+      - pagetoken
+      - bucket
+      - prefix
+      - projectid
+      - finalFileName
+    steps:
+      - list-files:
+          call: googleapis.storage.v1.objects.list
+          args:
+            bucket: ${bucket}
+            pageToken: ${pagetoken}
+            prefix: ${prefix}
+            maxResults: 1000
+          result: listResult
+      - init-iter:
+          assign:
+            - finalFileFormatted:
+                name: ${finalFileName}
+            - fileList:
+                - ${finalFileFormatted}
+      - process-files:
+          for:
+            value: file
+            in: ${listResult.items}
+            steps:
+              - concat-file:
+                  assign:
+                    - fileFormatted:
+                        name: ${file.name}
+                    - fileList: ${list.concat(fileList, fileFormatted)}
+              - test-concat:
+                  switch:
+                    - condition: ${len(fileList) == 32}
+                      steps:
+                        - compose-files:
+                            call: compose_file
+                            args:
+                              fileList: ${fileList}
+                              projectid: ${projectid}
+                              bucket: ${bucket}
+                              finalFileName: ${finalFileName}
+                            next: init-for-iter
+                        - init-for-iter:
+                            assign:
+                              - fileList:
+                                  - ${finalFileFormatted}
+      - finish-compose: # Process the latest files in the fileList buffer
+          switch:
+            - condition: ${len(fileList) > 1} # If there is more than the finalFileName in the list
+              steps:
+                - last-compose-files:
+                    call: compose_file
+                    args:
+                      fileList: ${fileList}
+                      projectid: ${projectid}
+                      bucket: ${bucket}
+                      finalFileName: ${finalFileName}
+      - return-step:
+          return: ${listResult}
+
+compose_file:
+  params:
+    - fileList
+    - projectid
+    - bucket
+    - finalFileName
+  steps:
+    - compose:
+        call: googleapis.storage.v1.objects.compose
+        args:
+          destinationBucket: ${bucket}
+          destinationObject: ${text.replace_all(finalFileName,"/","%2F")}
+          body:
+            sourceObjects: ${fileList}
