@@ -1,11 +1,17 @@
 import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, patch
 from google.cloud import bigquery
 import types
 import gzip
 from io import BytesIO
+import os
 
-from bulk_inference_pipeline.src.utils import stream_from_bigquery, chunks
+from bulk_inference_pipeline.src.utils import (
+    stream_from_bigquery,
+    chunks,
+    parse_sql_script,
+    upload_to_bucket,
+)
 
 
 def test_stream_from_bigquery():
@@ -69,3 +75,54 @@ def in_memory_gzipped_csv():
     # Seek back to the beginning of the file
     stream.seek(0)
     return stream
+
+
+@pytest.fixture
+def sample_sql_script(tmpdir):
+    # Create a sample SQL script
+    sql_script = """SELECT * FROM my_table;"""
+    filepath = os.path.join(tmpdir, "test.sql")
+    with open(filepath, "w") as f:
+        f.write(sql_script)
+    return filepath
+
+
+def test_parse_sql_script(sample_sql_script):
+    # Ensure that the function returns the contents of the SQL script
+    assert parse_sql_script(sample_sql_script) == "SELECT * FROM my_table;"
+
+    # Ensure that the function raises a FileNotFoundError if the file does not exist
+    with pytest.raises(FileNotFoundError):
+        parse_sql_script("non_existent_file.sql")
+
+
+@pytest.fixture
+def mock_storage_client():
+    with patch("google.cloud.storage.Client") as MockClass:
+        yield MockClass.return_value
+
+
+def test_upload_to_bucket(mock_storage_client):
+    # Define the test variables
+    bucket_name = "my_bucket"
+    blob_name = "subfolder/test_file.txt"
+    path_to_local_file = "test_file.txt"
+
+    # Mock the Google Storage bucket and blob objects
+    bucket_mock = mock_storage_client.get_bucket.return_value
+    blob_mock = bucket_mock.blob.return_value
+
+    # Call the function and assert the return value
+    assert (
+        upload_to_bucket(
+            mock_storage_client, bucket_name, blob_name, path_to_local_file
+        )
+        == blob_mock.public_url
+    )
+
+    # Assert that the blob is uploaded from the local file
+    blob_mock.upload_from_filename.assert_called_once_with(path_to_local_file)
+
+    # Assert that the function called the expected Google Storage methods with the expected arguments
+    mock_storage_client.get_bucket.assert_called_once_with(bucket_name)
+    bucket_mock.blob.assert_called_once_with(blob_name)
