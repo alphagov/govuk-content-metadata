@@ -42,7 +42,7 @@ def test_excel_to_df(excel_file):
 def test_data():
     data = {
         "EntityType": ["Fruit", "Animal", "Color"],
-        "SeedTerm": ["apple", "cat", "red"],
+        "SeedTerm": ["green apple", "aloof and angry cat", "red"],
     }
     return pd.DataFrame(data)
 
@@ -51,9 +51,13 @@ def test_data():
 def expected_output(tmpdir):
     expected_output_file = tmpdir.join("expected_output.jsonl")
     with open(expected_output_file, "w") as f:
-        f.write('{"label": "Fruit", "pattern": [{"lower": "apple"}]}\n')
-        f.write('{"label": "Animal", "pattern": [{"lower": "cat"}]}\n')
-        f.write('{"label": "Color", "pattern": [{"lower": "red"}]}\n')
+        f.write(
+            '{"label": "Fruit", "pattern": [{"LOWER": "green"}, {"LOWER": "apple"}]}\n'
+        )
+        f.write(
+            '{"label": "Animal", "pattern": [{"LOWER": "aloof"}, {"LOWER": "and"}, {"LOWER": "angry"}, {"LOWER": "cat"}]}\n'
+        )
+        f.write('{"label": "Color", "pattern": [{"LOWER": "red"}]}\n')
     return expected_output_file
 
 

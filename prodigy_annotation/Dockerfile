@@ -4,9 +4,10 @@ WORKDIR /app
 
 RUN pip install --upgrade pip
 
-COPY wheel/prodigy-1.11.0-cp39-cp39-linux_x86_64.whl ./wheel/
-RUN pip install wheel/prodigy-1.11.0-cp39-cp39-linux_x86_64.whl \
-    && rm -rf wheel/prodigy-1.11.0-cp39-cp39-linux_x86_64.whl
+COPY wheel/prodigy-1.11.8-cp39-cp39-linux_x86_64.whl ./wheel/
+RUN pip install wheel/prodigy-1.11.8-cp39-cp39-linux_x86_64.whl \
+    && rm -rf wheel/prodigy-1.11.8-cp39-cp39-linux_x86_64.whl
+RUN spacy download en_core_web_lg
 
 COPY prodigy.json .
 COPY data ./data/

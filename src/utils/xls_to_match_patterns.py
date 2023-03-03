@@ -9,15 +9,16 @@ You must use arguments:
 import pandas as pd
 import argparse
 import json
-from typing import List
 
 
-def excel_to_df(excel_file: str, sheet_names: List[str]) -> pd.DataFrame:
+def excel_to_df(excel_file: str, sheet_names: str) -> pd.DataFrame:
     """Converts an excel workbook with one or more sheets into a single DataFrame.
 
     Args:
         excel_file (_type_): path to a .xlsx file.
-        sheet_names: a list of excel sheets contained in excel_file that will be combined
+        sheet_names: names of excel sheets contained in excel_file that will be combined,
+                     as one unique string with names separated by ,
+                     Example: "name1,name2,name3"
 
     Returns:
         pd.DataFrame: Concatenated DataFrame of the sheet(s).
@@ -38,11 +39,10 @@ def df_to_match_patterns(dataframe: pd.DataFrame, outfile: str) -> json:
         json: .JSONL file
     """
     with open(outfile, "w") as file:
-        for _, val in dataframe.iterrows():
-            pattern = {
-                "label": val["EntityType"],
-                "pattern": [{"lower": val["SeedTerm"]}],
-            }
+        for i, val in dataframe.iterrows():
+            pattern_list = [{"LOWER": j.lower()} for j in val["SeedTerm"].split(" ")]
+            pattern = {"label": val["EntityType"], "pattern": pattern_list}
+            # pattern = {"label": val['EntityType'], "pattern":[{"lower": val['SeedTerm']}]}
             print(pattern)
             file.write(json.dumps(pattern))
             file.write("\n")

@@ -13,7 +13,7 @@ It follows a three-stage process:
 
 ### 1. Setup Instructions
 
-1. Download the Prodigy wheel file from https://$PRODIGY_LICENSE@download.prodi.gy where $PRODIGY_LICENSE is predefined in the repo .secrets file. Download the `prodigy-1.11.0-cp39-cp39-linux_x86_64.whl` wheel file and move it into the `wheel/` folder in the working directory.
+1. Download the Prodigy wheel file from https://$PRODIGY_LICENSE@download.prodi.gy where $PRODIGY_LICENSE is predefined in the repo .secrets file. Download the `prodigy-1.11.8-cp39-cp39-linux_x86_64.whl` wheel file and move it into the `wheel/` folder in the working directory.
 2. Move the data you want to label into the `data/` folder in the working directory.
 
 
@@ -63,8 +63,13 @@ It follows a three-stage process:
 
 When in your containerised environment, you can run any prodigy commands as usual. For example:
 ```bash
-prodigy ner.manual example_dataset en_core_web_md ./data/example_sentences.jsonl --label LABEL1,LABEL2,LABEL3
+prodigy ner.manual dataset_to_save_annotation blank:en data/examples_to_annotate.jsonl --label TITLE,ROLE,OCCUPATION,SECTOR,ORG,GPE,LOC,FAC --patterns data/phase_2_patterns_no_occ.jsonl
 ```
+or
+```bash
+prodigy ner.correct dataset_to_save_annotation path/to/model-best data/examples_to_annotate.jsonl --label TITLE,ROLE,OCCUPATION,SECTOR,ORG,GPE,LOC,FAC --unsegmented
+```
+
 As the volume has been mounted between your host machine and the container in step 3, all databases will be saved in your local environment as well as the container.
 
 A web server will start at `http://0.0.0.0:8080`
@@ -76,3 +81,10 @@ You should add your first initial and surname to the end of the webserver, so th
 or
 
 `http://0.0.0.0:8080?session=atosi`
+
+
+### 4. For review
+
+```bash
+prodigy review dataset_where_to_save_reviewed_anns dataset1_with_anns,dataset2_with_ann --label TITLE,ROLE,OCCUPATION,SECTOR,ORG,GPE,LOC,FAC --view-id ner_manual
+```
