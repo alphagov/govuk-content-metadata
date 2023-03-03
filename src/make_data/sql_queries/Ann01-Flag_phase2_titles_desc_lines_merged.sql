@@ -114,7 +114,7 @@ WITH line_categories AS (
   REGEXP_EXTRACT_ALL(line, occupation_regex) AS which_occupation,
   REGEXP_CONTAINS( line, sector_regex) AS contains_sector,
   REGEXP_EXTRACT_ALL(line, sector_regex) AS which_sector
-FROM `cpto-content-metadata.content_ner.text_clean`
+FROM `cpto-content-metadata.content_ner.text`
 )
 
 SELECT url,
