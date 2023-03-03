@@ -1,10 +1,34 @@
 import pytest
+from unittest.mock import Mock, MagicMock
+from google.cloud import bigquery
 import types
 import gzip
 from io import BytesIO
 
+from bulk_inference_pipeline.src.utils import stream_from_bigquery, chunks
 
-from bulk_inference_pipeline.src.utils import chunks
+
+def test_stream_from_bigquery():
+    # create a mock bigquery client
+    mock_client = Mock(spec=bigquery.client.Client)
+
+    # create some test data
+    test_data = [("test", 1, "example.com"), ("another test", 2, "example.com")]
+
+    # create a mock query job with the test data
+    mock_query_job = MagicMock()
+    mock_query_job.__iter__.return_value = iter(test_data)
+    mock_query_job.result.return_value = iter(test_data)
+
+    # mock the bigquery query method to return the mock query job
+    mock_client.query.return_value = mock_query_job
+
+    # call the function with a test query
+    query = "SELECT * FROM mytable"
+    results = list(stream_from_bigquery(query, mock_client))
+
+    # check that the function returned the expected results
+    assert results == [("test", 1, "example.com"), ("another test", 2, "example.com")]
 
 
 def test_chunks_output_type_1():
