@@ -2,6 +2,8 @@
 
 This folder contains various scripts and functions that are used at various points throughout the project. The purpose of the scripts in these section are always to contribute to the creation of datasets, be it for generating data for annotation, or creating a dataset for another reason.
 
+## `src/make_data/sql_queries`
+
 There are 4 .sql files that are used for creating an annotation set. These are all prefixed with `Ann-0x...`:
 
 1. `sql_queries/Ann01-Flag_phase2_titles_desc_lines_merged`
@@ -15,3 +17,20 @@ This SQL Script calculates value counts for each of the phase 2 categories, so u
 
 4. `sql_queries/Ann04-Generate_testing_data`
 This script creates a dataset for annotation. It takes a random sample of 1000 lines for each of the categories in the phase being annotated where a seed term has been flagged in the `primary_table` (step 2). It also takes a random sample of 1000 lines from across GOV.UK. These are then ordered according to category type, so models can be trained after each 1000 annotations.
+
+In addition, the following files allow the users to select the training sets:
+
+5. `sql_queries/Ann05-Stratify-annotation-set.sql`
+Scripts that creates different sets (cycles), each with equal proportions of entity categories.
+
+6. `sql_queries/Ann06-Sample-cycle-set.sql`
+Script to sample all examples tagged with a specified cycle.
+
+Bonus script:
+
+7. `sql_queries/Ann07-Create-sample-for-event-category.sql`
+Script to create a training set with texts that are likley to contain EVENT entity instances.
+
+### Dependencies
+
+All these scripts and generated tables are dependent on the `cpto-content-metadata.phase2_categories` dataset.
