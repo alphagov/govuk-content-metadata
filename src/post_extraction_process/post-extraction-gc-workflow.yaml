@@ -185,7 +185,7 @@ main:
             args:
               projectId: ${projectid}
               body:
-                query: ${"EXPORT DATA OPTIONS( uri='gs://" + bucket + "/" + prefix + "/" + "*.csv', format='CSV', compression='GZIP', overwrite=true, header=true) AS " + query_headers}
+                query: ${"EXPORT DATA OPTIONS( uri='gs://" + bucket + "/" + prefix + "/" + "*.csv.gz', format='CSV', compression='GZIP', overwrite=true, header=true) AS " + query_headers}
                 useLegacySql: false
 
     - export-bq_table_to_gcs:
@@ -197,7 +197,7 @@ main:
                     extract:
                         compression: "GZIP"
                         destinationFormat: "CSV"
-                        destinationUris: ['${"gs://" + bucket + "/" + prefix + "/" + "/z*.csv"}']
+                        destinationUris: ['${"gs://" + bucket + "/" + prefix + "/" + "/z*.csv.gz"}']
                         fieldDelimiter: ","
                         printHeader: false
                         sourceTable:
@@ -248,7 +248,7 @@ list_and_delete_files:
                           call: googleapis.storage.v1.objects.delete
                           args:
                             bucket: ${bucket}
-                            object: ${text.replace_all(file.name,"/","%2F")}
+                            object: ${text.url_encode(file.name)}
                             userProject: ${projectid}
                           result: deleteResult
           except:
@@ -274,7 +274,7 @@ list_and_compose_file:
             bucket: ${bucket}
             pageToken: ${pagetoken}
             prefix: ${prefix}
-            maxResults: 1000
+            maxResults: 62
           result: listResult
       - init-iter:
           assign:
@@ -333,6 +333,6 @@ compose_file:
         call: googleapis.storage.v1.objects.compose
         args:
           destinationBucket: ${bucket}
-          destinationObject: ${text.replace_all(finalFileName,"/","%2F")}
+          destinationObject: ${text.url_encode(file.name)}
           body:
             sourceObjects: ${fileList}
