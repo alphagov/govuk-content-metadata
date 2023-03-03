@@ -23,6 +23,7 @@ def excel_to_df(excel_file) -> pd.DataFrame:
     df = pd.read_excel(excel_file)
     return df
 
+
 def csv_to_df(csv_file) -> pd.DataFrame:
     """Converts an excel sheet with one or more tabs into a single DataFrame.
 
