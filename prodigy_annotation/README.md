@@ -63,8 +63,13 @@ It follows a three-stage process:
 
 When in your containerised environment, you can run any prodigy commands as usual. For example:
 ```bash
-prodigy ner.manual phase_2_test_subset400_rh blank:en data/phase_2_test_subset400.jsonl --label PER-TITLE,LOC-COMMON,SECTOR,PER-ROLE,PER-OCCUPATION --patterns data/phase_2_patterns_no_occ.jsonl
+prodigy ner.manual dataset_to_save_annotation blank:en data/examples_to_annotate.jsonl --label TITLE,ROLE,OCCUPATION,SECTOR,ORG,GPE,LOC,FAC --patterns data/phase_2_patterns_no_occ.jsonl
 ```
+or
+```bash
+prodigy ner.correct dataset_to_save_annotation path/to/model-best data/examples_to_annotate.jsonl --label TITLE,ROLE,OCCUPATION,SECTOR,ORG,GPE,LOC,FAC --unsegmented
+```
+
 As the volume has been mounted between your host machine and the container in step 3, all databases will be saved in your local environment as well as the container.
 
 A web server will start at `http://0.0.0.0:8080`
@@ -81,5 +86,5 @@ or
 ### 4. For review
 
 ```bash
-prodigy review phase_2_test_subset400_review phase_2_test_subset400_rh,phase_2_test_subset400_at --label PER-TITLE,LOC-COMMON,SECTOR,PER-ROLE,PER-OCCUPATION,ORG-COMMON --view-id ner_manual
+prodigy review dataset_where_to_save_reviewed_anns dataset1_with_anns,dataset2_with_ann --label TITLE,ROLE,OCCUPATION,SECTOR,ORG,GPE,LOC,FAC --view-id ner_manual
 ```
