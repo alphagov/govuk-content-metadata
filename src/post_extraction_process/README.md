@@ -2,7 +2,7 @@
 
 A [Google Workflow](https://cloud.google.com/workflows/docs/overview) orchestrates the named entities post-extraction processing.
 
-The workflow consists of three steps and can be found in the [src/post_extraction_process/post-extraction-gc-workflow.yaml][src/post_extraction_process/post-extraction-gc-workflow.yaml] file.
+The workflow consists of three steps and can be found in the [src/post_extraction_process/post-extraction-gc-workflow.yaml](src/post_extraction_process/post-extraction-gc-workflow.yaml) file.
 
 The three steps are:
 

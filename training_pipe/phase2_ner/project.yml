@@ -1,0 +1,96 @@
+title: "GovNER Phase2 SpaCy Training Pipeline"
+description: "SpaCy pipeline to train NER model for phase-2 entities. Runs through multiple stages including data prep and training"
+
+# Variables can be referenced across the project.yml using ${vars.var_name}
+vars:
+  config: "config.cfg"
+  gpu_id: 0
+  train: "data_train"
+  dev: "data_test"
+  gcp_storage_remote: "gs://cpto-content-metadata/spacy-project-remote/phase2_ner"
+
+remotes:
+  default: '${vars.gcp_storage_remote}'
+
+# These are the directories that the project needs. The project CLI will make
+# sure that they always exist.
+directories: ["assets", "training", "configs", "metrics", "corpus"]
+
+# Assets that should be downloaded or available in the directory. We"re shipping
+# them with the project, so they won't have to be downloaded. But the
+# "project assets" command still lets you verify that the checksums match.
+assets:
+  - dest: "assets/${vars.train}.jsonl"
+    description: "JSONL-formatted training data exported from Prodigy"
+  - dest: "assets/${vars.dev}.jsonl"
+    description: "JSONL-formatted development data exported from Prodigy"
+
+workflows:
+  all:
+    - get-assets
+    - preprocess
+    - create-config
+    - train_spacy
+    - evaluate
+    - push_remote
+
+commands:
+
+  - name: get-assets
+    script:
+      - "python3 -m spacy project assets"
+    help: "Fetch project assets"
+
+  - name: "preprocess"
+    help: "Convert the data to spaCy's binary format"
+    script:
+      - "python3 src/preprocess.py assets/${vars.train}.jsonl corpus/${vars.train}.spacy"
+      - "python3 src/preprocess.py assets/${vars.dev}.jsonl corpus/${vars.dev}.spacy"
+    deps:
+      - "assets/${vars.train}.jsonl"
+      - "assets/${vars.dev}.jsonl"
+      - "src/preprocess.py"
+    outputs:
+      - "corpus/${vars.train}.spacy"
+      - "corpus/${vars.dev}.spacy"
+
+  - name: create-config
+    help: "Initialise and save a config.cfg file using the recommended settings for your use case"
+    script:
+      - "python3 -m spacy init config configs/${vars.config} --lang en --pipeline transformer,ner --optimize accuracy --gpu --force"
+    outputs:
+      - "configs/${vars.config}"
+
+  - name: train_spacy
+    help: "Train a named entity recognition model with spaCy"
+    script:
+      - "python3 -m spacy train configs/${vars.config} --output training/ --paths.train corpus/${vars.train}.spacy --paths.dev corpus/${vars.dev}.spacy --gpu-id ${vars.gpu_id}"
+    deps:
+      - "corpus/${vars.train}.spacy"
+      - "corpus/${vars.dev}.spacy"
+    outputs:
+      - "training/model-best"
+
+  - name: "evaluate"
+    help: "Evaluate the model and export metrics"
+    script:
+      - "python3 -m spacy evaluate training/model-best corpus/${vars.dev}.spacy --output metrics/metrics.json"
+    deps:
+      - "corpus/${vars.dev}.spacy"
+      - "training/model-best"
+
+  - name: push_remote
+    help: "Push outputs to remote"
+    script:
+      - "python3 -m spacy project push default"
+    deps:
+      - "training/model-best"
+      - "metrics/metrics.json"
+
+  # clean up files (not in workflow by default)
+  - name: clean
+    help: "Remove intermediate files"
+    script:
+      - "rm -rf training/*"
+      - "rm -rf metrics/*"
+      - "rm -rf corpus/*"

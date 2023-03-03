@@ -9,28 +9,30 @@ You must use arguments:
 import pandas as pd
 import argparse
 import json
+from typing import List
 
 
-def excel_to_df(excel_file, sheet_names) -> pd.DataFrame:
-    """Converts an excel sheet with one or more tabs into a single DataFrame.
+def excel_to_df(excel_file: str, sheet_names: List[str]) -> pd.DataFrame:
+    """Converts an excel workbook with one or more sheets into a single DataFrame.
 
     Args:
-        excel_file (_type_): A .xlsx file.
+        excel_file (_type_): path to a .xlsx file.
+        sheet_names: a list of excel sheets contained in excel_file that will be combined
 
     Returns:
-        pd.DataFrame: Concatenated DataFrame of the tab(s).
+        pd.DataFrame: Concatenated DataFrame of the sheet(s).
     """
     dfs = pd.read_excel(excel_file, sheet_name=[i for i in sheet_names])
-    concat = pd.concat([dfs[i] for i in sheet_names])
-    return concat
+    concat_dfs = pd.concat([dfs[i] for i in sheet_names])
+    return concat_dfs
 
 
-def df_to_match_patterns(dataframe, outfile) -> json:
+def df_to_match_patterns(dataframe: pd.DataFrame, outfile: str) -> json:
     """Converts rows of a DataFrame into Spacy match pattern format.
 
     Args:
-        dataframe (_type_): DataFrame
-        outfile (_type_): .JSONL file
+        dataframe (_type_): a pandas DataFrame with columns 'EntityType' and 'SeedTerm'
+        outfile (_type_): filepath to the .JSONL file
 
     Returns:
         json: .JSONL file
@@ -43,7 +45,6 @@ def df_to_match_patterns(dataframe, outfile) -> json:
             print(pattern)
             file.write(json.dumps(pattern))
             file.write("\n")
-            # file.write(pattern)
 
 
 if __name__ == "__main__":
