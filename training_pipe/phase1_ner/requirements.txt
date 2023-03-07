@@ -1,4 +1,0 @@
---extra-index-url https://${PRODIGY_LICENSE}@download.prodi.gy/index
-prodigy==1.11.8
-spacy[cuda112]
-spacy-transformers
