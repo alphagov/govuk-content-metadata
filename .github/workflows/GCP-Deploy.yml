@@ -1,12 +1,7 @@
 name: Docker
 
 on:
-<<<<<<< HEAD
-  pull_request:
-    branches: [ main ]
-=======
   push:
->>>>>>> 3c62605 (update gcloud ci/cd workflow)
     paths:
       - src/ner_streamlit_app/**
 
@@ -36,11 +31,11 @@ jobs:
         - name: Run Cloud Build process
           run: gcloud builds submit --config src/ner_streamlit_app/cloudbuild.yaml
 
-        # - name: Build Docker image
-        #   run: docker build -t $IMAGE_NAME ./src/make_visualisations
+        - name: Build Docker image
+          run: docker build -t $IMAGE_NAME ./src/make_visualisations
 
-        # - name: Push Docker image
-        #   run: docker push $IMAGE_NAME
+        - name: Push Docker image
+          run: docker push $IMAGE_NAME
 
-        # - name: Deploy Docker image
-        #   run: gcloud run deploy ${{ secrets.GCP_APP_NAME }} --image $IMAGE_NAME --region europe-west2 --platform managed --port 8501 --min-instances 0 --max-instances 5 --cpu 1 --memory 4Gi
+        - name: Deploy Docker image
+          run: gcloud run deploy ${{ secrets.GCP_APP_NAME }} --image $IMAGE_NAME --region europe-west2 --platform managed --port 8501 --min-instances 0 --max-instances 5 --cpu 1 --memory 4Gi
