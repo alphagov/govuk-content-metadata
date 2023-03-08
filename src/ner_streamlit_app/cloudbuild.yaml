@@ -1,7 +1,7 @@
 steps:
 # Download the model from gcp into image
 - name: 'gcr.io/cloud-builders/gsutil'
-  args: ['-m', 'cp', '-r', 'gs://cpto-content-metadata/models', '.']
+  args: ['-m', 'cp', '-r', 'gs://cpto-content-metadata/models', './src/ner_streamlit_app']
   id: 'download-model'
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
