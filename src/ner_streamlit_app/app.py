@@ -1,4 +1,3 @@
-from google.cloud import storage
 import spacy
 import visualizer
 import pandas as pd
@@ -7,8 +6,6 @@ import streamlit as st
 from collections import Counter
 from config import colors, entity_names, default_text
 from utils import get_model_metrics, get_model_ents_metrics, url_get_sents
-from download_models import replicate_folder_structure, download_files_from_bucket
-
 
 # page configuration
 st.set_page_config(page_title="GovNER 2.0", page_icon="🧐", layout="wide")
@@ -40,25 +37,10 @@ with st.sidebar:
             :return: Transformer pipeline.
             :rtype: Model.
             """
-
-            # instantiate_storage_client
-            storage_client = storage.Client()
-            bucket_name = "cpto-content-metadata"
-
-            replicate_folder_structure(
-                bucket_name=bucket_name,
-                folder="models/mdl_ner_trf_b1_b4/model-best",
-                storage_client=storage_client,
-            )
-            download_files_from_bucket(
-                bucket_name=bucket_name,
-                folder="models/mdl_ner_trf_b1_b4/model-best",
-                storage_client=storage_client,
-            )
             nlp = spacy.load(model_path)
             return nlp
 
-        nlp = load_model(model_path="models/mdl_ner_trf_b1_b4/model-best")
+        nlp = load_model(model_path="./models/mdl_ner_trf_b1_b4/model-best")
 
     # displacy metric for loaded model in sidebar
     metrics = get_model_metrics(nlp)
