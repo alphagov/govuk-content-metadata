@@ -6,7 +6,7 @@ steps:
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app', '.']
-# Push the container image to Container Registry
+# Push the container image to GCP Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app']
 images:
