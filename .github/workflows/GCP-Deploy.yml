@@ -41,7 +41,7 @@ jobs:
 
         # Deploy container image to Cloud Run
         - name: Deploy to Cloud Run
-        - id: 'deploy'
+          id: 'deploy'
           uses: 'google-github-actions/deploy-cloudrun@v1'
           with:
             service: 'ner-streamlit-app'
