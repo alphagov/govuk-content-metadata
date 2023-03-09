@@ -31,15 +31,16 @@ jobs:
           run: gcloud auth configure-docker --quiet
 
         # Checkout repository in GCP
-        - name: Checkout repository
+        - name: Checkout Repository
           uses: actions/checkout@v2
 
         # Run cloudbuild.yaml in the correct directory
-        - name: Run Cloud Build process
+        - name: Run Cloud Build Process
           run: gcloud builds submit --config cloudbuild.yaml
           working-directory: src/ner_streamlit_app
 
         # Deploy container image to Cloud Run
+        - name: Deploy to Cloud Run
         - id: 'deploy'
           uses: 'google-github-actions/deploy-cloudrun@v1'
           with:
