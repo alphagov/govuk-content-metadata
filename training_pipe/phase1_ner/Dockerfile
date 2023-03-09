@@ -11,14 +11,12 @@ RUN apt update && apt-get install -y apt-transport-https && \
     apt install --no-install-recommends -y python3.8 python3-pip python3-setuptools python3-distutils && \
     apt clean && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-
-RUN python3.8 -m pip install --upgrade pip && \
-    python3.8 -m pip install --no-cache-dir -r requirements.txt
-
 COPY . .
 
 RUN ls --recursive .
+
+RUN python3.8 -m pip install --upgrade pip \
+    && python3.8 -m pip install --no-cache-dir -r requirements.txt
 
 ENTRYPOINT [ "python3" ]
 CMD ["-m", "spacy", "project", "run", "all"]
