@@ -1,11 +1,11 @@
 steps:
 # Download the model from gcp into image
 - name: 'gcr.io/cloud-builders/gsutil'
-  args: ['-m', 'cp', '-r', 'gs://cpto-content-metadata/models', '.']
+  args: ['-m', 'cp', '-r', 'gs://cpto-content-metadata/models/mdl_ner_trf_b1_b4/model-best', '.']
   id: 'download-model'
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app', './src/ner_streamlit_app']
+  args: ['build', '-t', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app', '.']
 # Push the container image to GCP Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app']

@@ -40,7 +40,7 @@ with st.sidebar:
             nlp = spacy.load(model_path)
             return nlp
 
-        nlp = load_model(model_path="./models/mdl_ner_trf_b1_b4/model-best")
+        nlp = load_model(model_path="./model-best")
 
     # displacy metric for loaded model in sidebar
     metrics = get_model_metrics(nlp)
