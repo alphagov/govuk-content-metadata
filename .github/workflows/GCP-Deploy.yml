@@ -38,3 +38,11 @@ jobs:
         - name: Run Cloud Build process
           run: gcloud builds submit --config cloudbuild.yaml
           working-directory: src/ner_streamlit_app
+
+        # Deploy container image to Cloud Run
+        - id: 'deploy'
+          uses: 'google-github-actions/deploy-cloudrun@v1'
+          with:
+            service: 'ner-streamlit-app'
+            image: 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app'
+            flags: '--region=europe-west2 --port=8501 --min-instances=0 --max-instances=5 --cpu=1 --memory=4Gi'

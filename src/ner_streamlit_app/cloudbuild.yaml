@@ -9,9 +9,5 @@ steps:
 # Push the container image to GCP Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app']
-# Deploy container image to Cloud Run
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args: ['run', 'deploy', 'ner-streamlit-app', '--image', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app', '--region', 'europe-west2', '--platform', 'managed', '--port', '8501', '--min-instances', '0', '--max-instances', '5', '--cpu', '1', '--memory', '4Gi']
 images:
 - europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app
