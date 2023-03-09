@@ -11,7 +11,7 @@ from utils import get_model_metrics, get_model_ents_metrics, url_get_sents
 st.set_page_config(page_title="GovNER 2.0", page_icon="🧐", layout="wide")
 
 # page main titles and description
-st.title("Welcome to GovNER 2.0 🧐")
+st.title("TEST Welcome to GovNER 2.0 🧐")
 st.write("### Demonstration of NER on GOV.UK page")
 st.write(
     "Data Products have developed a model that can detect entities of interest from 'govspeak' in GOV.UK content.",
@@ -40,7 +40,7 @@ with st.sidebar:
             nlp = spacy.load(model_path)
             return nlp
 
-        nlp = load_model(model_path="./models/mdl_ner_trf_b1_b4/model-best")
+        nlp = load_model(model_path="./model-best")
 
     # displacy metric for loaded model in sidebar
     metrics = get_model_metrics(nlp)
