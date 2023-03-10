@@ -15,7 +15,7 @@ colors = {
     "PHONE": "#aaff00",
     "OCCUPATION": "#d0c2ef",
     "FAC": "#f58a07",
-    "EVENT":"#0099ff"
+    "EVENT": "#0099ff",
 }
 
 entity_names = [k for (k, _) in colors.items()]
