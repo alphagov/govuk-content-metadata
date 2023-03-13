@@ -99,7 +99,9 @@ The pipeline is currently deployed in a Docker container onto a Virtual Machine 
 
 A schedule is associated to the VM which runs the pipeline twice a month, on the 1st and 15th of each month. To run the pipeline on an ad-hoc basis outside of this schedule, simply start the VM instance (please remember to turn it off!).
 
-The GCE VM instance for the Phase-1 entities is called `bulk-inference-phase1-ubuntu-gpu`.
+Current GCE VM instances:
+- `bulk-inference-phase1-ubuntu-gpu` for Phase-1 entities,
+- `bulk-inference-phase2-ubuntu-gpu` for Phase-2 entities.
 
 To know more about how to the VM was set up, please see [bulk_inference_pipeline/README.md](bulk_inference_pipeline/README.md).
 
