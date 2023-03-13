@@ -29,7 +29,8 @@ with st.sidebar:
         help="At present, you can choose our latest Transformer NER model to embed your text. More to come!",
     )
 
-    # Select model - only one model for now
+    # Select model - Only choice is 'Transformer', which incorporates 2 models (P1 and P2) automatically.
+    # User not given option to toggle P1 and P2 models at the moment, but could do in future. Not a priority.
     if ModelType == "Transformer":
         # load transformermodel and cache
         @st.cache(allow_output_mutation=True)
@@ -44,7 +45,7 @@ with st.sidebar:
             nlp = spacy.load(model_path)
             return nlp
 
-        # load bith models
+        # load both models
         nlp_1 = load_model(model_path="./models/phase1_ner_trf_model/model-best")
         nlp_2 = load_model(model_path="./models/phase2_ner_trf_model/model-best")
 
@@ -114,12 +115,15 @@ with st.expander("Input text"):
             doc_1 = nlp_1(text)
             doc_2 = nlp_2(text)
 
-# visualisations
+# visualisations - text annotation on left (col1), donut chart on right (col2)
 col1, col2 = st.columns([2, 1])
+
+
 with col1:
 
     # taken from https://spacy.io/usage/visualizers
     # set entities as spans for both model outputs - note - doc must be the same to merge
+    # we are adding the spans from doc2 to those of doc1.
     doc_1.spans["sc"] = [
         Span(doc_1, ent.start, ent.end, ent.label_) for ent in doc_1.ents
     ]
@@ -134,7 +138,7 @@ with col1:
     st.markdown(ent_html, unsafe_allow_html=True)
 
 with col2:
-    # entity and label counts visualisation
+    # entity and label counts visualisation - donut chart
 
     # get the list of entities from both models
     ents = [i for i in doc_1.ents] + [i for i in doc_2.ents]
