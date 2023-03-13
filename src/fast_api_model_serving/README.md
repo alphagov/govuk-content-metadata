@@ -59,7 +59,7 @@ When finished, you will be able to see the model container on the GCP container 
 
 Following the above steps, you will push your image into an image registry on GCP.
 In vertex AI, navigate to the Model Registry sub-directory, and at the top click on the `Import` option.
-Complete the configuration as required.
+Complete the configuration as required. This is comuplsory if you are using a custom model - something built using Fast API or similar - however, if you are using a Tensorflow or Sklearn model, you may not have to do this - see https://cloud.google.com/vertex-ai/docs/training/overview.
 
 This registers the model on Vertex, which can then be used for Online (realtime) and Batch prediction jobs.
 For this project, it will usually be the latter.
