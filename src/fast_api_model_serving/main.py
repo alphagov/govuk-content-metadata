@@ -23,6 +23,7 @@ class Content(BaseModel):
                 but good to have a reference to the page url.
     content: The text to be fed into the model for inference.
     """
+
     post_url: str
     content: str
 
@@ -32,6 +33,7 @@ class Payload(BaseModel):
     """
     A list of content, multiple {"post_url":"content"} value pairs.
     """
+
     instances: List[Content]
 
 
@@ -41,6 +43,7 @@ class SingleEntity(BaseModel):
     The data model that responses will be sent back by the server.
     Returns text as well as the entities and their locations.
     """
+
     text: str
     entity_type: str
     entity_startchar: str
@@ -52,6 +55,7 @@ class Entities(BaseModel):
     """
     A list of multiple responses from multiple requests payload.
     """
+
     post_url: str
     entities: List[SingleEntity]
 

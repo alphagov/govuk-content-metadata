@@ -17,7 +17,7 @@ It contains components:
 - Access to the `cpto-content-metadata` project on GCP
 - GCP authentication. Run
 
-```bash 
+```bash
 gcloud auth login
 
 ## To run the Fast API locally
