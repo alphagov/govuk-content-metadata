@@ -1,0 +1,17 @@
+steps:
+- name: gcr.io/cloud-builders/gcloud:latest
+  entrypoint: "ls"
+  args: ["-lah","/workspace"]
+# Download the model from gcp into image
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ['-m', 'cp', '-r', 'gs://cpto-content-metadata/models/phase2_ner_trf_model/model-best', '/workspace/models/']
+# Build the container image
+# and set the build-time variables phaseN
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-bulk-inference-phase2', '.',
+  '--build-arg', 'phaseN=2']
+# Push the container image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-bulk-inference-phase2']
+images:
+- europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-bulk-inference-phase2
