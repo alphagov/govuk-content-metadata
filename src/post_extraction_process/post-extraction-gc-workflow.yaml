@@ -55,6 +55,15 @@ main:
                   name,
                   LOWER(name) AS name_lower,
                   type,
+                  'title' AS part_of_page
+                FROM `cpto-content-metadata.named_entities_raw.title_2`, UNNEST(entities)
+                WHERE name IS NOT null
+                UNION ALL
+                SELECT
+                  url,
+                  name,
+                  LOWER(name) AS name_lower,
+                  type,
                   'description' AS part_of_page
                 FROM `cpto-content-metadata.named_entities_raw.description_1`, UNNEST(entities)
                 WHERE name IS NOT null
@@ -64,8 +73,26 @@ main:
                   name,
                   LOWER(name) AS name_lower,
                   type,
+                  'description' AS part_of_page
+                FROM `cpto-content-metadata.named_entities_raw.description_2`, UNNEST(entities)
+                WHERE name IS NOT null
+                UNION ALL
+                SELECT
+                  url,
+                  name,
+                  LOWER(name) AS name_lower,
+                  type,
                   'text' AS part_of_page
                 FROM `cpto-content-metadata.named_entities_raw.text_1`, UNNEST(entities)
+                WHERE name IS NOT null
+                UNION ALL
+                SELECT
+                  url,
+                  name,
+                  LOWER(name) AS name_lower,
+                  type,
+                  'text' AS part_of_page
+                FROM `cpto-content-metadata.named_entities_raw.text_2`, UNNEST(entities)
                 WHERE name IS NOT null
                 )
                 SELECT
@@ -333,6 +360,6 @@ compose_file:
         call: googleapis.storage.v1.objects.compose
         args:
           destinationBucket: ${bucket}
-          destinationObject: ${text.url_encode(file.name)}
+          destinationObject: ${text.url_encode(finalFileName)}
           body:
             sourceObjects: ${fileList}
