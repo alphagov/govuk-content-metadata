@@ -1,27 +1,8 @@
-# this file, along with src.make_visualisations.visualize.py is the source code taken from
-# https://github.com/explosion/spacy-streamlit/tree/master/spacy_streamlit
-# because a bug would't allow direct installation
-
-import streamlit as st
 import pandas as pd
-import spacy
 import base64
 import requests
 from bs4 import BeautifulSoup
 from typing import List
-
-
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
-def load_model(name: str) -> spacy.language.Language:
-    """Load a spaCy model."""
-    return spacy.load(name)
-
-
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
-def process_text(model_name: str, text: str) -> spacy.tokens.Doc:
-    """Process a text and create a Doc object."""
-    nlp = load_model(model_name)
-    return nlp(text)
 
 
 def get_svg(svg: str, style: str = "", wrap: bool = True):
