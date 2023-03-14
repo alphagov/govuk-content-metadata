@@ -360,6 +360,6 @@ compose_file:
         call: googleapis.storage.v1.objects.compose
         args:
           destinationBucket: ${bucket}
-          destinationObject: ${text.url_encode(file.name)}
+          destinationObject: ${text.url_encode(finalFileName)}
           body:
             sourceObjects: ${fileList}
