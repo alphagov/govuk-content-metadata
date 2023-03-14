@@ -15,12 +15,12 @@ All the scripts are available in the [bulk_inference_pipeline/config_vm](bulk_in
 
 Open the `config_vm/env_vars.sh` file and update the value of the environment variables as necessary.
 
-Then load the variables by running:
+Then load the variables by running, setting N = 1 for phase 1 and N = 2 for phase 2:
 ```shell
-source config_vm/env_vars.sh
+source config_vm/env_vars_phase${N}.sh
 ```
 
-Open the `config_vm/startup_script_vm_gce.sh` file and set or update the value of the `DOCKER_IMAGE_NAME` variable (if needed).
+Open the `config_vm/startup_script_vm_gce.sh` file and set or update the value of the `DOCKER_IMAGE_NAME` variable (IF NEEDED - i.e., using a different docker image).
 
 
 # 1. Create the general Ubuntu VM on GCE
@@ -58,7 +58,7 @@ bash config_vm/create_schedule_policy_vm.sh
 ```
 
 The start-up script defines which docker image to be launched every time the VM is started.
-Please modify the script (`config_vm/startup_script_vm_gce.sh`) if you need a different docker image to be launched.
+Please modify the script (`config_vm/startup_script_vm_*.sh`) if you need a different docker image to be launched.
 
 The inference pipeline is now scheduled to run according to the schedule specified in `config_vm/create_schedule_policy_vm.sh`; modify the schedule if needed. No manual actions needed.
 

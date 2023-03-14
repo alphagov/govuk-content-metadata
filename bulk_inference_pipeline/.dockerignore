@@ -1,2 +1,4 @@
 config_vm/
 config_vm/*
+cloudbuild_phase1.yaml
+cloudbuild_phase2.yaml
