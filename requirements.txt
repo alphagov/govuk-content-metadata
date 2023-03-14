@@ -26,7 +26,7 @@ python-dateutil==2.8.2
 pytz==2022.1
 PyYAML==6.0
 requests==2.27.1
-setuptools==67.4.0
+setuptools==67.6.0
 six==1.16.0
 soupsieve==2.3.2.post1
 spacy==3.5.0
@@ -45,6 +45,8 @@ dvc==2.45.1
 spacy-streamlit==1.0.4
 streamlit==1.17.0
 openpyxl==3.1.1
+pytest-mock==3.10.0
+protobuf==3.20.3
 ## The following requirements were added by pip freeze:
 aiofiles==23.1.0
 aiohttp==3.8.4
@@ -106,6 +108,7 @@ dvc-render==0.2.0
 dvc-studio-client==0.5.0
 dvc-task==0.1.11
 dvclive==2.1.0
+en-core-web-lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.5.0/en_core_web_lg-3.5.0-py3-none-any.whl
 entrypoints==0.4
 et-xmlfile==1.1.0
 executing==1.2.0
@@ -192,7 +195,6 @@ pluggy==1.0.0
 preshed==3.0.8
 prometheus-client==0.16.0
 prompt-toolkit==3.0.37
-protobuf==3.20.3
 psutil==5.9.4
 ptyprocess==0.7.0
 pure-eval==0.2.2

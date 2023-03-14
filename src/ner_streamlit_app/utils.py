@@ -1,26 +1,8 @@
-# this file, along with src.make_visualisations.visualize.py is the source code taken from
-# https://github.com/explosion/spacy-streamlit/tree/master/spacy_streamlit
-# because a bug would't allow direct installation
-
-import streamlit as st
 import pandas as pd
-import spacy
 import base64
 import requests
 from bs4 import BeautifulSoup
-
-
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
-def load_model(name: str) -> spacy.language.Language:
-    """Load a spaCy model."""
-    return spacy.load(name)
-
-
-@st.cache(allow_output_mutation=True, suppress_st_warning=True)
-def process_text(model_name: str, text: str) -> spacy.tokens.Doc:
-    """Process a text and create a Doc object."""
-    nlp = load_model(model_name)
-    return nlp(text)
+from typing import List
 
 
 def get_svg(svg: str, style: str = "", wrap: bool = True):
@@ -38,14 +20,30 @@ def get_html(html: str):
     return WRAPPER.format(html)
 
 
-def get_model_metrics(nlp_model):
+def get_model_metrics(nlp_model) -> dict:
+    """Get high level performance stats from spacy model
+
+    Args:
+        nlp_model (spacy model): Trained spacy model pipeline
+
+    Returns:
+        dict: Overall metrics dictionary
+    """
     model_f = float("{:.3f}".format(nlp_model.meta["performance"]["ents_f"]))
     model_p = float("{:.3f}".format(nlp_model.meta["performance"]["ents_p"]))
     model_r = float("{:.3f}".format(nlp_model.meta["performance"]["ents_r"]))
     return {"model_f": model_f, "model_p": model_p, "model_r": model_r}
 
 
-def get_model_ents_metrics(nlp_model):
+def get_model_ents_metrics(nlp_model) -> pd.DataFrame:
+    """Get low level entity-type metrics
+
+    Args:
+        nlp_model (_type_): Trained spacy model pipeline
+
+    Returns:
+        pd.DataFrame: Dataframe of results
+    """ """"""
     ents_per_type = nlp_model.meta["performance"]["ents_per_type"]
     df = pd.DataFrame(ents_per_type)
     return df.T
@@ -73,14 +71,31 @@ LOGO = get_svg(LOGO_SVG, wrap=False, style="max-width: 100%; margin-bottom: 25px
 
 
 # get a html response from a page of interest
-def _get_page_soup(url):
+def _get_page_soup(url: str) -> BeautifulSoup:
+    """Scrape HTML from url into beautiful soup object.
+
+    Args:
+        url (str): url
+
+    Returns:
+        BeautifulSoup: Beautuful soup object
+    """
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
     return soup
 
 
-# get text data from html and return list of sentences
-def _get_sents_from_soup(soup):
+def _get_sents_from_soup(soup: BeautifulSoup) -> List[str]:
+    """Get sentences from a Beautiful Soup object.
+
+    Args:
+        soup (BeautifulSoup): Beautiful Soup object.
+
+    Returns:
+        List[str]: List of sentences on a page.
+    """
+    if soup is None:
+        return []
     body = soup.findAll(attrs={"class": "gem-c-govspeak"})
     sents = [i.text.split("\n") for i in body]
     sents_clean = [list(filter(None, i)) for i in sents]
@@ -89,7 +104,17 @@ def _get_sents_from_soup(soup):
 
 # get html and sentences from url
 def url_get_sents(url):
+    """Return sentences from a url.
+
+    Args:
+        url (_type_): A valid GOV.UK url.
+
+    Returns:
+        _type_: List of sentences.
+    """
     soup = _get_page_soup(url)
     sents_clean = _get_sents_from_soup(soup)
-    sents_clean = sents_clean[0]
-    return sents_clean
+    if sents_clean:
+        return sents_clean[0]
+    else:
+        raise ValueError("No sentences detected.")
