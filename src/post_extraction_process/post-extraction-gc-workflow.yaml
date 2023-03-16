@@ -43,57 +43,75 @@ main:
               WITH ents_all AS (
                 SELECT
                   url,
-                  name,
-                  LOWER(name) AS name_lower,
-                  type,
-                  'title' AS part_of_page
-                FROM `cpto-content-metadata.named_entities_raw.title_1`, UNNEST(entities)
-                WHERE name IS NOT null
+                  entities.name AS name,
+                  LOWER(entities.name) AS name_lower,
+                  entities.type,
+                  'title' AS part_of_page,
+                  line_number,
+                  entities.start AS char_start,
+                  entities.end AS char_end
+                FROM `cpto-content-metadata.named_entities_raw.title_1`, UNNEST(entities) AS entities
+                WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
                   url,
-                  name,
-                  LOWER(name) AS name_lower,
-                  type,
-                  'title' AS part_of_page
-                FROM `cpto-content-metadata.named_entities_raw.title_2`, UNNEST(entities)
-                WHERE name IS NOT null
+                  entities.name AS name,
+                  LOWER(entities.name) AS name_lower,
+                  entities.type,
+                  'title' AS part_of_page,
+                  line_number,
+                  entities.start AS char_start,
+                  entities.end AS char_end
+                FROM `cpto-content-metadata.named_entities_raw.title_2`, UNNEST(entities) AS entities
+                WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
                   url,
-                  name,
-                  LOWER(name) AS name_lower,
-                  type,
-                  'description' AS part_of_page
-                FROM `cpto-content-metadata.named_entities_raw.description_1`, UNNEST(entities)
-                WHERE name IS NOT null
+                  entities.name AS name,
+                  LOWER(entities.name) AS name_lower,
+                  entities.type,
+                  'description' AS part_of_page,
+                  line_number,
+                  entities.start AS char_start,
+                  entities.end AS char_end
+                FROM `cpto-content-metadata.named_entities_raw.description_1`, UNNEST(entities) AS entities
+                WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
                   url,
-                  name,
-                  LOWER(name) AS name_lower,
-                  type,
-                  'description' AS part_of_page
-                FROM `cpto-content-metadata.named_entities_raw.description_2`, UNNEST(entities)
-                WHERE name IS NOT null
+                  entities.name AS name,
+                  LOWER(entities.name) AS name_lower,
+                  entities.type,
+                  'description' AS part_of_page,
+                  line_number,
+                  entities.start AS char_start,
+                  entities.end AS char_end
+                FROM `cpto-content-metadata.named_entities_raw.description_2`, UNNEST(entities) AS entities
+                WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
                   url,
-                  name,
-                  LOWER(name) AS name_lower,
-                  type,
-                  'text' AS part_of_page
-                FROM `cpto-content-metadata.named_entities_raw.text_1`, UNNEST(entities)
-                WHERE name IS NOT null
+                  entities.name AS name,
+                  LOWER(entities.name) AS name_lower,
+                  entities.type,
+                  'text' AS part_of_page,
+                  line_number,
+                  entities.start AS char_start,
+                  entities.end AS char_end
+                FROM `cpto-content-metadata.named_entities_raw.text_1`, UNNEST(entities) AS entities
+                WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
                   url,
-                  name,
-                  LOWER(name) AS name_lower,
-                  type,
-                  'text' AS part_of_page
-                FROM `cpto-content-metadata.named_entities_raw.text_2`, UNNEST(entities)
-                WHERE name IS NOT null
+                  entities.name AS name,
+                  LOWER(entities.name) AS name_lower,
+                  entities.type,
+                  'text' AS part_of_page,
+                  line_number,
+                  entities.start AS char_start,
+                  entities.end AS char_end
+                FROM `cpto-content-metadata.named_entities_raw.text_2`, UNNEST(entities) AS entities
+                WHERE entities.name IS NOT null
                 )
                 SELECT
                   *,
