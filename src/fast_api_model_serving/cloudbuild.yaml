@@ -13,11 +13,11 @@ steps:
   id: 'download-phase2-model'
 # Build the container image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/cpto-content-metadata/fastapi-ner-trf', '.']
-  waitFor: ['download-model']
+  args: ['build', '-t', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/fastapi-ner-trf', '.']
+  waitFor: ['download-phase1-model', 'download-phase2-model']
 # Push container image to container registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/cpto-content-metadata/fastapi-ner-trf']
+  args: ['push', 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/fastapi-ner-trf']
 
 images:
-- gcr.io/cpto-content-metadata/fastapi-ner-trf
+- europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/fastapi-ner-trf
