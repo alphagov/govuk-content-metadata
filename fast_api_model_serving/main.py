@@ -2,15 +2,16 @@
 # For more information on the conventions used, visit https://fastapi.tiangolo.com/tutorial/first-steps/
 # for comprehensive explainations.
 
-# To run locally:
+# To run locally for quick testing:
 # uvicorn main:app --reload
-# http://localhost:8080/docs
+# http://localhost:8000/docs
 
 
 from fastapi import FastAPI
 from typing import Union, Any
 import spacy
 from pydantic import BaseModel, HttpUrl, Field
+from src.model_helpers import combine_ner_components
 
 # Initialisation - create a FastAPI instance
 app = FastAPI()
@@ -18,33 +19,6 @@ app = FastAPI()
 print("Load the spacy models")
 nlp_phase1 = spacy.load("models/phase1_ner_trf_model/model-best")
 nlp_phase2 = spacy.load("models/phase2_ner_trf_model/model-best")
-
-
-def combine_ner_components(
-    ner_trf1: spacy.pipeline, ner_trf2: spacy.pipeline
-) -> spacy.pipeline:
-    """
-    Takes in two spacy transformer pipeline objects, each containing a Named Entity Recognition (NER)
-    component, and returns a new spacy pipeline object that combines the two NER components.
-
-    Args:
-
-        ner_trf1: the first spacy transformer pipeline containing a NER component to be combined
-        ner_trf2: the second spacy transformer pipeline containing a NER component to be combined
-
-    Returns:
-        spacy.pipeline: a new spacy pipeline object that combines the two NER components,
-        placing the ner_trf2 NER component before the ner_trf1 NER component.
-
-    Ref: https://github.com/explosion/projects/tree/v3/tutorials/ner_double
-    """
-    # give this component a copy of its own tokenizer
-    ner_trf2.replace_listeners("transformer", "ner", ["model.tok2vec"])
-    # put the second ner component before the other ner
-    ner_trf1.add_pipe("ner", name="ner_2", source=ner_trf2, before="ner")
-    print(ner_trf1.pipe_names)
-    return ner_trf1
-
 
 nlp = combine_ner_components(nlp_phase1, nlp_phase2)
 
