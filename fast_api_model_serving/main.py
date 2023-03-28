@@ -4,7 +4,7 @@
 
 # To run locally:
 # uvicorn main:app --reload
-# http://localhost:8000/docs
+# http://localhost:8080/docs
 
 
 from fastapi import FastAPI
@@ -16,8 +16,8 @@ from pydantic import BaseModel, HttpUrl, Field
 app = FastAPI()
 
 print("Load the spacy models")
-nlp_phase1 = spacy.load("phase1_ner_trf_model/model-best")
-nlp_phase2 = spacy.load("phase2_ner_trf_model/model-best")
+nlp_phase1 = spacy.load("models/phase1_ner_trf_model/model-best")
+nlp_phase2 = spacy.load("models/phase2_ner_trf_model/model-best")
 
 
 def combine_ner_components(
@@ -159,7 +159,7 @@ async def root():
 
 
 # GET endpoint for app health check to ensure server is running
-@app.get("/health_check", status_code=200)
+@app.get("/health-check", status_code=200)
 async def health_check():
     return {"response": "HTTP 200 OK"}
 
