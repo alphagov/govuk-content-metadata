@@ -31,8 +31,8 @@ To deploy your model to a local endpoint instead of an online endpoint:
 - make sure you have the models downloaded:
 
 ```shell
-gsutil cp -m -r gs://cpto-content-metadata/models/phase2_ner_trf_model ./models
-gsutil cp -m -r gs://cpto-content-metadata/models/phase2_ner_trf_model ./models
+gsutil -m cp -r gs://cpto-content-metadata/models/phase1_ner_trf_model ./models
+gsutil -m cp -r gs://cpto-content-metadata/models/phase2_ner_trf_model ./models
 ```
 
 - then from this sub-directory root, run:
