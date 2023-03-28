@@ -55,7 +55,7 @@ Note: Delete the downloaded models before building and pushing the docker image 
 First of all, ensure you are in the sub-directory root:
 
 ```shell
-cd src/fast_api_model_serving
+cd fast_api_model_serving
 ```
 
 To build and push the docker image to GCP, run:
