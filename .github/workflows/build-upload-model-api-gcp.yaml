@@ -48,5 +48,5 @@ jobs:
 
         # Upload model to Vertex AI model registry
         - name: Upload model to Vertex AI model registry
-          run:  bash ${GITHUB_WORKSPACE}/deploy_to_vertexai.sh
-          working-directory: fast_api_model_serving
+          run:  bash ${GITHUB_WORKSPACE}/fast_api_model_serving/deploy_to_vertexai.sh
+          
