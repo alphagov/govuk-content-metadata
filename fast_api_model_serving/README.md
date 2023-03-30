@@ -1,4 +1,4 @@
-# `fast_api_model_serving` folder overview
+# `fast_api_model_serving`
 
 ## Overview
 
@@ -23,10 +23,7 @@ gcloud auth login
 
 Our custom container was built following [GCP guidelines on how to use a custom container to serve predictions from a custom-trained model](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements). See also the [use-custom-container](https://cloud.google.com/vertex-ai/docs/predictions/use-custom-container) docs.
 
-In particular, GCP Vertex AI requires specific prediction request (input) and response (output) JSON format structures for custom ML models.
-
-Please see [https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#formatting-instances-as-json](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#formatting-instances-as-json) for more datails.
-
+In particular, GCP Vertex AI requires specific prediction request (input) and response (output) JSON format structures for custom ML models. Please see [https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#formatting-instances-as-json](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#formatting-instances-as-json) for more datails.
 
 
 ## Development and testing phase
@@ -52,7 +49,6 @@ uvicorn --host 0.0.0.0 main:app --port 8080 --reload
 ```
 
 A server should start at `http://0.0.0.0:8080`.
-
 The API documentation will be automatically created at `http://localhost:8080/docs`.
 
 From here you can interact with the API. Any changes to the code should be reflected in real time, useful for dev.
@@ -64,8 +60,8 @@ Note: Delete the downloaded models before building and pushing the docker image 
 
 ### Push the model to GCP Artifact Registry:
 
-This step is automated by [a GitHub Action workflow](../.github/workflows/build-upload-model-api-gcp.yaml); the docker image is built and pushed to GCP Artifact Registry
-when a change is pushed to any file in this `fast_api_model_serving` sub-directory.
+This step is automated by [a GitHub Action workflow](.github/workflows/build-upload-model-api-gcp.yaml); the docker image is built and pushed to GCP Artifact Registry
+when a change is pushed to any file in the `fast_api_model_serving` sub-directory.
 
 When finished, you will be able to see the model container on the project's GCP artifact registry.
 
@@ -74,7 +70,7 @@ When finished, you will be able to see the model container on the project's GCP 
 
 This registers the model on Vertex, which can then be used for Online (realtime) and Batch prediction jobs.
 
-The step is automated by the [GitHub Action workflow](../.github/workflows/build-upload-model-api-gcp.yaml), which runs the bash script [deploy_to_vertexai.sh](deploy_to_vertexai.sh_) where the gcloud commands to upload the model are implemented.
+The step is automated by the [GitHub Action workflow](../.github/workflows/build-upload-model-api-gcp.yaml), which runs the bash script [deploy_to_vertexai.sh](fast_api_model_serving/deploy_to_vertexai.sh) where the gcloud commands to upload the model are implemented.
 Adapt the bash script if changes are needed.
 
 Note that this is a compulsory step in that we are using a custom model and a custom container. However, if you are using a Tensorflow or Sklearn model, you may not have to do this - see https://cloud.google.com/vertex-ai/docs/training/overview.
@@ -85,22 +81,21 @@ Note that this is a compulsory step in that we are using a custom model and a cu
 
 #### Batch predictions
 
-For the content metadata project, it will usually be Batch predictions.
+For the content metadata project, we will only need Vertex AI Batch predictions. For batch predictions, no extra model set-up is needed.
 
-For batch predictions, no extra set up is needed.
-
-To learn more, please see the following GCP's guidelines:
+To learn more about batch predictions in Vertex AI, please see the following GCP's guidelines:
 - [get-predictions](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions)
 - [get_batch_predictions](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#get_batch_predictions)
 
 
 #### Online (real-time) predictions
 
-For online predictions, two extra steps must be take:
+For online predictions, two extra steps must be taken:
 - Create a Vertex AI endpoint
-- Deploy the model to the endpoint
+- Deploy the model to the endpoint.
 
-These two steps have been implemented as optional options in the bash script [fast_api_model_serving/deploy_to_vertexai.sh](fast_api_model_serving/deploy_to_vertexai.sh).
+These two steps have been implemented as optional command-line options in the bash script [fast_api_model_serving/deploy_to_vertexai.sh](fast_api_model_serving/deploy_to_vertexai.sh).
+See the bash script's docstring for more detials.
 
 To execute them, from the terminal in this subdirectiry run:
 ```shell
@@ -109,15 +104,15 @@ bash deploy_to_vertexai.sh --deploy
 
 You can check progress by visiting https://console.cloud.google.com/vertex-ai/endpoints and https://console.cloud.google.com/vertex-ai/models.
 
-To know more:
+To know more about online predictions in Vertex AI, see:
 - [get_online_predictions](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#get_online_predictions)
 
 As said, these steps are only needed for online (real-time) predictions
-but they are good for testing and development so they are included in the bash script but as optional steps, and they are not run as part of our continous deployment workflow.
+but they are good for testing and development, so they are included in the bash script but as optional steps, and they are not run as part of our continous deployment workflow.
 
 
 ### How to make sure everything works as expected?
 
-Even if our aim is to do Batch predictions, [it is recommend](https://medium.com/google-cloud/google-vertex-ai-batch-predictions-ad7057d18d1f) testing the model at least once in an online approach (deployed to Vertex AI Endpoint). This way, we can ensure the model runs successfully. Debugging is a lot easier as well.
+Even if our aim is to do Batch predictions, [it is recommended](https://medium.com/google-cloud/google-vertex-ai-batch-predictions-ad7057d18d1f) testing the model at least once in an online approach (deployed to Vertex AI Endpoint). This way, we can ensure the model runs successfully. Debugging is a lot easier as well.
 
 IMPORTANT: Vertex AI endpoint is not a serverless service (so you always encounter some cost), thus, please remember to undeploy the model from the endpoint after done with your testing.
