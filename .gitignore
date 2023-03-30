@@ -929,3 +929,6 @@ prodigy_annotation/wheel/*
 **/metrics/**
 **/training/
 **/training/**
+
+**/**/models/*
+!**/**/models/.gitkeep
