@@ -1,9 +1,7 @@
-import spacy
+from spacy.language import Language
 
 
-def combine_ner_components(
-    ner_trf1: spacy.pipeline, ner_trf2: spacy.pipeline
-) -> spacy.pipeline:
+def combine_ner_components(ner_trf1: Language, ner_trf2: Language) -> Language:
     """
     Takes in two spacy transformer pipeline objects, each containing a Named Entity Recognition (NER)
     component, and returns a new spacy pipeline object that combines the two NER components.
@@ -14,7 +12,7 @@ def combine_ner_components(
         ner_trf2: the second spacy transformer pipeline containing a NER component to be combined
 
     Returns:
-        spacy.pipeline: a new spacy pipeline object that combines the two NER components,
+        a new spacy pipeline object that combines the two NER components,
         placing the ner_trf2 NER component before the ner_trf1 NER component.
 
     Ref: https://github.com/explosion/projects/tree/v3/tutorials/ner_double
