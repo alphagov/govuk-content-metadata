@@ -6,15 +6,30 @@
 # uvicorn main:app --reload
 # http://localhost:8000/docs
 
-
-from fastapi import FastAPI
 from typing import Union, Any
+from fastapi import FastAPI
 import spacy
 from pydantic import BaseModel, HttpUrl, Field
 from src.model_helpers import combine_ner_components
 
+# Metadata
+tags_metadata = [
+    {
+        "name": "ner",
+        "description": "Extract named entities from one document",
+    },
+    {
+        "name": "ner-vertex-ai",
+        "description": "Extract named entities from multiple documents",
+    },
+]
+
 # Initialisation - create a FastAPI instance
-app = FastAPI()
+app = FastAPI(
+    title="GovNER API",
+    description="Extracting named entities from GOV.UK using a custom NER spacy model",
+    openapi_tags=tags_metadata,
+)
 
 print("Load the spacy models")
 nlp_phase1 = spacy.load("models/phase1_ner_trf_model/model-best")
@@ -90,7 +105,7 @@ class SingleEntity(BaseModel):
 
 class OutputEntities(BaseModel):
     """
-    Response data model: structure of responses that will be sent back by the server.
+    Response data model for a single document input: structure of responses that will be sent back by the server.
     """
 
     url: Union[HttpUrl, None] = Field(
@@ -119,6 +134,7 @@ class OutputEntities(BaseModel):
 class ResponseEntitiesVertexAI(BaseModel):
     """
     JSON body format of prediction response for Vertex AI.
+    Response data model for multiple documents.
     Ref: https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements
     """
 
@@ -141,7 +157,7 @@ async def health_check():
 # POST endpoints for predictions
 
 
-@app.post("/ner", response_model=OutputEntities)
+@app.post("/ner", tags=["ner"], response_model=OutputEntities)
 async def get_entities_one_doc(input: InputContent) -> Any:
     document = nlp(input.text)
     entities = [
@@ -156,7 +172,9 @@ async def get_entities_one_doc(input: InputContent) -> Any:
     return {"url": input.url, "entities": entities, "line_number": input.line_number}
 
 
-@app.post("/ner-vertex-ai", response_model=ResponseEntitiesVertexAI)
+@app.post(
+    "/ner-vertex-ai", tags=["ner-vertex-ai"], response_model=ResponseEntitiesVertexAI
+)
 async def get_entities(input: InputContentVertexAI) -> Any:
     documents = [nlp(instance.text) for instance in input.instances]
     entities = [
