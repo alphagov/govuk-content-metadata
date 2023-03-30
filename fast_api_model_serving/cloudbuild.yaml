@@ -1,4 +1,4 @@
-# This file runs operations on GCP Cloud Build. Essentiall carries out steps that you may perform
+# This file runs operations on GCP Cloud Build. It carries out steps that you may perform
 # locally, but using Google Cloud Build instead. Crucially, the first step loads the NER model
 # embedded into the image at build, rather than loading during app runtime.
 # For more information, visit https://cloud.google.com/build/docs/build-config-file-schema.
