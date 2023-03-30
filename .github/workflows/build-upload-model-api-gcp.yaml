@@ -11,7 +11,7 @@ name: GovNER Model API
 on:
  push:
   paths:
-    - fast_api_model_serving/
+    - fast_api_model_serving/**
 
 env:
   GITHUB_SHA: ${{ github.sha }}
