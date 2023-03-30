@@ -1,0 +1,52 @@
+# Connect our Cloud service with GitHub, in such a way that, with each push,
+# the Docker image is uploaded to the Artifact Registry of our Cloud service.
+
+# Steps:
+# - Deploy custom docker to Artifact Registry
+# - Upload model to Vertex AI model registry
+# Secrets are defined in GitHub secrets
+
+name: GovNER Model API
+
+on:
+ push:
+  paths:
+    - fast_api_model_serving/
+
+env:
+  GITHUB_SHA: ${{ github.sha }}
+  GITHUB_REF: ${{ github.ref }}
+
+jobs:
+    setup-build-upload:
+        # Authenticate to GCP
+        name: Setup Gcloud Account
+        runs-on: ubuntu-latest
+
+        steps:
+
+        # Set GCP credentials in CI/CD instance
+        - name: Login
+          uses: google-github-actions/setup-gcloud@v0
+          with:
+            project_id: ${{ secrets.GCP_PROJECT_ID }}
+            service_account_email: ${{ secrets.GCP_EMAIL }}
+            service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+
+        # Allow CI/CD instance to use Docker in GCP
+        - name: Configure Docker
+          run: gcloud auth configure-docker --quiet
+
+        # Checkout repository in GCP
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+
+        # Run cloudbuild.yaml in the correct directory
+        - name: Run Cloud Build Process
+          run: gcloud builds submit --config cloudbuild.yaml
+          working-directory: fast_api_model_serving
+
+        # Upload model to Vertex AI model registry
+        - name: Upload model to Vertex AI model registry
+          run:  bash ${GITHUB_WORKSPACE}/deploy_to_vertexai.sh
+          working-directory: fast_api_model_serving
