@@ -1,6 +1,6 @@
 SELECT
   url,
-  title
-FROM `govuk-knowledge-graph.content.title`
+  description AS text
+FROM `govuk-knowledge-graph.content.description`
 INNER JOIN `cpto-content-metadata.content_ner_daily_new.{FILTERED_TABLE}` USING (url)
 ;
