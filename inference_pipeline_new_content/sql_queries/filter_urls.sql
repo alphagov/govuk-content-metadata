@@ -4,10 +4,10 @@ SQL script to identify those GOV.UK pages that were either:
 - newly created
 the day before ('yesterday').
 
-Pages are further filtered to only include pages whose:
+Pages are further filtered to only include those whose:
 - locale is English,
 - status in beta or live
-- document type indicates they do not contain any actual content.
+- document type indicates they do contain actual content.
 """
 
 WITH filtered_urls AS (

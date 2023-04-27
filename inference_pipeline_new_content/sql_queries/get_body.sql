@@ -29,7 +29,7 @@ WITH no_extra_whites AS (
         )
         SELECT
           url,
-          REGEXP_REPLACE(line, r'(?i:(?:(?:(?:ftp|https?):\\/\\/)(?:www\\.)?|www\\.))(?:[a-zA-Z]+:\\/\\/)?(?:[a-zA-Z0-9-.]+)/{1}([a-zA-Z0-9-./]+)', '') AS line,
+          REGEXP_REPLACE(line, r'(?i:(?:(?:(?:ftp|https?):\\/\\/)(?:www\\.)?|www\\.))(?:[a-zA-Z]+:\\/\\/)?(?:[a-zA-Z0-9-.]+)/{1}([a-zA-Z0-9-./]+)', '') AS text,
           line_number,
           original_line,
           prop_ascii_chars,
