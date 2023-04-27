@@ -55,6 +55,9 @@ class InputContent(BaseModel):
     line_number: Union[int, None] = Field(
         default=None, description="Line number of the text on the webpage"
     )
+    part_of_page: Union[str, None] = Field(
+        default=None, description="Part of page (e.g., 'title')"
+    )
 
     class Config:
         schema_extra = {
@@ -62,6 +65,7 @@ class InputContent(BaseModel):
                 "url": "https://www.gov.uk/government/people/rishi-sunak",
                 "text": "Rishi Sunak became Prime Minister on 25 October 2022",
                 "line_number": 2,
+                "part_of_page": "title",
             }
         }
 
@@ -116,6 +120,9 @@ class OutputEntities(BaseModel):
     line_number: Union[int, None] = Field(
         default=None, description="Line number of the text on the webpage"
     )
+    part_of_page: Union[str, None] = Field(
+        default=None, description="Part of page (e.g., 'title')"
+    )
 
     class Config:
         schema_extra = {
@@ -127,6 +134,7 @@ class OutputEntities(BaseModel):
                     {"name": "25 October 2022", "type": "DATE", "start": 37, "end": 52},
                 ],
                 "line_number": 2,
+                "part_of_page": "text",
             }
         }
 
@@ -169,7 +177,12 @@ async def get_entities_one_doc(input: InputContent) -> Any:
         }
         for ent in document.ents
     ]
-    return {"url": input.url, "entities": entities, "line_number": input.line_number}
+    return {
+        "url": input.url,
+        "entities": entities,
+        "line_number": input.line_number,
+        "part_of_page": input.part_of_page,
+    }
 
 
 @app.post(
@@ -191,7 +204,12 @@ async def get_entities(input: InputContentVertexAI) -> Any:
     ]
     return {
         "predictions": [
-            {"url": instance.url, "entities": ents, "line_number": instance.line_number}
+            {
+                "url": instance.url,
+                "entities": ents,
+                "line_number": instance.line_number,
+                "part_of_page": instance.part_of_page,
+            }
             for instance, ents in zip(input.instances, entities)
         ]
     }
