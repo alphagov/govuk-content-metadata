@@ -1,0 +1,101 @@
+WITH filtered_urls AS (
+    SELECT
+        url,
+        document_type,
+        phase,
+        locale,
+        public_updated_at,
+        first_published_at
+    FROM `govuk-knowledge-graph.graph.page`
+    WHERE locale='en'
+    AND (DATE(public_updated_at) = DATE_ADD(CURRENT_DATE(), INTERVAL -1 DAY) OR DATE(first_published_at) = DATE_ADD(CURRENT_DATE(), INTERVAL -1 DAY))
+    AND phase IN ('live', 'beta')
+    AND document_type IS NOT NULL AND document_type NOT IN (
+            'business_support_finder',
+            'finder',
+            'finder_email_signup',
+            'gone',
+            'licence_finder',
+            'need',
+            'placeholder',
+            'placeholder_ministerial_role',
+            'placeholder_person',
+            'placeholder_policy_area',
+            'placeholder_topical_event',
+            'placeholder_world_location_news_page',
+            'world_location_news',
+            'redirect',
+            'special_route')
+    ),
+    body_no_extra_whites AS (
+        SELECT
+            url,
+            line_number,
+            public_updated_at,
+            first_published_at,
+            REGEXP_REPLACE(LTRIM(RTRIM(line)), r'\\s+', ' ') as line
+            FROM `govuk-knowledge-graph.content.lines`
+            INNER JOIN filtered_urls USING (url)
+            ),
+    body_extra_info AS (
+        SELECT
+            url,
+            line_number,
+            public_updated_at,
+            first_published_at,
+            line,
+            CHAR_LENGTH(line) AS number_of_chars,
+            CHAR_LENGTH(REGEXP_REPLACE( REGEXP_REPLACE(line, ' ', ''), r'([^[:ascii:]]+)', '')) AS number_of_chars_that_are_ascii,
+            CHAR_LENGTH(REGEXP_REPLACE(line, r'.,;!?/|()£ ', '')) AS number_of_chars_no_puncs,
+        FROM body_no_extra_whites
+    ),
+    body_extra_info2 AS (
+        SELECT
+            url,
+            line_number,
+            public_updated_at,
+            first_published_at,
+            line,
+            ROUND(number_of_chars_that_are_ascii / number_of_chars_no_puncs, 4) AS prop_ascii_chars
+            FROM body_extra_info
+    ),
+    body_texts AS (
+        SELECT
+            url,
+            REGEXP_REPLACE(line, r'(?i:(?:(?:(?:ftp|https?):\\/\\/)(?:www\\.)?|www\\.))(?:[a-zA-Z]+:\\/\\/)?(?:[a-zA-Z0-9-.]+)/{1}([a-zA-Z0-9-./]+)', '') AS text,
+            line_number,
+            'text' AS part_of_page,
+            public_updated_at,
+            first_published_at
+        FROM body_extra_info2
+        WHERE prop_ascii_chars >= 0.1
+    ),
+    descriptions AS (
+        SELECT
+            url,
+            description AS text,
+            CAST(null AS INT64) AS line_number,
+            'description' AS part_of_page,
+            public_updated_at,
+            first_published_at
+        FROM `govuk-knowledge-graph.content.description`
+        INNER JOIN filtered_urls USING (url)
+    ),
+    titles AS (
+        SELECT
+            url,
+            title AS text,
+            CAST(null AS INT64) AS line_number,
+            'title' AS part_of_page,
+            public_updated_at,
+            first_published_at
+        FROM `govuk-knowledge-graph.content.title`
+        INNER JOIN filtered_urls USING (url)
+    )
+    SELECT * FROM titles
+    UNION ALL
+    SELECT * FROM descriptions
+    UNION ALL
+    SELECT * FROM body_texts
+    ORDER by url, line_number
+;
