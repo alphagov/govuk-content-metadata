@@ -1,0 +1,164 @@
+main:
+    steps:
+    - assignment:
+        assign:
+            - projectid: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+            - gs_bucket: cpto-content-metadata
+            - gs_folder: vertex_ner_daily_batchjob
+            - json_request_file: request_daily_ner.json
+            # - sql_get_content: get_new_content.txt
+            - sql_get_content: get_new_content_test.txt
+            - sql_postprocess: postprocess_predictions.txt
+            - sql_count_entities: count_entities.txt
+            - bq_input_dataset: content_ner_daily_new
+            - bq_input_table: all_parts_of_page
+            - bq_output_dataset: named_entities_raw_daily
+            - bq_output_table: all_parts_of_page
+            - bq_postprocessed_table: named_entities_all
+            - bq_count_table: named_entities_counts
+            - create_disposition: "CREATE_IF_NEEDED"
+            - write_disposition: "WRITE_TRUNCATE"
+            - vertex_batchjob_uri: https://europe-west2-aiplatform.googleapis.com/v1beta1/projects/cpto-content-metadata/locations/europe-west2/batchPredictionJobs
+    - read_get_content_sql_from_gcs:
+        call: googleapis.storage.v1.objects.get
+        args:
+            bucket: ${gs_bucket}
+            object: ${gs_folder + "%2F" + sql_get_content}
+            alt: "media"
+        result: get_content_query
+    - read_postprocess_sql_from_gcs:
+        call: googleapis.storage.v1.objects.get
+        args:
+            bucket: ${gs_bucket}
+            object: ${gs_folder + "%2F" + sql_postprocess}
+            alt: "media"
+        result: postprocess_query
+    - read_count_sql_from_gcs:
+        call: googleapis.storage.v1.objects.get
+        args:
+            bucket: ${gs_bucket}
+            object: ${gs_folder + "%2F" + sql_count_entities}
+            alt: "media"
+        result: count_entities_query
+    - read_request_json_from_gcs:
+        call:  http.get
+        args:
+            url:  ${"https://storage.googleapis.com/download/storage/v1/b/"  +  gs_bucket  +  "/o/"  + gs_folder + "%2F" + json_request_file}
+            auth:
+                type:  OAuth2
+            query:
+                alt:  media
+        result:  json_request_body
+    - delete_output_bq_table:
+        try:
+            call: googleapis.bigquery.v2.tables.delete
+            args:
+                datasetId: ${bq_output_dataset}
+                projectId: ${projectid}
+                tableId: ${bq_output_table}
+        except:
+            as: e
+            steps:
+                - output_table_not_exist:
+                    switch:
+                        - condition: ${e.code == 404}
+                          next: create_input_table
+        next: create_input_table
+    - create_input_table:
+        call: googleapis.bigquery.v2.jobs.insert
+        args:
+          projectId: ${projectid}
+          body:
+            configuration:
+              query:
+                query: ${get_content_query}
+                destinationTable:
+                  projectId: ${projectid}
+                  datasetId: ${bq_input_dataset}
+                  tableId: ${bq_input_table}
+                create_disposition: ${create_disposition}
+                write_disposition: ${write_disposition}
+                allowLargeResults: true
+                useLegacySql: false
+        next: get_size_of_created_input_table
+    - get_size_of_created_input_table:
+        call: googleapis.bigquery.v2.tables.get
+        args:
+            datasetId: ${bq_input_dataset}
+            projectId: ${projectid}
+            tableId: ${bq_input_table}
+        result: input_table_new_content
+        next: shall_workflow_end
+    - shall_workflow_end:
+        switch:
+            - condition: ${input_table_new_content.numBytes == "0"}
+              next: end
+        next: run_vertex_batchjob
+    - run_vertex_batchjob:
+        call: http.post
+        args:
+          url: ${vertex_batchjob_uri}
+          headers:
+                Authorization: Bearer $(gcloud auth print-access-token)
+                Content-Type: application/json
+          body:
+                ${json_request_body.body}
+          auth:
+                type: OAuth2
+        next: check_if_output_table_created
+    - check_if_output_table_created:
+        try:
+          call: googleapis.bigquery.v2.tables.get
+          args:
+            datasetId: ${bq_output_dataset}
+            projectId: ${projectid}
+            tableId: ${bq_output_table}
+          result: bq_api_response
+        except:
+            as: e
+            steps:
+                - known_errors:
+                    switch:
+                        - condition: ${e.code == 404}
+                          next: wait
+                - unhandled_exception:
+                    raise: ${e}
+        next: postprocess_predictions
+    - wait:
+            call: sys.sleep
+            args:
+                seconds: 350                        # every 5 min
+            next: check_if_output_table_created
+    - postprocess_predictions:
+        call: googleapis.bigquery.v2.jobs.insert
+        args:
+          projectId: ${projectid}
+          body:
+            configuration:
+              query:
+                query: ${postprocess_query}
+                destinationTable:
+                  projectId: ${projectid}
+                  datasetId: ${bq_output_dataset}
+                  tableId: ${bq_postprocessed_table}
+                create_disposition: ${create_disposition}
+                write_disposition: ${write_disposition}
+                allowLargeResults: true
+                useLegacySql: false
+        next: count_entities
+    - count_entities:
+        call: googleapis.bigquery.v2.jobs.insert
+        args:
+          projectId: ${projectid}
+          body:
+            configuration:
+              query:
+                query: ${count_entities_query}
+                destinationTable:
+                  projectId: ${projectid}
+                  datasetId: ${bq_output_dataset}
+                  tableId: ${bq_count_table}
+                create_disposition: ${create_disposition}
+                write_disposition: ${write_disposition}
+                allowLargeResults: true
+                useLegacySql: false
