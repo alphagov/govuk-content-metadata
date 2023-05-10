@@ -1,9 +1,9 @@
 name: Deploy new-content NER inference workflow
 
 on:
-  [push, pull_request]
-paths:
-  - inference_pipeline_new_content/daily_batchjob_workflow.yml
+  push:
+    paths:
+      - inference_pipeline_new_content/daily_batchjob_workflow.yml
 
 jobs:
     setup-build-upload:
