@@ -3,11 +3,11 @@ main:
     - assignment:
         assign:
             - projectid: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+            - location: ${sys.get_env("GOOGLE_CLOUD_LOCATION)}
             - gs_bucket: cpto-content-metadata
             - gs_folder: vertex_ner_daily_batchjob
             - json_request_file: request_daily_ner.json
-            # - sql_get_content: get_new_content.txt
-            - sql_get_content: get_new_content_test.txt
+            - sql_get_content: get_new_content.txt
             - sql_postprocess: postprocess_predictions.txt
             - sql_count_entities: count_entities.txt
             - bq_input_dataset: content_ner_daily_new
@@ -18,7 +18,7 @@ main:
             - bq_count_table: named_entities_counts
             - create_disposition: "CREATE_IF_NEEDED"
             - write_disposition: "WRITE_TRUNCATE"
-            - vertex_batchjob_uri: https://europe-west2-aiplatform.googleapis.com/v1beta1/projects/cpto-content-metadata/locations/europe-west2/batchPredictionJobs
+            - vertex_batchjob_uri: https://${location}-aiplatform.googleapis.com/v1beta1/projects/${projectid}/locations/${location}/batchPredictionJobs
     - read_get_content_sql_from_gcs:
         call: googleapis.storage.v1.objects.get
         args:
@@ -127,7 +127,7 @@ main:
     - wait:
             call: sys.sleep
             args:
-                seconds: 350                        # every 5 min
+                seconds: 300                        # every 5 min
             next: check_if_output_table_created
     - postprocess_predictions:
         call: googleapis.bigquery.v2.jobs.insert
