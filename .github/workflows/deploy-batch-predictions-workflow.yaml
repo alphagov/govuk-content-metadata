@@ -35,4 +35,5 @@ jobs:
             --location $ZONE \
             --source $WORKFLOW_SOURCE_PATH \
             --project ${{ secrets.GCP_PROJECT_ID }} \
-            --labels "commit-sha=${{ github.sha }}"
+            --labels "commit-sha=${{ github.sha }}" \
+            --service-account ${{ secrets.GCP_NER_NEW_CONTENT_PIPE_SA }}
