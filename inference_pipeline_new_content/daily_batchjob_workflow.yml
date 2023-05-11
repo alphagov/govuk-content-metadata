@@ -63,7 +63,7 @@ main:
                     switch:
                         - condition: ${e.code == 404}
                           next: create_input_table
-        next: create_input_table
+        next: get_size_of_created_input_table # CHAGE to create_input_table WHEN PERMISSION TO SA GRANTED
     - create_input_table:
         call: googleapis.bigquery.v2.jobs.insert
         args:
