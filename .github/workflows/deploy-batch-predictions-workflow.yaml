@@ -4,6 +4,10 @@ on:
   push:
     paths:
       - inference_pipeline_new_content/daily_batchjob_workflow.yml
+env:
+  WORKFLOW_NAME: daily-ner-batch-predictions
+  ZONE: europe-west2
+  WORKFLOW_SOURCE_PATH: inference_pipeline_new_content/daily_batchjob_workflow.yml
 
 jobs:
     deploy-gcp-workflow:
@@ -11,20 +15,21 @@ jobs:
         name: Setup Gcloud Account
         runs-on: ubuntu-latest
         steps:
-        # Set GCP credentials in CI/CD instance
+        - name: Checkout Repository
+          uses: actions/checkout@v3
         - id: 'auth'
           uses: 'google-github-actions/auth@v1'
           with:
-            credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-        - name: 'Set up Cloud SDK'
+            workload_identity_provider: ${{ secrets.GCP_GITHUB_WORKLOAD_IDENTITY_PROVIDER }}
+            service_account: ${{ secrets.GCP_NER_NEW_CONTENT_PIPE_SA }}
+        # `setup-gcloud` automatically picks up authentication from `auth`
+        - name: 'Set up gcloud'
           uses: 'google-github-actions/setup-gcloud@v1'
-        - name: Checkout Repository
-          uses: actions/checkout@v3
+
         - name: Use gcloud CLI to deploy workflow
           run: |
-            gcloud workflows deploy daily-ner-batch-predictions \
-            --location europe-west2 \
-            --source inference_pipeline_new_content/daily_batchjob_workflow.yml \
+            gcloud workflows deploy $WORKFLOW_NAME \
+            --location $ZONE \
+            --source $WORKFLOW_SOURCE_PATH \
             --project ${{ secrets.GCP_PROJECT_ID }} \
-            --labels "commit-sha=${{ github.sha }}" \
-            --service-account cpto-content-metadata-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+            --labels "commit-sha=${{ github.sha }}"
