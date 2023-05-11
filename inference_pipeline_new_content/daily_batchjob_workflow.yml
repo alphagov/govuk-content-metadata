@@ -3,7 +3,7 @@ main:
     - variables:
         assign:
             - projectid: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
-            - zone: ${sys.get_env("GOOGLE_CLOUD_LOCATION)}
+            - zone: ${sys.get_env("GOOGLE_CLOUD_LOCATION")}
             - gs_bucket: cpto-content-metadata
             - gs_folder: vertex_ner_daily_batchjob
             - json_request_file: request_daily_ner.json
