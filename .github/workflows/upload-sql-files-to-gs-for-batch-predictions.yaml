@@ -7,9 +7,6 @@ on:
   push:
     paths:
       - inference_pipeline_new_content/sql_queries/**
-env:
-  PATH_TO_FOLDER: inference_pipeline_new_content/sql_queries
-  DESTINATION_BUCKET_NAME: cpto-content-metadata/vertex_ner_daily_batchjob
 
 jobs:
     upload-sql-to-gs:
@@ -24,7 +21,7 @@ jobs:
         - name: Checkout Repository
           uses: actions/checkout@v3
           with:
-          fetch-depth: 0
+            fetch-depth: 0
         - id: 'auth'
           uses: 'google-github-actions/auth@v1'
           with:
@@ -32,20 +29,14 @@ jobs:
             service_account: ${{ secrets.GCP_NER_NEW_CONTENT_PIPE_SA }}
         # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
         - name: 'Set up Cloud SDK'
-          uses: 'google-github-actions/setup-gcloud@v0'
+          uses: 'google-github-actions/setup-gcloud@v1'
         - name: Get changed files in the target folder
           id: changed-files-specific
           uses: tj-actions/changed-files@v35
           with:
-            files: $PATH_TO_FOLDER/*.{txt}
+            files: inference_pipeline_new_content/sql_queries/**
         - name: Run step if any file(s) in the docs folder change
           if: steps.changed-files-specific.outputs.any_changed == 'true'
           run: |
+            gsutil rsync -r -x '^(?!.*\.txt$).*' inference_pipeline_new_content/sql_queries gs://cpto-content-metadata/vertex_ner_daily_batchjob/
             echo "These files have changed: ${{ steps.changed-files-specific.outputs.all_changed_files }}"
-        - name: Upload changed files
-          if: steps.changed-files-specific.outputs.any_changed == 'true'
-          run: |
-            for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-              gsutil cp $file gs://$DESTINATION_BUCKET_NAME/
-              echo "$file was upload to gs"
-            done
