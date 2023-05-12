@@ -3,7 +3,7 @@ input:
   PROJECT_ID: cpto-content-metadata
   MODEL_ID: 4804056572823076864
   MACHINE_TYPE: n1-standard-8
-  BATCH_SIZE: 80
+  BATCH_SIZE: 84
   MIN_NODES: 1    # minimum number of nodes (virtual machines)
   MAX_NODES: 4
   INPUT_FORMAT: bigquery
