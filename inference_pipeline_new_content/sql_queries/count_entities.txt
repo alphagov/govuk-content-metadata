@@ -44,5 +44,5 @@ combined_counts AS (
     IFNULL(text_count, 0) AS text_count,
     IFNULL(total_count, 0) AS total_count,
   FROM combined_counts
-  ORDER BY url
+  ORDER BY url, type
 ;
