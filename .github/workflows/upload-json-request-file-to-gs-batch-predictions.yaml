@@ -1,6 +1,6 @@
 name: Upload JSON request body file to Google Storage
 
-# Upload sql queries when changes to the files have been pushed to GitHub
+# Upload JSON when changes to the file have been pushed to GitHub
 # Ref: https://github.com/google-github-actions/upload-cloud-storage#upload-cloud-storage
 # and https://github.com/tj-actions/changed-files
 on:
