@@ -36,5 +36,5 @@ jobs:
         - id: 'upload-file'
           uses: 'google-github-actions/upload-cloud-storage@v1'
           with:
-            path: $PATH_TO_FILE
-            destination: $DESTINATION_BUCKET_NAME
+            path: ${{ env.PATH_TO_FILE }}
+            destination: ${{ env.DESTINATION_BUCKET_NAME }}
