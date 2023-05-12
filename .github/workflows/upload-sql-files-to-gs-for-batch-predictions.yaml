@@ -1,0 +1,51 @@
+name: Upload sql queries for batch job to Google Storage
+
+# Upload sql queries when changes to the files have been pushed to GitHub
+# Ref: https://github.com/google-github-actions/upload-cloud-storage#upload-cloud-storage
+# and https://github.com/tj-actions/changed-files
+on:
+  push:
+    paths:
+      - inference_pipeline_new_content/sql_queries/**
+env:
+  PATH_TO_FOLDER: inference_pipeline_new_content/sql_queries
+  DESTINATION_BUCKET_NAME: cpto-content-metadata/vertex_ner_daily_batchjob
+
+jobs:
+    upload-sql-to-gs:
+        # Authenticate to GCP
+        name: Setup Gcloud Account
+        runs-on: ubuntu-latest
+        # Add "id-token" with the intended permissions.
+        permissions:
+          contents: 'read'
+          id-token: 'write'
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v3
+          with:
+          fetch-depth: 0
+        - id: 'auth'
+          uses: 'google-github-actions/auth@v1'
+          with:
+            workload_identity_provider: ${{ secrets.GCP_GITHUB_WORKLOAD_IDENTITY_PROVIDER }}
+            service_account: ${{ secrets.GCP_NER_NEW_CONTENT_PIPE_SA }}
+        # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+        - name: 'Set up Cloud SDK'
+          uses: 'google-github-actions/setup-gcloud@v0'
+        - name: Get changed files in the target folder
+          id: changed-files-specific
+          uses: tj-actions/changed-files@v35
+          with:
+            files: $PATH_TO_FOLDER/*.{txt}
+        - name: Run step if any file(s) in the docs folder change
+          if: steps.changed-files-specific.outputs.any_changed == 'true'
+          run: |
+            echo "These files have changed: ${{ steps.changed-files-specific.outputs.all_changed_files }}"
+        - name: Upload changed files
+          if: steps.changed-files-specific.outputs.any_changed == 'true'
+          run: |
+            for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+              gsutil cp $file gs://$DESTINATION_BUCKET_NAME/
+              echo "$file was upload to gs"
+            done
