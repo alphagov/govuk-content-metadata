@@ -166,6 +166,6 @@ main:
         call: googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run
         args:
           workflow_id: ${update_and_export_entities_workflow}
-          location: ${location}
+          location: ${zone}
           project_id: ${projectid}
         result: nested_workflow_results
