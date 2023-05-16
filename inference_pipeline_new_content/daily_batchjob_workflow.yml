@@ -163,9 +163,9 @@ main:
                 allowLargeResults: true
                 useLegacySql: false
     - execute_update_entities_workflow:
-            call: googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run
-            args:
-                workflow_id: ${update_and_export_entities_workflow}
-                location: ${location}
-                project_id: ${projectid}
-            return: "All Done!"
+        call: googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run
+        args:
+          workflow_id: ${update_and_export_entities_workflow}
+          location: ${location}
+          project_id: ${projectid}
+        result: nested_workflow_results
