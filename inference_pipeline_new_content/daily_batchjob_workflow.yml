@@ -18,6 +18,7 @@ main:
             - bq_count_table: named_entities_counts
             - create_disposition: "CREATE_IF_NEEDED"
             - write_disposition: "WRITE_TRUNCATE"
+            - update_and_export_entities_workflow: update_entity_buildup.yml
     - read_get_content_sql_from_gcs:
         call: googleapis.storage.v1.objects.get
         args:
@@ -161,3 +162,10 @@ main:
                 write_disposition: ${write_disposition}
                 allowLargeResults: true
                 useLegacySql: false
+    - execute_update_entities_workflow:
+            call: googleapis.workflowexecutions.v1.projects.locations.workflows.executions.run
+            args:
+                workflow_id: ${update_and_export_entities_workflow}
+                location: ${location}
+                project_id: ${projectid}
+            return: "All Done!"
