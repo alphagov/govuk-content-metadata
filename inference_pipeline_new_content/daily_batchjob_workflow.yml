@@ -18,7 +18,7 @@ main:
             - bq_count_table: named_entities_counts
             - create_disposition: "CREATE_IF_NEEDED"
             - write_disposition: "WRITE_TRUNCATE"
-            - update_and_export_entities_workflow: update_entity_buildup.yml
+            - update_and_export_entities_workflow: daily-update-entity-tables
     - read_get_content_sql_from_gcs:
         call: googleapis.storage.v1.objects.get
         args:
