@@ -3,13 +3,13 @@ SET affected_urls = ARRAY(
 SELECT DISTINCT URL
 FROM `cpto-content-metadata.named_entities_raw_daily.named_entities_all`
 );
-DELETE `cpto-content-metadata.named_entities_COPY.named_entities_all`
+DELETE `cpto-content-metadata.named_entities.named_entities_all`
 WHERE URL IN UNNEST(affected_urls)
 ;
-DELETE `cpto-content-metadata.named_entities_COPY.named_entities_counts`
+DELETE `cpto-content-metadata.named_entities.named_entities_counts`
 WHERE URL IN UNNEST(affected_urls)
 ;
-INSERT `cpto-content-metadata.named_entities_COPY.named_entities_all` (url,
+INSERT `cpto-content-metadata.named_entities.named_entities_all` (url,
     name, name_lower, type, char_start, char_end,
     part_of_page, line_number, url_entity_nametype)
 SELECT
@@ -17,7 +17,7 @@ SELECT
     part_of_page, line_number, url_entity_nametype
 FROM `cpto-content-metadata.named_entities_raw_daily.named_entities_all`
 ;
-INSERT `cpto-content-metadata.named_entities_COPY.named_entities_counts` (url,
+INSERT `cpto-content-metadata.named_entities.named_entities_counts` (url,
     name_lower, type, url_entity_nametype,
     title_count, description_count, text_count, total_count)
 SELECT

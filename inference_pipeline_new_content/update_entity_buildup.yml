@@ -12,11 +12,9 @@ main:
               nextPageToken: ""
           - listResult:
               nextPageToken: ""
-          # CHANGE DATASET NAME BELOW (both queries!) after testing
           - query_update_entity_tables: update_entity_accumulation.txt
-          - query_headers: "SELECT * FROM `cpto-content-metadata.named_entities_COPY.named_entities_counts` LIMIT 0"
-          # CHANGE dataset id after testing
-          - bq_dataset_id: named_entities_COPY
+          - query_headers: "SELECT * FROM `cpto-content-metadata.named_entities.named_entities_counts` LIMIT 0"
+          - bq_dataset_id: named_entities
           - bq_table_to_export: "named_entities_counts"
           - create_disposition: "CREATE_IF_NEEDED"  # create a new one if table doesn't exist
           - write_disposition: "WRITE_TRUNCATE"  # truncate it if the table already exists
