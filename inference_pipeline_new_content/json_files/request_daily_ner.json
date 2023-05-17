@@ -1,1 +1,35 @@
-{"displayName": "bq-request-ner-daily", "model": "projects/cpto-content-metadata/locations/europe-west2/models/4804056572823076864", "inputConfig": {"instancesFormat": "bigquery", "bigquerySource": {"inputUri": "bq://cpto-content-metadata.content_ner_daily_new.all_parts_of_page"}}, "outputConfig": {"predictionsFormat": "bigquery", "bigqueryDestination": {"outputUri": "bq://cpto-content-metadata.named_entities_raw_daily.all_parts_of_page"}}, "dedicatedResources": {"machineSpec": {"machineType": "n1-standard-8"}, "startingReplicaCount": 1, "maxReplicaCount": 4}, "manualBatchTuningParameters": {"batch_size": 84}, "instanceConfig": {"instanceType": "object", "includedFields": ["url", "text", "line_number", "part_of_page"]}}
+{
+    "displayName": "bq-request-ner-daily",
+    "model": "projects/cpto-content-metadata/locations/europe-west2/models/4804056572823076864",
+    "inputConfig": {
+        "instancesFormat": "bigquery",
+        "bigquerySource": {
+            "inputUri": "bq://cpto-content-metadata.content_ner_daily_new.all_parts_of_page"
+        }
+    },
+    "outputConfig": {
+        "predictionsFormat": "bigquery",
+        "bigqueryDestination": {
+            "outputUri": "bq://cpto-content-metadata.named_entities_raw_daily.all_parts_of_page"
+        }
+    },
+    "dedicatedResources": {
+        "machineSpec": {
+            "machineType": "n1-standard-8"
+        },
+        "startingReplicaCount": 1,
+        "maxReplicaCount": 4
+    },
+    "manualBatchTuningParameters": {
+        "batch_size": 64
+    },
+    "instanceConfig": {
+        "instanceType": "object",
+        "includedFields": [
+            "url",
+            "text",
+            "line_number",
+            "part_of_page"
+        ]
+    }
+}
