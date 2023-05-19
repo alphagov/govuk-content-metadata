@@ -2,6 +2,28 @@
 
 A daily pipeline is scheduled to run at 3:00AM (UTC time) to extract named entities from the content items that substantially changed or were newly created the day before.
 
+## End-to-end pipeline flow diagram and walk-through
+
+![DailyPipelineVertexAI](../images/NER_daily_batch_prediction_pipeline.png)
+
+The end-to-end pipeline is orchestrated through [a Google Cloud Workflow](daily_batchjob_workflow.yml).
+
+Main steps:
+
+- [1] Fetch the body of text, description and title of all those GOV.UK pages which were newly created or substantially changed the day before. These are identified through the metadata fields `first_published_at` and `public_updated_at` respectively.
+
+- [2] If there is any such page,
+
+- [3] send the text data to Vertex AI (via a POST HTTP API request) to get batch predictions from our custom-trained NER model. NER predictions involve identifying and classifying all occurrences of Named Entities in the text (as for the Named Entity Schema the models have been trained to learn).
+
+- [4] Post-process the prediction data: unnest the json-like strings (which is the format for predictions output by Vertex AI) and add url-encoded URI for each classified entity instance (e.g., the entity occurrence ('England', 'GPE') gets assigned the URI 'https://www.gov.uk/named-entity/GPE/england').
+
+- [5] Count the occurrences of each entity-type per GOV.UK url.
+
+- [6] Update the Big Query tables that contain the named entities extracted so far across all GOV.UK pages (other via bulk inference or daily inference).
+
+- [7] Export the Big Query table containing the entity-type counts to Google Storage as a GZIP CSV file.
+
 ## Techstack and GCP roles
 
 The pipeline uses the following tools:
@@ -58,27 +80,6 @@ The following Github Action workflows are in use by the pipeline:
 - [upload-sql-files-to-gs-for-batch-predictions.yaml](../.github/workflows/upload-sql-files-to-gs-for-batch-predictions.yaml):
     uploads the sql queries in the [`inference_pipeline_new_content/sql_queries`](./sql_queries/) folder to Google Storage whenever changes to any of files are pushed to the remote.
 
-## End-to-end pipeline flow diagram and walk-through
-
-![DailyPipelineVertexAI](../images/NER_daily_batch_prediction_pipeline.png)
-
-The end-to-end pipeline is orchestrated through [a Google Cloud Workflow](daily_batchjob_workflow.yml).
-
-Main steps:
-
-- [1] Fetch the body of text, description and title of all those GOV.UK pages which were newly created or substantially changed the day before. These are identified through the metadata fields `first_published_at` and `public_updated_at` respectively.
-
-- [2] If there is any such page,
-
-- [3] send the text data to Vertex AI (via a POST HTTP API request) to get batch predictions from our custom-trained NER model. NER predictions involve identifying and classifying all occurrences of Named Entities in the text (as for the Named Entity Schema the models have been trained to learn).
-
-- [4] Post-process the prediction data: unnest the json-like strings (which is the format for predictions output by Vertex AI) and add url-encoded URI for each classified entity instance (e.g., the entity occurrence ('England', 'GPE') gets assigned the URI 'https://www.gov.uk/named-entity/GPE/england').
-
-- [5] Count the occurrences of each entity-type per GOV.UK url.
-
-- [6] Update the Big Query tables that contain the named entities extracted so far across all GOV.UK pages (other via bulk inference or daily inference).
-
-- [7] Export the Big Query table containing the entity-type counts to Google Storage as a GZIP CSV file.
 
 ## A note on Vertex AI Batch Prediction Job
 
@@ -92,9 +93,9 @@ Please refer to [fast_api_model_serving/README.md](../fast_api_model_serving/REA
 
 We are serving Vertex AI Batch Predictions via HTTP POST method, as part of [a Cloud Workflow](./daily_batchjob_workflow.yml).
 
-The pipeline uses the Vertex AI API to send batch prediction requests by sending a JSON request body to the HTTP server. The JSON request body contains all the information needed for running a batch prediction job. Please see [the original documentation](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#request_a_batch_prediction) and [also here](https://cloud.google.com/vertex-ai/docs/tabular-data/classification-regression/get-batch-predictions#make-batch-request) for more info.
+The pipeline uses the Vertex AI API to send batch prediction requests by sending a JSON request body to the HTTP server. The JSON request body contains all the information needed for running a batch prediction job. Please see [Vertex AI's original documentation](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#request_a_batch_prediction) and [also here](https://cloud.google.com/vertex-ai/docs/tabular-data/classification-regression/get-batch-predictions#make-batch-request) for more info.
 
-To facilitate the compilation of the JSON request body, we created a utility function that compiles and saved the request body to a file called [request_daily_ner.json](./json_files/request_daily_ner.json). The JSON file is then automatically uploaded to Google Storage by a Github Action when commits are pushed to teh remote, and is fetched by the Cloud Workflow before the request is made.
+To facilitate the compilation of the JSON request body, we created a utility function that compiles and saved the request body to a file called [request_daily_ner.json](./json_files/request_daily_ner.json). The JSON file is then automatically uploaded to Google Storage by a Github Action when commits are pushed to the remote, and is fetched by the Cloud Workflow before the HTTP request is made.
 
 To modify the prediction parameters (e.g. batch size or machine type) for the batch prediction job and update the JSON request body file accordingly, please update the values in [request_json_config.yml](./utils/request_json_config.yml) and then execute the [python utility script](./utils/create_json_request_body.py):
 
@@ -112,7 +113,7 @@ The execution is scheduled daily at 3:00AM (UTC time). This is expressed as '0 3
 
 ## Compute instance scaling
 
-The following parameters' values can be changed in the confighuration file [inference_pipeline_new_content/utils/request_json_config.yml](./utils/request_json_config.yml).
+The following scaling parameters' values can be changed in the configuration file [inference_pipeline_new_content/utils/request_json_config.yml](./utils/request_json_config.yml).
 
 ### Number of nodes
 
@@ -134,6 +135,6 @@ Vertex AI Batch Prediction sends, per default, 64 instances (records) to your mo
 
 To know more about scaling compute instances and associated prices, see:
 - [notebooks/official/custom/sdk-custom-image-classification-batch.ipynb](https://github.com/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/official/custom/sdk-custom-image-classification-batch.ipynb)
-- [pricing#pred_eur](https://cloud.google.com/vertex-ai/pricing#pred_eur0
+- [pricing#pred_eur](https://cloud.google.com/vertex-ai/pricing#pred_eur0)
 - [pricing#custom-trained_models](https://cloud.google.com/vertex-ai/pricing#custom-trained_models)
 - [predictions/configure-compute](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute).
