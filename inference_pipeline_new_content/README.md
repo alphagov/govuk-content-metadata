@@ -6,61 +6,63 @@ A daily pipeline is scheduled to run at 3:00AM (UTC time) to extract named entit
 
 The pipeline uses the following tools:
 
-- [Vertex AI Batch Predictions](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#get_batch_predictions) for a custom-trained model in a custom constainer;
-- Big Query;
-- Google Storage;
+- [Vertex AI Batch Predictions](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#get_batch_predictions) for a custom-trained model in a custom constainer
+- Big Query
+- Google Storage
 - [GCP Cloud Workflow](https://cloud.google.com/workflows/docs/overview)
-- An HTTP server that serve predictions for our fine-tuned NER model. Refer to [fast_api_model_serving/README.md](fast_api_model_serving/README.md) for how this was set up;
+- An HTTP server that serve predictions for our fine-tuned NER model - refer to [fast_api_model_serving/README.md](../fast_api_model_serving/README.md) for how this was set up
 - GitHub Actions for continous deployment.
 
 The pipeline is managed through a custom GCP service account with the following roles/permissions:
 
-- roles/aiplatform.admin
-- roles/bigquery.admin
-- roles/iam.serviceAccountUser
-- roles/logging.logWriter
-- roles/storage.objectAdmin
-- roles/workflows.editor
-- roles/workflows.invoker
+- `roles/aiplatform.admin`
+- `roles/bigquery.admin`
+- `roles/iam.serviceAccountUser`
+- `roles/logging.logWriter`
+- `roles/storage.objectAdmin`
+- `roles/workflows.editor`
+- `roles/workflows.invoker`
 
-The custom service account has been further set up as "iam.workloadIdentityUser" via Workload Identity federation to authenticate and authorise GitHub Actions Workflows to Google Cloud. See below for more info.
+The custom service account has been further set up as "iam.workloadIdentityUser" via Workload Identity Federation to authenticate and authorise GitHub Actions Workflows to Google Cloud. See [the section Workload Identity Federation below](#workload-identity-federation) for more info.
 
-In addition, the custom service account has "roles/bigquery.dataViewer" role for the following cross-project Big Query tables: govuk-knowledge-graph.graph.page, govuk-knowledge-graph.content.lines, govuk-knowledge-graph.content.description, govuk-knowledge-graph.content.title.
+In addition, the custom service account has `bigquery.dataViewer` role for the following cross-project Big Query tables:
+- govuk-knowledge-graph.graph.page
+- govuk-knowledge-graph.content.lines
+- govuk-knowledge-graph.content.description
+- govuk-knowledge-graph.content.title
 
 ### Workload Identity Federation
 
-We set up the process of authenticating and authorising GitHub Actions Workflows to Google Cloud via Workload Identity Federation.
-
-We followed these instructions:
+We set up the process of authenticating and authorising GitHub Actions Workflows to Google Cloud via Workload Identity Federation, by following these instructions:
 - https://github.com/google-github-actions/auth#setting-up-workload-identity-federation
 - https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines
 
 ## GitHub Secrets
 
 - `GCP_NER_NEW_CONTENT_PIPE_SA`: GCP custom service account for the daily NER pipeline (full email address);
-- `GCP_GITHUB_WORKLOAD_IDENTITY_PROVIDER`: Workload Identity Provider (Github) source ID, in the format `projects/${GCP-PROJECT-NUMBER}/locations/global/workloadIdentityPools/${GCP-PROJECT-NAME}/providers/${WIP-PROVIDER-NAME}`.
+- `GCP_GITHUB_WORKLOAD_IDENTITY_PROVIDER`: (Github) Workload Identity Provider source ID, in the format `projects/${GCP-PROJECT-NUMBER}/locations/global/workloadIdentityPools/${GCP-PROJECT-NAME}/providers/${WIP-PROVIDER-NAME}`.
 
 ## Continuous Deployment
 
-Github Action workflows in use by the pipeline:
+The following Github Action workflows are in use by the pipeline:
 
-- [deploy-batch-predictions-workflow.yaml](.github/workflows/deploy-batch-predictions-workflow.yaml):
-    deployes the Cloud Workflow specified in `inference_pipeline_new_content/daily_batchjob_workflow.yml` to Google Cloud whenever changes to the YAML file are pushed to the remote.
+- [deploy-batch-predictions-workflow.yaml](../.github/workflows/deploy-batch-predictions-workflow.yaml):
+    deployes the Cloud Workflow specified in [`inference_pipeline_new_content/daily_batchjob_workflow.yml`](daily_batchjob_workflow.yml) to Google Cloud whenever changes to the YAML file are pushed to the remote.
 
-- [deploy-daily-update-entity-tables-workflow.yaml](.github/workflows/deploy-daily-update-entity-tables-workflow.yaml):
-    deployes the Cloud Workflow specified in `inference_pipeline_new_content/update_entity_buildup.yml` to Google Cloud whenever changes to the YAML file are pushed to the remote.
+- [deploy-daily-update-entity-tables-workflow.yaml](../.github/workflows/deploy-daily-update-entity-tables-workflow.yaml):
+    deployes the Cloud Workflow specified in [`inference_pipeline_new_content/update_entity_buildup.yml`](update_entity_buildup.yml) to Google Cloud whenever changes to the YAML file are pushed to the remote.
 
-- [upload-json-request-file-to-gs-batch-predictions.yaml](.github/workflows/upload-json-request-file-to-gs-batch-predictions.yaml):
-    uploads the JSON request body file `inference_pipeline_new_content/json_files/request_daily_ner.json` to Google Storage whenever changes to the file are pushed to the remote.
+- [upload-json-request-file-to-gs-batch-predictions.yaml](../.github/workflows/upload-json-request-file-to-gs-batch-predictions.yaml):
+    uploads the JSON request body file [`inference_pipeline_new_content/json_files/request_daily_ner.json`](./json_files/request_daily_ner.json) to Google Storage whenever changes to the file are pushed to the remote.
 
-- [upload-sql-files-to-gs-for-batch-predictions.yaml](.github/workflows/upload-sql-files-to-gs-for-batch-predictions.yaml):
-    uploads the sql queries in the `inference_pipeline_new_content/sql_queries` folder to Google Storage whenever changes to any of files are pushed to the remote.
+- [upload-sql-files-to-gs-for-batch-predictions.yaml](../.github/workflows/upload-sql-files-to-gs-for-batch-predictions.yaml):
+    uploads the sql queries in the [`inference_pipeline_new_content/sql_queries`](./sql_queries/) folder to Google Storage whenever changes to any of files are pushed to the remote.
 
 ## End-to-end pipeline flow diagram and walk-through
 
-![DailyPipelineVertexAI](images/NER_daily_batch_prediction_pipeline.png)
+![DailyPipelineVertexAI](../images/NER_daily_batch_prediction_pipeline.png)
 
-The end-to-end pipeline is orchestrated through a Google Cloud Workflow.
+The end-to-end pipeline is orchestrated through [a Google Cloud Workflow](daily_batchjob_workflow.yml).
 
 Main steps:
 
@@ -68,13 +70,13 @@ Main steps:
 
 - [2] If there is any such page,
 
-- [3] send the text data to Vertex AI (via a POST HTTP API request) to get batch predictions from our custom-trained NER model. Predictions involve identify and classify all occurrences of Named Entities (as for our Named Entity Schema the models have been trained to learn).
+- [3] send the text data to Vertex AI (via a POST HTTP API request) to get batch predictions from our custom-trained NER model. NER predictions involve identifying and classifying all occurrences of Named Entities in the text (as for the Named Entity Schema the models have been trained to learn).
 
-- [4] Post-process the prediction data: unnest the json-like strings (the format of predictions output by Vertex AI) and add url-encoded URI for each classified entity instance (e.g., the entity occurrence ('England', 'GPE') gets assigned the URI 'https://www.gov.uk/named-entity/GPE/england').
+- [4] Post-process the prediction data: unnest the json-like strings (which is the format for predictions output by Vertex AI) and add url-encoded URI for each classified entity instance (e.g., the entity occurrence ('England', 'GPE') gets assigned the URI 'https://www.gov.uk/named-entity/GPE/england').
 
-- [5] Count the occurrence of each entity-type per GOV.UK url.
+- [5] Count the occurrences of each entity-type per GOV.UK url.
 
-- [6] Update the Big Query tables that contain the named entities extracted so far across all the GOV.UK pages (other via bulk inference or daily inference).
+- [6] Update the Big Query tables that contain the named entities extracted so far across all GOV.UK pages (other via bulk inference or daily inference).
 
 - [7] Export the Big Query table containing the entity-type counts to Google Storage as a GZIP CSV file.
 
@@ -84,25 +86,23 @@ Under the hood, Vertex AI Batch Prediction service creates a model endpoint to s
 
 As a result, debugging issues can be difficult. 
 
-Please refer to [fast_api_model_serving/README.md](fast_api_model_serving/README.md) for how the HTTP server for our NER model predictions has been set up, how testing/debugging can be done and how Vertex AI works.
+Please refer to [fast_api_model_serving/README.md](../fast_api_model_serving/README.md) for how the HTTP server for our NER model predictions has been set up, how testing/debugging can be done and how Vertex AI works.
 
 ### Create/Update the JSON request body
 
-We are serving Vertex AI Batch Predictions via HTTP method via a POST request sent as part of [the Cloud Workflow](inference_pipeline_new_content/daily_batchjob_workflow.yml).
+We are serving Vertex AI Batch Predictions via HTTP POST method, as part of [a Cloud Workflow](./daily_batchjob_workflow.yml).
 
 The pipeline uses the Vertex AI API to send batch prediction requests by sending a JSON request body to the HTTP server. The JSON request body contains all the information needed for running a batch prediction job. Please see [the original documentation](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions#request_a_batch_prediction) and [also here](https://cloud.google.com/vertex-ai/docs/tabular-data/classification-regression/get-batch-predictions#make-batch-request) for more info.
 
-To facilitate the compilation of the JSON request body, we created a utility function that compiles the the request body in a file called [request_daily_ner.json](inference_pipeline_new_content/json_files/request_daily_ner.json).
+To facilitate the compilation of the JSON request body, we created a utility function that compiles and saved the request body to a file called [request_daily_ner.json](./json_files/request_daily_ner.json). The JSON file is then automatically uploaded to Google Storage by a Github Action when commits are pushed to teh remote, and is fetched by the Cloud Workflow before the request is made.
 
-To modify the prediction parameters (e.g. batch size) for the batch prediction job and update the JSON request body file, please update the values in [request_json_config.yml](inference_pipeline_new_content/utils/request_json_config.yml) and then execute the [python utility script](inference_pipeline_new_content/utils/create_json_request_body.py):
+To modify the prediction parameters (e.g. batch size or machine type) for the batch prediction job and update the JSON request body file accordingly, please update the values in [request_json_config.yml](./utils/request_json_config.yml) and then execute the [python utility script](./utils/create_json_request_body.py):
 
 ```shell
 cd inference_pipeline_new_content
 python utils/create_json_request_body.py \
   "utils/request_json_config.yml"
 ```
-
-The JSON file is automatically uploaded to Google Storage by a Github Action when commits are pushed to teh remote, and is fetched by the Cloud Workflow before the request is made.
 
 ## Scheduled execution
 
@@ -112,7 +112,7 @@ The execution is scheduled daily at 3:00AM (UTC time). This is expressed as '0 3
 
 ## Compute instance scaling
 
-The following parameters' velues can be changed in the confighuration file [inference_pipeline_new_content/utils/request_json_config.yml](inference_pipeline_new_content/utils/request_json_config.yml).
+The following parameters' values can be changed in the confighuration file [inference_pipeline_new_content/utils/request_json_config.yml](./utils/request_json_config.yml).
 
 ### Number of nodes
 
