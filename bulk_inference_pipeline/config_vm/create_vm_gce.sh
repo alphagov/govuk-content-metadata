@@ -14,7 +14,7 @@ gcloud compute instances create ${VM_NAME} \
     --image-project ubuntu-os-cloud \
     --maintenance-policy TERMINATE \
     --restart-on-failure \
-    --service-account=cpto-content-metadata-sa@cpto-content-metadata.iam.gserviceaccount.com \
+    --service-account=${NER_BULK_INFERENCE_SA} \
     --scopes https://www.googleapis.com/auth/cloud-platform \
     --description 'govNER bulk inference pipeline'
 
