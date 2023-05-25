@@ -256,7 +256,7 @@ tomli==2.0.1
 tomlkit==0.11.6
 toolz==0.12.0
 torch==1.13.1
-tornado==6.2
+tornado>=6.3.2
 traitlets==5.9.0
 typer==0.7.0
 typing_extensions==4.5.0
