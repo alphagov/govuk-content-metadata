@@ -1,3 +1,7 @@
+--extra-index-url https://download.pytorch.org/whl/cu117
+torch>=2.0.0
+torchvision
+torchaudio
 dill==0.3.4
 flake8==4.0.1
 joblib==1.2.0
@@ -6,12 +10,10 @@ pyflakes==2.4.0
 python-dateutil==2.8.2
 PyYAML==6.0
 setuptools
-spacy[cuda112]
+spacy[cuda117]<=3.5
 spacy-transformers
 google-auth==2.14.1
 google.cloud-bigquery==3.3.6
 google.cloud-storage==2.5.0
-thinc_gpu_ops
 GPUtil
---extra-index-url https://download.pytorch.org/whl/cu112
-torch
+thinc_gpu_ops
