@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.1-runtime-ubuntu20.04
+FROM nvidia/cuda:11.7.0-runtime-ubuntu20.04
 
 WORKDIR /infer
 ENV PYTHONUNBUFFERED=1
