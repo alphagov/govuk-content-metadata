@@ -5,11 +5,11 @@
 # 1. pull and launch the latest Docker image every time the VM is booted/started.
 
 # Requires following env variable to be defined:
-DOCKER_IMAGE_NAME=ner-bulk-inference-phase1
+# DOCKER_IMAGE_NAME
 
 # Ensure CUDA is on the PATH
 echo "Add CUDA to the PATH"
-export PATH=/usr/local/cuda-11.2/bin${PATH:+:${PATH}}
+export PATH=/usr/local/cuda-11.7/bin${PATH:+:${PATH}}
 
 # Check Docker set up
 echo "Authenticate docker via the pre-installed gcloud cli and the attached service account"
