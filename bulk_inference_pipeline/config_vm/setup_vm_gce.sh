@@ -38,20 +38,21 @@ echo "Installation of Nvidia CUDA..."
 # sudo apt-get update
 #sudo apt-get -y install cuda
 
-echo "Installing CUDA version 11.2.1"
-# from : https://developer.nvidia.com/cuda-11.2.0-download-archive?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=2004&target_type=deblocal
-wget https://developer.download.nvidia.com/compute/cuda/11.2.0/local_installers/cuda-repo-ubuntu2004-11-2-local_11.2.0-460.27.04-1_amd64.deb
-sudo dpkg -i cuda-repo-ubuntu2004-11-2-local_11.2.0-460.27.04-1_amd64.deb
-sudo apt-key add /var/cuda-repo-ubuntu2004-11-2-local/7fa2af80.pub
+echo "Installing CUDA version 11.7.0"
+# from:  https://developer.nvidia.com/cuda-11-7-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=20.04&target_type=deb_local
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+wget https://developer.download.nvidia.com/compute/cuda/11.7.0/local_installers/cuda-repo-ubuntu2004-11-7-local_11.7.0-515.43.04-1_amd64.deb
+sudo dpkg -i cuda-repo-ubuntu2004-11-7-local_11.7.0-515.43.04-1_amd64.deb
+sudo cp /var/cuda-repo-ubuntu2004-11-7-local/cuda-*-keyring.gpg /usr/share/keyrings/
 sudo apt-get update
-sudo apt-get -y install cuda-11.2
+sudo apt-get -y install cuda
 
 echo "Add CUDA to the PATH"
 # from https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#post-installation-actions
 # Environment set-up
-# export PATH=/usr/local/cuda-11.8/bin${PATH:+:${PATH}}
-# if cuda 11.2
-export PATH=/usr/local/cuda-11.2/bin${PATH:+:${PATH}}
+# if cuda 11.7
+export PATH=/usr/local/cuda-11.7/bin${PATH:+:${PATH}}
 
 echo "Checks that CUDA was installed successfully"
 # Verify the installation

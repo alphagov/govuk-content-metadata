@@ -932,3 +932,5 @@ prodigy_annotation/wheel/*
 
 **/**/models/*
 !**/**/models/.gitkeep
+
+**/startup_script_vm.sh

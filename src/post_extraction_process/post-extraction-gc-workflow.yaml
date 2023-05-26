@@ -26,7 +26,7 @@ main:
               nextPageToken: ""
           - listResult:
               nextPageToken: ""
-          - query_headers: "SELECT * FROM `cpto-content-metadata.named_entities.named_entities_counts` LIMIT 0"
+          - query_headers: "SELECT * FROM named_entities.named_entities_counts LIMIT 0"
           - bq_dataset_id: "named_entities"
           - table_id_1_processed: "named_entities_all"
           - table_id_2_counts: "named_entities_counts"
@@ -50,7 +50,7 @@ main:
                   line_number,
                   entities.start AS char_start,
                   entities.end AS char_end
-                FROM `cpto-content-metadata.named_entities_raw.title_1`, UNNEST(entities) AS entities
+                FROM named_entities_raw.title_1, UNNEST(entities) AS entities
                 WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
@@ -62,7 +62,7 @@ main:
                   line_number,
                   entities.start AS char_start,
                   entities.end AS char_end
-                FROM `cpto-content-metadata.named_entities_raw.title_2`, UNNEST(entities) AS entities
+                FROM named_entities_raw.title_2, UNNEST(entities) AS entities
                 WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
@@ -74,7 +74,7 @@ main:
                   line_number,
                   entities.start AS char_start,
                   entities.end AS char_end
-                FROM `cpto-content-metadata.named_entities_raw.description_1`, UNNEST(entities) AS entities
+                FROM named_entities_raw.description_1, UNNEST(entities) AS entities
                 WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
@@ -86,7 +86,7 @@ main:
                   line_number,
                   entities.start AS char_start,
                   entities.end AS char_end
-                FROM `cpto-content-metadata.named_entities_raw.description_2`, UNNEST(entities) AS entities
+                FROM named_entities_raw.description_2, UNNEST(entities) AS entities
                 WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
@@ -98,7 +98,7 @@ main:
                   line_number,
                   entities.start AS char_start,
                   entities.end AS char_end
-                FROM `cpto-content-metadata.named_entities_raw.text_1`, UNNEST(entities) AS entities
+                FROM named_entities_raw.text_1, UNNEST(entities) AS entities
                 WHERE entities.name IS NOT null
                 UNION ALL
                 SELECT
@@ -110,7 +110,7 @@ main:
                   line_number,
                   entities.start AS char_start,
                   entities.end AS char_end
-                FROM `cpto-content-metadata.named_entities_raw.text_2`, UNNEST(entities) AS entities
+                FROM named_entities_raw.text_2, UNNEST(entities) AS entities
                 WHERE entities.name IS NOT null
                 )
                 SELECT
@@ -124,28 +124,28 @@ main:
                   SELECT
                     url, name_lower, type, url_entity_nametype,
                     COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS title_count
-                  FROM `cpto-content-metadata.named_entities.named_entities_all`
+                  FROM named_entities.named_entities_all
                   WHERE part_of_page = 'title'
                   ),
                   description_counts AS (
                   SELECT
                     url, name_lower, type, url_entity_nametype,
                     COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS description_count
-                  FROM `cpto-content-metadata.named_entities.named_entities_all`
+                  FROM named_entities.named_entities_all
                   WHERE part_of_page = 'description'
                   ),
                   text_counts AS (
                   SELECT
                     url, name_lower, type, url_entity_nametype,
                     COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS text_count
-                  FROM `cpto-content-metadata.named_entities.named_entities_all`
+                  FROM named_entities.named_entities_all
                   WHERE part_of_page = 'text'
                   ),
                   total_counts AS (
                     SELECT
                     url, name_lower, type, url_entity_nametype,
                     COUNT(*) AS total_count
-                  FROM `cpto-content-metadata.named_entities.named_entities_all`
+                  FROM named_entities.named_entities_all
                   GROUP BY url, name_lower, type, url_entity_nametype
                   ),
                   combined_counts AS (
