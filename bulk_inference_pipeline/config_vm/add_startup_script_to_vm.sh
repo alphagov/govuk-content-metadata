@@ -8,8 +8,10 @@
 # VM_NAME
 
 # Stop the VM
-gcloud compute instances stop ${VM_NAME}
+gcloud compute instances stop ${VM_NAME} \
+  --zone=${ZONE}
 
 # Add start-up script to existing VM instance
 gcloud compute instances add-metadata ${VM_NAME} \
-  --metadata-from-file startup-script=${STARTUP_SCRIPT_PATH}
+  --metadata-from-file startup-script=config_vm/startup_script_vm.sh \
+  --zone=${ZONE}

@@ -57,21 +57,29 @@ The set-up script will:
 - Authenticate Docker via the pre-installed gcloud cli and the attached service account.
 
 
-### 3. Stop the instance and add the start-up script.
+### 3. Add the start-up script
 
 The start-up script launches the specified docker image every time the VM is started.
+
+* Create the bash start-up script for the intended phase entity by running in your terminal:
+
+```shell
+envsubst '$DOCKER_IMAGE_NAME'  <config_vm/template_startup_script_vm.txt > config_vm/startup_script_vm.sh
+```
+
+This will substitute the value of the bash environment variable $DOCKER_IMAGE_NAME into the script and
+save it to a new (bash) file called `config_vm/startup_script_vm.sh`.
+
+* Add the start-up script to the VM
 
 ```shell
 bash config_vm/add_startup_script_to_vm.sh
 ```
 
-The start-up script defines which docker image to be launched every time the VM is started.
-Please modify the value of the `DOCKER_IMAGE_NAME` environment variable if want a different docker image to be launched.
-
 **Note**: Every time you modify anything in the start-up script, you'll need to re-add it to the VM instance using step (3).
 
 
-### 4. And a scheduled execution time to the VM instance
+### 4. Add a scheduled execution to the VM instance
 
 * If needed, modify the values of `SCHEDULE_START_AT` and `SCHEDULE_STOP_AT` in [config_vm/env_vars_phase1.sh](/bulk_inference_pipeline/config_vm/env_vars_phase1.sh) for updating Phase-1 Entity inference pipeline and [config_vm/env_vars_phase2.sh](/bulk_inference_pipeline/config_vm/env_vars_phase2.sh) for Phase-2 Entity inference pipeline.
 

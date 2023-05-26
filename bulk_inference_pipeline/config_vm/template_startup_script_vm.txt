@@ -4,8 +4,6 @@
 # This start-up script does:
 # 1. pull and launch the latest Docker image every time the VM is booted/started.
 
-# Requires following env variable to be defined:
-# DOCKER_IMAGE_NAME
 
 # Ensure CUDA is on the PATH
 echo "Add CUDA to the PATH"
