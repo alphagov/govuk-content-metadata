@@ -75,12 +75,13 @@ from thinc.api import get_current_ops, set_gpu_allocator
 
 # For GPU memory allocation management
 # https://github.com/explosion/spaCy/issues/9432
-set_gpu_allocator("pytorch")
+# set_gpu_allocator("pytorch")
 
 # Check if Spacy can see/use GPU
 is_using_gpu = spacy.prefer_gpu()
 if is_using_gpu:
     print("Using GPU!")
+    set_gpu_allocator("pytorch")
     spacy.require_gpu()
     print("GPU Usage")
     GPUtil.showUtilization()
