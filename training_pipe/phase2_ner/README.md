@@ -1,8 +1,8 @@
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS START (do not remove) -->
 
-# 🪐 spaCy Project: GovNER Phase1 SpaCy Training Pipeline
+# 🪐 spaCy Project: GovNER Phase2 SpaCy Training Pipeline
 
-SpaCy pipeline to train NER model for phase-1 entities. Runs through multiple stages including data prep and training
+SpaCy pipeline to train NER model for phase-2 entities. Runs through multiple stages including data prep and training
 
 ## 📋 project.yml
 
