@@ -1,12 +1,11 @@
 ## Prodigy Annotation Environment
 
 This repository folder has been created to ensure a seamless and portable annotation environment for annotators.
-It follows a three-stage process:
+
+It follows a multi-stage process:
 1. [Set up the environment](#1-setup-instructions)
 2. [Build the environment using Docker](#2-build-the-environment)
 3. [Begin annotation](#3-start-annotating)
-
-In addition, once the annotation effort is completed:
 4. [Review, compare and solve conflicts among the annotations of multiple annotators](#4-to-review-and-moderate-annotations-from-multiple-annotators)
 5. [Export the annotations from Prodigy to a JSONL file](#5-export-annotations-to-a-jsonl-file).
 
@@ -49,11 +48,11 @@ Please see Prodigy's official documentations at [prodi.gy/docs](https://prodi.gy
 
 ### 2. Build the Environment
 
-    1. Ensure you are in the `prodigy_annotation/` subdirectory.
+    * 1. Ensure you are in the `prodigy_annotation/` subdirectory.
 
-    2. If necessary, update the [annotation_instructions.html](/prodigy_annotation/instructions/annotation_instructions.html) and the [prodigy.json](/prodigy_annotation/prodigy.json) with details about the entity schema to be annotated for.
+    * 2. If necessary, update the [annotation_instructions.html](/prodigy_annotation/instructions/annotation_instructions.html) and the [prodigy.json](/prodigy_annotation/prodigy.json) with details about the entity schema to be annotated for.
 
-    3. Build the docker image, by running
+    * 3. Build the docker image, by running
 
         ```bash
         docker build -t prodann --no-cache .
@@ -67,7 +66,7 @@ Please see Prodigy's official documentations at [prodi.gy/docs](https://prodi.gy
 
         This builds a Docker image called `prodann` (prodigy annotation) locallly.
 
-    4. Run the docker image with
+    * 4. Run the docker image with
 
         ```bash
         docker run -itd --name prodann_con -p 8080:8080 -v $HOME/.prodigy:/app/.prodigy prodann
@@ -91,7 +90,7 @@ Please see Prodigy's official documentations at [prodi.gy/docs](https://prodi.gy
 
         The container will start runnning in the backgrond.
 
-    5. Run commands within the container by running
+    * 5. Run commands within the container by running
 
         ```bash
         docker exec -it prodann_con bash
