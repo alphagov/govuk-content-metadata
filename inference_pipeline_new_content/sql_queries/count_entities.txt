@@ -1,0 +1,48 @@
+WITH title_counts AS (
+  SELECT
+    url, name_lower, type, url_entity_nametype,
+    COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS title_count
+    FROM `cpto-content-metadata.named_entities_raw_daily.named_entities_all`
+    WHERE part_of_page = 'title'
+    ),
+description_counts AS (
+  SELECT
+    url, name_lower, type, url_entity_nametype,
+    COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS description_count
+  FROM `cpto-content-metadata.named_entities_raw_daily.named_entities_all`
+  WHERE part_of_page = 'description'
+  ),
+text_counts AS (
+  SELECT
+    url, name_lower, type, url_entity_nametype,
+    COUNT(*) OVER (PARTITION BY url, name_lower, type, url_entity_nametype) AS text_count
+  FROM `cpto-content-metadata.named_entities_raw_daily.named_entities_all`
+  WHERE part_of_page = 'text'
+  ),
+total_counts AS (
+  SELECT
+    url, name_lower, type, url_entity_nametype,
+    COUNT(*) AS total_count
+  FROM `cpto-content-metadata.named_entities_raw_daily.named_entities_all`
+  GROUP BY url, name_lower, type, url_entity_nametype
+  ),
+combined_counts AS (
+  SELECT
+    *
+    FROM title_counts
+    FULL JOIN description_counts USING(url, name_lower, type, url_entity_nametype)
+    FULL JOIN text_counts USING(url, name_lower, type, url_entity_nametype)
+    FULL JOIN total_counts USING(url, name_lower, type, url_entity_nametype)
+  )
+  SELECT DISTINCT
+    url,
+    name_lower,
+    type,
+    url_entity_nametype,
+    IFNULL(title_count, 0) AS title_count,
+    IFNULL(description_count, 0) AS description_count,
+    IFNULL(text_count, 0) AS text_count,
+    IFNULL(total_count, 0) AS total_count,
+  FROM combined_counts
+  ORDER BY url, type
+;

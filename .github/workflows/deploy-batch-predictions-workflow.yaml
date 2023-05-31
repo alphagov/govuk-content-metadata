@@ -1,0 +1,39 @@
+name: Deploy new-content NER inference workflow
+
+on:
+  push:
+    paths:
+      - inference_pipeline_new_content/daily_batchjob_workflow.yml
+env:
+  WORKFLOW_NAME: daily-ner-batch-predictions
+  ZONE: europe-west2
+  WORKFLOW_SOURCE_PATH: inference_pipeline_new_content/daily_batchjob_workflow.yml
+
+jobs:
+    deploy-gcp-workflow:
+        # Authenticate to GCP
+        name: Setup Gcloud Account
+        runs-on: ubuntu-latest
+        # Add "id-token" with the intended permissions.
+        permissions:
+          contents: 'read'
+          id-token: 'write'
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v3
+        - id: 'auth'
+          uses: 'google-github-actions/auth@v1'
+          with:
+            workload_identity_provider: ${{ secrets.GCP_GITHUB_WORKLOAD_IDENTITY_PROVIDER }}
+            service_account: ${{ secrets.GCP_NER_NEW_CONTENT_PIPE_SA }}
+        # `setup-gcloud` automatically picks up authentication from `auth`
+        - name: 'Set up gcloud'
+          uses: 'google-github-actions/setup-gcloud@v1'
+        - name: Use gcloud CLI to deploy workflow
+          run: |
+            gcloud workflows deploy $WORKFLOW_NAME \
+            --location $ZONE \
+            --source $WORKFLOW_SOURCE_PATH \
+            --project ${{ secrets.GCP_PROJECT_ID }} \
+            --labels "commit-sha=${{ github.sha }}" \
+            --service-account ${{ secrets.GCP_NER_NEW_CONTENT_PIPE_SA }}

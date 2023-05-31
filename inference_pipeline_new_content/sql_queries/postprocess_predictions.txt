@@ -1,0 +1,42 @@
+CREATE TEMPORARY FUNCTION ENCODE_URI_COMPONENT(strings STRING)
+RETURNS STRING
+LANGUAGE js AS '''
+if (strings == null) return null;
+try {
+  return encodeURIComponent(strings);
+  } catch (e) {
+    return strings;
+    }'''
+;
+WITH predictions_array AS (
+SELECT
+  url,
+  part_of_page,
+  line_number,
+  JSON_EXTRACT_ARRAY(prediction, '$[entities]') AS json_array
+FROM `cpto-content-metadata.named_entities_raw_daily.all_parts_of_page`
+),
+predictions_unnested AS (
+SELECT
+  url,
+  JSON_EXTRACT(json_array, '$.name') AS name,
+  JSON_EXTRACT(json_array, '$.type') AS type,
+  JSON_EXTRACT_SCALAR(json_array, '$.start') AS char_start,
+  JSON_EXTRACT_SCALAR(json_array, '$.end') AS char_end,
+  part_of_page,
+  line_number,
+FROM predictions_array, UNNEST(json_array) AS json_array
+)
+SELECT
+  url,
+  name,
+  LOWER(name) AS name_lower,
+  type,
+  char_start,
+  char_end,
+  part_of_page,
+  line_number,
+  CONCAT('https://www.gov.uk/named-entity/', type, '/', ENCODE_URI_COMPONENT(LOWER(name))) AS url_entity_nametype,
+FROM predictions_unnested
+ORDER BY url, line_number
+;
