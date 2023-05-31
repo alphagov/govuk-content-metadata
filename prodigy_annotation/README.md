@@ -21,11 +21,11 @@ Please see Prodigy's official documentations at [prodi.gy/docs](https://prodi.gy
 
 ### 1. Setup Instructions
 
-    1. Download the Prodigy wheel file from https://$PRODIGY_LICENSE@download.prodi.gy where $PRODIGY_LICENSE is predefined in the repo .secrets file. Download the `prodigy-1.11.8-cp39-cp39-linux_x86_64.whl` wheel file and move it into the `wheel/` folder in the working directory.
+1. Download the Prodigy wheel file from https://$PRODIGY_LICENSE@download.prodi.gy where $PRODIGY_LICENSE is predefined in the repo .secrets file. Download the `prodigy-1.11.8-cp39-cp39-linux_x86_64.whl` wheel file and move it into the `wheel/` folder in the working directory.
 
-    2. Move the data you want to label into the [`data/` folder](/prodigy_annotation/data).
+2. Move the data you want to label into the [`data/` folder](/prodigy_annotation/data).
 
-        Data must be in JSONL format, with each row containing the following fields:
+    Data must be in JSONL format, with each row containing the following fields:
 
         ```
         {"text": "Some text to be annotated",
@@ -36,50 +36,50 @@ Please see Prodigy's official documentations at [prodi.gy/docs](https://prodi.gy
         }
         ```
 
-        You can specify any other "meta" subfields, for instance, we also used:
-        - "line_number" (INT)
-        - "regex_or_rand" ("regex" or "rand") to identify whether the text in the sample was picked via pattern matching or stratified random samplying
-        - "cat" (STRING) to indicate the main entity category the text was identified for via pattern matching.
+    You can specify any other "meta" subfields, for instance, we also used:
+    - "line_number" (INT)
+    - "regex_or_rand" ("regex" or "rand") to identify whether the text in the sample was picked via pattern matching or stratified random samplying
+    - "cat" (STRING) to indicate the main entity category the text was identified for via pattern matching.
 
-        Please refer to the following utility python modueles to create the JSONL file of texts to annotate:
-        - [src/utils/csv_to_annotation.py](/src/utils/csv_to_annotation.py)
-        - [src/utils/xls_to_match_patterns.py](/src/utils/xls_to_match_patterns.py)
+    Please refer to the following utility python modueles to create the JSONL file of texts to annotate:
+    - [src/utils/csv_to_annotation.py](/src/utils/csv_to_annotation.py)
+    - [src/utils/xls_to_match_patterns.py](/src/utils/xls_to_match_patterns.py)
 
 
 ### 2. Build the Environment
 
-    * 1. Ensure you are in the `prodigy_annotation/` subdirectory.
+* 1. Ensure you are in the `prodigy_annotation/` subdirectory.
 
-    * 2. If necessary, update the [annotation_instructions.html](/prodigy_annotation/instructions/annotation_instructions.html) and the [prodigy.json](/prodigy_annotation/prodigy.json) with details about the entity schema to be annotated for.
+* 2. If necessary, update the [annotation_instructions.html](/prodigy_annotation/instructions/annotation_instructions.html) and the [prodigy.json](/prodigy_annotation/prodigy.json) with details about the entity schema to be annotated for.
 
-    * 3. Build the docker image, by running
+* 3. Build the docker image, by running
 
-        ```bash
-        docker build -t prodann --no-cache .
-        ```
+    ```bash
+    docker build -t prodann --no-cache .
+    ```
 
-        Or, if you are using and M1 machine
+    Or, if you are using and M1 machine
 
-        ```bash
-        docker build  --platform linux/amd64 -t prodann --no-cache .
-        ```
+    ```bash
+    docker build  --platform linux/amd64 -t prodann --no-cache .
+    ```
 
-        This builds a Docker image called `prodann` (prodigy annotation) locallly.
+    This builds a Docker image called `prodann` (prodigy annotation) locallly.
 
-    * 4. Run the docker image with
+* 4. Run the docker image with
 
-        ```bash
-        docker run -itd --name prodann_con -p 8080:8080 -v $HOME/.prodigy:/app/.prodigy prodann
-        ```
+    ```bash
+    docker run -itd --name prodann_con -p 8080:8080 -v $HOME/.prodigy:/app/.prodigy prodann
+    ```
 
-        or, if using and M1 machine
+    or, if using and M1 machine
 
-        ```bash
-        docker run --platform linux/amd64 -itd --name prodann_con -p 8080:8080 -v $HOME/.prodigy:/app/.prodigy prodann
-        ```
+    ```bash
+    docker run --platform linux/amd64 -itd --name prodann_con -p 8080:8080 -v $HOME/.prodigy:/app/.prodigy prodann
+    ```
 
-        This creates a container based on the docker image which will be the Prodigy annotation environment.
-        The command is broken down as follows:
+    This creates a container based on the docker image which will be the Prodigy annotation environment.
+    The command is broken down as follows:
 
         * `docker run`: Run a docker container
         * `-it`,`d`: Run in _interactive_, _detached_ (background) mode
@@ -88,22 +88,22 @@ Please see Prodigy's official documentations at [prodi.gy/docs](https://prodi.gy
         * `-v $HOME/.prodigy:/app/.prodigy`: Map the local .prodigy config to the location on the container. This is to persist data
         * `prodann`: The Docker image to use
 
-        The container will start runnning in the backgrond.
+    The container will start runnning in the backgrond.
 
-    * 5. Run commands within the container by running
+* 5. Run commands within the container by running
 
-        ```bash
-        docker exec -it prodann_con bash
-        ```
+    ```bash
+    docker exec -it prodann_con bash
+    ```
 
-        You will see your terminal change, and you will now be annotating in the Prodigy container environment.
+    You will see your terminal change, and you will now be annotating in the Prodigy container environment.
 
 
 ### 3. Start Annotating
 
 When in your containerised environment, you can run any prodigy commands as usual.
 
-Please refer to Prodigy's documentation on [ner-manual](https://prodi.gy/docs/recipes#ner-manual), [ner-correct](https://prodi.gy/docs/recipes#ner-correct) and [https://prodi.gy/docs/recipes#ner-teach](ner-teach) for the different approaches to annotate, including pattern-matching and model-boostrapping functionalities.
+Please refer to Prodigy's documentation on [ner-manual](https://prodi.gy/docs/recipes#ner-manual), [ner-correct](https://prodi.gy/docs/recipes#ner-correct) and [ner-teach](https://prodi.gy/docs/recipes#ner-teach) for the different approaches to annotate, including pattern-matching and model-boostrapping functionalities.
 
 For example:
 
