@@ -1,30 +1,28 @@
 {
-    "port": 8080,
-    "host": "0.0.0.0",
-    "show_stats": true,
-    "instructions": "./instructions/phase2_instructions.html",
-    "show_flag":true,
-    "hide_meta":false,
-
-    "custom_theme": {
-        "labels": {
-          "FORM": "#79dd6f",
-          "MONEY": "#e4f60b",
-          "PERSON": "#ffdd00",
-          "DATE": "#fcf6d3",
-          "POSTCODE": "#f9b750",
-          "EMAIL": "#4a0bcc",
-          "PHONE": "#aaff00",
-
-          "TITLE": "#79dd6f",
-          "ROLE": "#00ffcc",
-          "OCCUPATION": "#e4f60b",
-          "SECTOR": "#ffdd00",
-          "LOC": "#a89532",
-          "GPE": "#ffb5fa",
-          "FAC": "#ffb24d",
-          "ORG": "#cff5bf",
-          "EVENT": "#f0eec0"
-        }
-      }
+  "port": 8080,
+  "host": "0.0.0.0",
+  "show_stats": true,
+  "instructions": "./instructions/annotation_instructions.html",
+  "show_flag": true,
+  "hide_meta": false,
+  "custom_theme": {
+    "labels": {
+      "FORM": "#79dd6f",
+      "MONEY": "#e4f60b",
+      "PERSON": "#ffdd00",
+      "DATE": "#fcf6d3",
+      "POSTCODE": "#f9b750",
+      "EMAIL": "#4a0bcc",
+      "PHONE": "#aaff00",
+      "TITLE": "#79dd6f",
+      "ROLE": "#00ffcc",
+      "OCCUPATION": "#e4f60b",
+      "SECTOR": "#ffdd00",
+      "LOC": "#a89532",
+      "GPE": "#ffb5fa",
+      "FAC": "#ffb24d",
+      "ORG": "#cff5bf",
+      "EVENT": "#f0eec0"
+    }
+  }
 }
