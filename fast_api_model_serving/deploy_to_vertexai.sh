@@ -31,7 +31,7 @@
 # General
 GCP_PROJECT=cpto-content-metadata
 REGION=europe-west2
-SA_NAME=cpto-content-metadata-sa
+SERVICE_ACCOUNT_EMAIL=${GCP_NER_MODEL_API_SA}
 
 # Unique name for the model
 TIMESTAMP=$(date +%Y%m%d)
@@ -139,6 +139,6 @@ if "$DEPLOY_FLAG"; then
     --min-replica-count=$MIN_REPLICA_COUNT\
     --max-replica-count=$MAX_REPLICA_COUNT \
     --traffic-split=0=100 \
-    --service-account=$SA_NAME@$GCP_PROJECT.iam.gserviceaccount.com
+    --service-account=$SERVICE_ACCOUNT_EMAIL
 
 fi
