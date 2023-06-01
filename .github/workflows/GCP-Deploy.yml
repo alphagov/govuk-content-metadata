@@ -9,7 +9,8 @@ on:
       - src/ner_streamlit_app/**
 
 env:
-  DOCKER_IMAGE_URI: europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app
+  DOCKER_IMAGE: 'ner-streamlit-app'
+  DOCKER_REGISTRY_HOSTNAME: 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo'
   APP_NAME: ner-streamlit-app
 
 jobs:
@@ -33,9 +34,9 @@ jobs:
         - name: 'Set up gcloud'
           uses: 'google-github-actions/setup-gcloud@v1'
 
-        # Allow CI/CD instance to use Docker in GCP
+        # ASet up docker to authenticate
         - name: Configure Docker
-          run: gcloud auth configure-docker --quiet
+          run: gcloud auth configure-docker europe-west2-docker.pkg.dev --quiet
 
         # Run cloudbuild.yaml in the correct directory
         - name: Run Cloud Build Process
@@ -48,5 +49,5 @@ jobs:
           uses: 'google-github-actions/deploy-cloudrun@v1'
           with:
             service: $APP_NAME
-            image: $DOCKER_IMAGE_URI
+            image: "$DOCKER_REGISTRY_HOSTNAME"/"$DOCKER_IMAGE":latest
             flags: '--region=europe-west2 --port=8501 --min-instances=0 --max-instances=5 --cpu=1 --memory=4Gi'
