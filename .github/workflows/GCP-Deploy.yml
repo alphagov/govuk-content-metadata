@@ -8,11 +8,6 @@ on:
     paths:
       - src/ner_streamlit_app/**
 
-env:
-  DOCKER_IMAGE: 'ner-streamlit-app'
-  DOCKER_REGISTRY_HOSTNAME: 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo'
-  APP_NAME: 'ner-streamlit-app'
-
 jobs:
     deploy-streamlit-app:
         # Authenticate to GCP
@@ -48,6 +43,6 @@ jobs:
           id: 'deploy'
           uses: 'google-github-actions/deploy-cloudrun@v1'
           with:
-            service: "$APP_NAME"
-            image: "$DOCKER_REGISTRY_HOSTNAME"/"$DOCKER_IMAGE":latest
+            service: 'ner-streamlit-app'
+            image: 'europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo/ner-streamlit-app':latest
             flags: '--region=europe-west2 --port=8501 --min-instances=0 --max-instances=5 --cpu=1 --memory=4Gi'
