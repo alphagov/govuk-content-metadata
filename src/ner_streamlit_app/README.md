@@ -2,6 +2,8 @@
 
 This sub-directory contains the code and requirements we developed to create a [Streamlit](https://streamlit.io/) app to visualise NER outputs. This is an interactive web application built with the aim to help prospective users understand how NER works via visualisation and user interaction.
 
+Note: The web app has restricted access from the public, achieved via a load balancer and Identity-Aware-Proxy (IAP).
+
 
 ## Software / tools
 
@@ -40,8 +42,7 @@ streamlit-app
 ```
 
 The local volume mounts such as `"$HOME/.config/gcloud` are generated when you authenticate with gcloud in step 1 above.
-This is also the case for the environment variables below. These are all generated in the users home directory, provided they
-have authenticated to gcloud.
+This is also the case for the environment variables below. These are all generated in the users home directory, provided they have authenticated to gcloud.
 
 
 ## Deployment via Google Cloud Platform
@@ -57,8 +58,15 @@ The app deployment requires access to/ use of the following tools:
 
 The app deployment is managed through a user-created GCP service account with the following roles/permissions:
 
+- roles/cloudbuild.builds.builder
+- roles/cloudbuild.builds.editor
+- roles/iam.serviceAccountUser
+- roles/run.admin
+- roles/storage.objectAdmin
+- roles/viewer
 - roles/storage.buckets.get (for the `gs://cpto-content-metadata/models/` bucket)
 - roles/artifactregistry.reader (for the `europe-west2-docker.pkg.dev/cpto-content-metadata/cpto-content-metadata-docker-repo` Artefact Registry repository)
+
 
 The custom service account has been further set up as "iam.workloadIdentityUser" via Workload Identity Federation to authenticate and authorise GitHub Actions Workflows to Google Cloud. This was set up by following the official documentations [github/setting-up-workload-identity-federation](https://github.com/google-github-actions/auth#setting-up-workload-identity-federation) and [gcp/workload-identity-federation-with-deployment-pipelines](https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines).
 
