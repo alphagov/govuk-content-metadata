@@ -11,13 +11,6 @@ The sub-directory contains the main components:
 - `Dockerfile`: A docker file for building a Docker image to build everything needed to run the API, so it can be deployed on GCP.
 - `cloudbuild.yaml`: GCP Cloud Build configuration file to automate steps to build and push the docker image to GCP Artifact Registry. Crucially, this file also downloads the models from GCP Google Storage, where they are saved, into the image as it is being build. This is more efficient than downloading at runtime inside the `main.py` script.
 
-## Prerequisites
-- Access to the `cpto-content-metadata` project on GCP
-- GCP authentication. Run
-
-```bash
-gcloud auth login
-```
 
 ### Vertex AI - Custom container requirements for prediction
 
@@ -27,6 +20,15 @@ In particular, GCP Vertex AI requires specific prediction request (input) and re
 
 
 ## Development and testing phase
+
+### Prerequisites
+
+- Access to the `cpto-content-metadata` project on GCP
+- GCP authentication. Run
+
+```bash
+gcloud auth login
+```
 
 ### Test the model API locally
 
@@ -58,6 +60,33 @@ Note: Delete the downloaded models before building and pushing the docker image 
 
 ## Deployment
 
+### Requirements
+
+#### Permissions
+
+To code uses a custom GCP service account with the following permissions:
+
+- roles/aiplatform.user
+- roles/cloudbuild.builds.builder
+- roles/cloudbuild.builds.editor
+- roles/iam.serviceAccountUser
+- roles/run.admin
+- roles/viewer
+
+#### Secrets
+
+<details>
+ <summary>Secrets</summary>
+
+ The application depends on a secret value having been set as environment variable, both
+ - locally, in the `.secrets` file in the repository's root directory (execute `direnv allow` to load the value), and
+ - as a GitHub secret.
+
+ `GCP_NER_MODEL_API_SA`: GCP custom service account (full email) for managing the deployment of the model as API via Vertex AI.
+
+ </details>
+
+
 ### Push the model to GCP Artifact Registry:
 
 This step is automated by [a GitHub Action workflow](.github/workflows/build-upload-model-api-gcp.yaml); the docker image is built and pushed to GCP Artifact Registry
@@ -81,7 +110,7 @@ Note that this is a compulsory step in that we are using a custom model and a cu
 
 #### Batch predictions
 
-For the content metadata project, we will only need Vertex AI Batch predictions. For batch predictions, no extra model set-up is needed.
+For the content metadata project, we only need Vertex AI Batch predictions. For batch predictions, no extra model set-up is needed.
 
 To learn more about batch predictions in Vertex AI, please see the following GCP's guidelines:
 - [get-predictions](https://cloud.google.com/vertex-ai/docs/predictions/get-predictions)
