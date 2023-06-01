@@ -9,30 +9,29 @@ on:
       - src/ner_streamlit_app/**
 
 jobs:
-
-    deploy:
+    deploy-streamlit-app:
         # Authenticate to GCP
         name: Setup Gcloud Account
         runs-on: ubuntu-latest
-        env:
-          IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}
+        # Add "id-token" with the intended permissions.
+        permissions:
+          contents: 'read'
+          id-token: 'write'
         steps:
-
-        # Set GCP credentials in CI/CD instance
-        - name: Login
-          uses: google-github-actions/setup-gcloud@v0
-          with:
-            project_id: ${{ secrets.GCP_PROJECT_ID }}
-            service_account_email: ${{ secrets.GCP_EMAIL }}
-            service_account_key: ${{ secrets.GCP_CREDENTIALS }}
-
-        # Allow CI/CD instance to use Docker in GCP
-        - name: Configure Docker
-          run: gcloud auth configure-docker --quiet
-
-        # Checkout repository in GCP
         - name: Checkout Repository
-          uses: actions/checkout@v2
+          uses: actions/checkout@v3
+        - id: 'auth'
+          uses: 'google-github-actions/auth@v1'
+          with:
+            workload_identity_provider: ${{ secrets.GCP_GITHUB_WORKLOAD_IDENTITY_PROVIDER }}
+            service_account: ${{ secrets.GCP_NER_APP_SA }}
+        # `setup-gcloud` automatically picks up authentication from `auth`
+        - name: 'Set up gcloud'
+          uses: 'google-github-actions/setup-gcloud@v1'
+
+        # ASet up docker to authenticate
+        - name: Configure Docker
+          run: gcloud auth configure-docker europe-west2-docker.pkg.dev --quiet
 
         # Run cloudbuild.yaml in the correct directory
         - name: Run Cloud Build Process
