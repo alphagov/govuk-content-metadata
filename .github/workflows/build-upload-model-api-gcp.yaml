@@ -19,27 +19,29 @@ env:
 
 jobs:
     setup-build-upload:
+
         # Authenticate to GCP
         name: Setup Gcloud Account
         runs-on: ubuntu-latest
-
+        # Add "id-token" with the intended permissions.
+        permissions:
+          contents: 'read'
+          id-token: 'write'
         steps:
-
-        # Set GCP credentials in CI/CD instance
-        - name: Login
-          uses: google-github-actions/setup-gcloud@v0
+        - name: Checkout Repository
+          uses: actions/checkout@v3
+        - id: 'auth'
+          uses: 'google-github-actions/auth@v1'
           with:
-            project_id: ${{ secrets.GCP_PROJECT_ID }}
-            service_account_email: ${{ secrets.GCP_EMAIL }}
-            service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+            workload_identity_provider: ${{ secrets.GCP_GITHUB_WORKLOAD_IDENTITY_PROVIDER }}
+            service_account: ${{ secrets.GCP_NER_MODEL_API_SA }}
+        # `setup-gcloud` automatically picks up authentication from `auth`
+        - name: 'Set up gcloud'
+          uses: 'google-github-actions/setup-gcloud@v1'
 
         # Allow CI/CD instance to use Docker in GCP
         - name: Configure Docker
           run: gcloud auth configure-docker --quiet
-
-        # Checkout repository in GCP
-        - name: Checkout Repository
-          uses: actions/checkout@v2
 
         # Run cloudbuild.yaml in the correct directory
         - name: Run Cloud Build Process
