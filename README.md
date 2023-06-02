@@ -53,22 +53,22 @@ The Named Entity Schema is the set of all entity types (i.e., categories) that t
 
 ## Daily 'new content only' inference pipeline :rocket:
 
-Complete code, requirements and documentation in [inference_pipeline_new_content](/bulk_inference_pipeline/README.md).
+Complete code, requirements and documentation in [inference_pipeline_new_content](/bulk_inference_pipeline).
 
 Inference pipeline scheduled to run daily to extract named entities from the content items on GOV.UK that substantially changed or were newly created the day before.
 
 Vertex AI Batch Predictions are served via HTTP POST method, as part of a scheduled Google Cloud Workflow.
 
-### Serving the model in production via FastAPI and uvicorn :unicorn:
+## Serving the model in production via FastAPI and uvicorn :unicorn:
 
-Complete code, requirements and documentation in [fast_api_model_serving](/fast_api_model_serving/README.md).
+Complete code, requirements and documentation in [fast_api_model_serving](/fast_api_model_serving).
 
 Containerised code to deploy and run an HTTP server to serve predictions for our custom-trained fine-tuned NER models.
 
 
 ## Bulk inference pipeline :weight_lifting:
 
-Complete code, requirements and documentation in [bulk_inference_pipeline](/bulk_inference_pipeline/README.md).
+Complete code, requirements and documentation in [bulk_inference_pipeline](/bulk_inference_pipeline).
 
 Inference pipeline to extract named entities from the whole GOV.UK content estate (in "bulk").
 The pipeline is deployed in a Docker container onto a Virtual Machine (VM) instance with GPU on Google Compute Engine (GCE).
@@ -78,21 +78,21 @@ The bulk pipeline is intended to be executed as a one-off, if either of the phas
 
 ## Training pipeline :running:
 
-Complete code, requirements and documentation in [training_pipe](/training_pipe/README.md).
+Complete code, requirements and documentation in [training_pipe](/training_pipe).
 
 Pipeline to fine-tune the encoder-style transformer `roberta-base` for custom NER on Google Vertex AI, using a [custom container training workflow](https://cloud.google.com/vertex-ai/docs/training/overview#workflow_for_custom_training) and [spaCy Projects](https://spacy.io/usage/projects) for the training application.
 
 
 ### Annotation workflow :pencil:
 
-Complete code, requirements and documentation in [prodigy_annotation](/prodigy_annotation/README.md).
+Complete code, requirements and documentation in [prodigy_annotation](/prodigy_annotation).
 
 Containerised code to create a seamless and portable annotation environment for annotators, using the proprietary software Prodigy.
 
 
 ## GovNER web app :computer:
 
-Complete code, requirements and documentation in [src/ner_streamlit_app](/src/ner_streamlit_app/README.md).
+Complete code, requirements and documentation in [src/ner_streamlit_app](/src/ner_streamlit_app).
 
 Containerised code to build the interactive web application aimed at helping prospective users understand how NER works via visualisation and user interaction.
 
@@ -115,8 +115,7 @@ Where we refer to the root directory we mean where this README.md is located.
 In addition:
 
 - a `.secrets` file in this repository's root directory
-- [load environment variables][docs-loading-environment-variables] from `.envrc`
-
+- [loaded environment variables](/docs/user_guide/loading_environment_variables.md) from `.envrc`
 
 #### Credentials
 
