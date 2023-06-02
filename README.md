@@ -2,7 +2,7 @@
 
 Repository for the GovNER project.
 
-GovNER systematically extracts key metadata from the content of the GOV.UK website. GovNER is an encoder-based language model that has been fine-tuned to perform Named Entity Recognition (NER) on "govspeak", the language(s) specific of the GOV.UK content estate.
+GovNER systematically extracts key metadata from the content of the GOV.UK website. GovNER is an encoder-based language model (RoBERTa) that has been fine-tuned to perform Named Entity Recognition (NER) on "govspeak", the language(s) specific of the GOV.UK content estate.
 
 The repository consists of 5 main stand-alone components, each contained in their own sub-directory:
 
@@ -27,7 +27,7 @@ The repository consists of 5 main stand-alone components, each contained in thei
 
 Named Entity Recognition (NER) is an Natural Language Processing (NLP) technique, a type of multi-class supervised machine-learning method that identifies and sorts 'entities', real-world things like people, organisations or events, from text.
 
-The Named Entity Schema is the set of all entity types (i.e., categories) that the NER model is trained to extract, together with their definitions and annotation instructions. For GovNER, we built as much as possible on [schema.org](https://schema.org/). Using an agile approach, delivery was broken down into 3 phases (i.e., sets) of entity types, for which we fine-tuned separate NER models. We have so far completed 2 phases. Predictions from these models were combined at inference stage.
+The Named Entity Schema is the set of all entity types (i.e., categories) that the NER model is trained to extract, together with their definitions and annotation instructions. For GovNER, we built as much as possible on [schema.org](https://schema.org/). Using an agile approach, delivery was broken down into 3 phases, corresponding to three sets of entity types, for which we fine-tuned separate NER models. We have so far completed 2 phases. Predictions from these models were combined at inference stage.
 
 #### Phase-1 entities
 
@@ -63,7 +63,7 @@ Vertex AI Batch Predictions are served via HTTP POST method, as part of a schedu
 
 Complete code, requirements and documentation in [fast_api_model_serving](/fast_api_model_serving).
 
-Containerised code to deploy and run an HTTP server to serve predictions for our custom-trained fine-tuned NER models.
+Containerised code to deploy and run an HTTP server to serve predictions vis API for our custom-trained fine-tuned NER models.
 
 
 ## Bulk inference pipeline :weight_lifting:
@@ -87,7 +87,7 @@ Pipeline to fine-tune the encoder-style transformer `roberta-base` for custom NE
 
 Complete code, requirements and documentation in [prodigy_annotation](/prodigy_annotation).
 
-Containerised code to create a seamless and portable annotation environment for annotators, using the proprietary software Prodigy.
+Containerised code to create an annotation environment for annotators, using the proprietary software Prodigy.
 
 
 ## GovNER web app :computer:
