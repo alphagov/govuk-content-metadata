@@ -1,29 +1,128 @@
-# `govuk-content-metadata`
+# :mag: GovNER :monocle_face: : extracting Named Entities from GOV.UK
 
-Project work related to extracting metdadata from gov.uk content.
+Repository for the GovNER project.
+
+GovNER systematically extracts key metadata from the content of the GOV.UK website. GovNER is an encoder-based language model (RoBERTa) that has been fine-tuned to perform Named Entity Recognition (NER) on "govspeak", the language(s) specific of the GOV.UK content estate.
+
+The repository consists of 5 main stand-alone components, each contained in their own sub-directory:
+
+- [Daily NER inference pipeline](#daily-new-content-only-inference-pipeline)
+- [Bulk NER inference pipeline](#bulk-inference-pipeline)
+- [Model fine-tuning pipeline](#training-pipeline)
+- [Model serving via REST API](#serving-the-model-in-production-via-fastapi-and-uvicorn)
+- [GovNER web app](#govner-web-app)
+
+
+## Tech Stack :cherries:
+
+* Python
+* FastApi / uvicorn
+* Docker
+* Google Cloud Platform  (Cloud Engine, Vertex AI, Workflows, Cloud Run, BigQuery, Storage,  Scheduler)
+* Github Actions
+* bash
+
+
+## Named Entity Recognition (NER) and Entity Schema
+
+Named Entity Recognition (NER) is an Natural Language Processing (NLP) technique, a type of multi-class supervised machine-learning method that identifies and sorts 'entities', real-world things like people, organisations or events, from text.
+
+The Named Entity Schema is the set of all entity types (i.e., categories) that the NER model is trained to extract, together with their definitions and annotation instructions. For GovNER, we built as much as possible on [schema.org](https://schema.org/). Using an agile approach, delivery was broken down into 3 phases, corresponding to three sets of entity types, for which we fine-tuned separate NER models. We have so far completed 2 phases. Predictions from these models were combined at inference stage.
+
+#### Phase-1 entities
+
+- Money (amount)
+- Form (government forms)
+- Person
+- Date
+- Postcode
+- Email
+- Phone (number)
+
+#### Phase-2 entities
+
+- Occupation
+- Role
+- Title
+- GPE
+- Location (non-GPE)
+- Facility
+- Organisation
+- Event
+
+
+## Daily 'new content only' inference pipeline :rocket:
+
+Complete code, requirements and documentation in [inference_pipeline_new_content](/bulk_inference_pipeline).
+
+Inference pipeline scheduled to run daily to extract named entities from the content items on GOV.UK that substantially changed or were newly created the day before.
+
+Vertex AI Batch Predictions are served via HTTP POST method, as part of a scheduled Google Cloud Workflow.
+
+## Serving the model in production via FastAPI and uvicorn :unicorn:
+
+Complete code, requirements and documentation in [fast_api_model_serving](/fast_api_model_serving).
+
+Containerised code to deploy and run an HTTP server to serve predictions vis API for our custom-trained fine-tuned NER models.
+
+
+## Bulk inference pipeline :weight_lifting:
+
+Complete code, requirements and documentation in [bulk_inference_pipeline](/bulk_inference_pipeline).
+
+Inference pipeline to extract named entities from the whole GOV.UK content estate (in "bulk").
+The pipeline is deployed in a Docker container onto a Virtual Machine (VM) instance with GPU on Google Compute Engine (GCE).
+
+The bulk pipeline is intended to be executed as a one-off, if either of the phase-1 entity or phase-2 entity models is retrained and re-deployed.
+
+
+## Training pipeline :running:
+
+Complete code, requirements and documentation in [training_pipe](/training_pipe).
+
+Pipeline to fine-tune the encoder-style transformer `roberta-base` for custom NER on Google Vertex AI, using a [custom container training workflow](https://cloud.google.com/vertex-ai/docs/training/overview#workflow_for_custom_training) and [spaCy Projects](https://spacy.io/usage/projects) for the training application.
+
+
+### Annotation workflow :pencil:
+
+Complete code, requirements and documentation in [prodigy_annotation](/prodigy_annotation).
+
+Containerised code to create an annotation environment for annotators, using the proprietary software Prodigy.
+
+
+## GovNER web app :computer:
+
+Complete code, requirements and documentation in [src/ner_streamlit_app](/src/ner_streamlit_app).
+
+Containerised code to build the interactive web application aimed at helping prospective users understand how NER works via visualisation and user interaction.
+
+
+## Developing :building_construction:
 
 ```{warning}
-Where this documentation refers to the root folder we mean where this README.md is
-located.
+Where we refer to the root directory we mean where this README.md is located.
 ```
 
-## Getting started
+### Requirements :construction:
 
-To start using this project, [first make sure your system meets its
-requirements](#requirements).
+- Git
+- [pre-commit](https://pre-commit.com/)
+- [Make](https://formulae.brew.sh/formula/make)
+- [gcloud CLI](https://cloud.google.com/sdk/gcloud)
+- [Docker](https://www.docker.com/)
+- Python (v3.9+) - Only for local development without Docker
 
-To be added.
+In addition:
 
-### Requirements
+- a `.secrets` file in this repository's root directory
+- [loaded environment variables](/docs/user_guide/loading_environment_variables.md) from `.envrc`
 
-```{note} Requirements for contributors
-[Contributors have some additional requirements][contributing]!
-```
+#### Credentials
 
-- Python 3.9+ installed
-- a `.secrets` file with the [required secrets and
-  credentials](#required-secrets-and-credentials)
-- [load environment variables][docs-loading-environment-variables] from `.envrc`
+Access to the project on Google Cloud Platform.
+
+
+#### Python requirements and pre-commit hooks
 
 To install the Python requirements and pre-commit hooks, open your terminal and enter:
 
@@ -37,67 +136,24 @@ or, alternatively, to only install the necessary Python packages using pip:
 pip install -r requirements.txt
 ```
 
-## Required secrets and credentials
+To add to the Python requirement file, add any new dependencies actually imported in your code to the `requirements-original.txt` file, and then run:
 
-To run this project, [you need a `.secrets` file with secrets/credentials as
-environmental variables][docs-loading-environment-variables-secrets]. The
-secrets/credentials should have the following environment variable name(s):
+```shell
+pip freeze -r requirements-original.txt > requirements.txt
+```
 
-| Secret/credential | Environment variable name | Description                                |
-|-------------------|---------------------------|--------------------------------------------|
-| Prodigy License   | `PRODIGY_LICENSE`         | Digit code                                 |
+### Tests :vertical_traffic_light:
 
-Once you've added, [load these environment variables using
-`.envrc`][docs-loading-environment-variables].
+Tests are run as part of [a GitHub action](/.github/workflows/ci.yml).
+
+To run test locally:
+
+```shell
+pytest
+```
 
 ## Licence
 
 Unless stated otherwise, the codebase is released under the MIT License. This covers
 both the codebase and any sample code in the documentation. The documentation is ©
 Crown copyright and available under the terms of the Open Government 3.0 licence.
-
-# Data Version Control (DVC)
-
-[DVC](dvc.org) is used in this project for version control of data and models.
-
-Requirements:
-- You must have read and write access to the [project GCP repository](gs://cpto-content-metadata)
-- DVC installed with `pip install 'dvc[gs]'`
-- Authenticated to used GCloud `gcloud auth application-default login`
-
-The project uses two DVC remotes; for data and models, respectively.
-
-To run:
-
-1. Pull the latest models DVC
-  ```shell
-  dvc pull -r cpto-ner-dvc-models
-  ```
-2. Pull the latest training data DVC
-  ```shell
-  dvc pull -r cpto-ner-dvc-data
-  ```
-
-This should populate your local model and data folders from remote storage on GCP.
-
-To commit/push the most recent data and models following updates. Use
-```bash
-dvc push
-```
-and
-```bash
-dvc pull
-```
-in place above.
-
-For more information, visit [Syncing Data to GCP Storage Buckets](https://iterative.ai/blog/using-gcp-remotes-in-dvc)
-
-
-# Bulk Inference pipeline [run on a VM with GPU on Google Compute Engine]
-
-Inference pipeline to extract named entities from the whole GOV.UK content estate (in "bulk").
-The pipeline is deployed in two Docker containers onto two Virtual Machine (VM) instances (one per phase-1 and one per phase-2 entities) on Google Compute Engine (GCE).
-
-The bulk inference pipeline is now intended to be executed as a one-off, if either of the phase-1 entity or phase-2 entity models is retrained and re-deployed.
-
-Please refer to the [bulk_inference_pipeline/README.md](/bulk_inference_pipeline/README.md) for complete documentations.

@@ -15,7 +15,8 @@ Please see Prodigy's official documentations at [prodi.gy/docs](https://prodi.gy
 
 ### Prerequisites
 
-- A Prodigy access token saved in a `.secrets` file. Please talk to the project leads if you don't already have one.
+- `PRODIGY_LICENSE`: Secret environemnt variable containing the Prodigy access token, saved in the `.secrets` file in the repository's root directory. Please talk to the project leads if you don't already have one.
+
 - A prodigy `...db` database saved in `$HOME/.prodigy`
 
 
