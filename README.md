@@ -6,11 +6,11 @@ GovNER systematically extracts key metadata from the content of the GOV.UK websi
 
 The repository consists of 5 main stand-alone components, each contained in their own sub-directory:
 
-- [Daily NER inference pipeline](#daily-new-content-only-inference-pipeline)
-- [Bulk NER inference pipeline](#bulk-inference-pipeline)
-- [Model fine-tuning pipeline](#training-pipeline)
-- [Model serving via REST API](#serving-the-model-in-production-via-fastapi-and-uvicorn)
-- [GovNER web app](#govner-web-app)
+- [Daily NER inference pipeline](#daily-new-content-only-inference-pipeline-rocket)
+- [Bulk NER inference pipeline](#bulk-inference-pipeline-weight_lifting)
+- [Model fine-tuning pipeline](#training-pipeline-running)
+- [Model serving via REST API](#serving-the-model-in-production-via-fastapi-and-uvicorn-unicorn)
+- [GovNER web app](#govner-web-app-computer)
 
 
 ## Tech Stack :cherries:
@@ -18,7 +18,7 @@ The repository consists of 5 main stand-alone components, each contained in thei
 * Python
 * FastApi / uvicorn
 * Docker
-* Google Cloud Platform  (Cloud Engine, Vertex AI, Workflows, Cloud Run, BigQuery, Storage,  Scheduler)
+* Google Cloud Platform  (Cloud Engine, Vertex AI, Workflows, Cloud Run, BigQuery, Cloud Storage,  Scheduler)
 * Github Actions
 * bash
 
@@ -53,7 +53,7 @@ The Named Entity Schema is the set of all entity types (i.e., categories) that t
 
 ## Daily 'new content only' inference pipeline :rocket:
 
-Complete code, requirements and documentation in [inference_pipeline_new_content](/bulk_inference_pipeline).
+Complete code, requirements and documentation in [inference_pipeline_new_content](/inference_pipeline_new_content/).
 
 Inference pipeline scheduled to run daily to extract named entities from the content items on GOV.UK that substantially changed or were newly created the day before.
 
