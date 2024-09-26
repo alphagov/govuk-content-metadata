@@ -45,7 +45,6 @@ EXCLUSION_PUBLISHING_APP = [
     "share-sale-publisher",
     "short-url-manager",
     "smartanswers",
-    "special-route-publisher",
     "static",
 ]
 
