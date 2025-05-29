@@ -1,5 +1,7 @@
 # :mag: GovNER :monocle_face: : extracting Named Entities from GOV.UK
 
+> ℹ️ **Archived** - This project is no longer in active development.
+
 Repository for the GovNER project.
 
 GovNER systematically extracts key metadata from the content of the GOV.UK website. GovNER is an encoder-based language model (RoBERTa) that has been fine-tuned to perform Named Entity Recognition (NER) on "govspeak", the language(s) specific of the GOV.UK content estate.
